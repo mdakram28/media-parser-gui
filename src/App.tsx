@@ -126,7 +126,7 @@ export default function Dashboard() {
             >
               AV1 Parser
             </Typography>
-            <a href="https://github.com/mdakram28/av1-parser-gui">
+            <a href="https://github.com/mdakram28/av1-parser-gui" style={{marginTop: -8}}>
               <IconButton color="inherit" style={{color: "white"}}>
                 <GitHubIcon />
               </IconButton>
