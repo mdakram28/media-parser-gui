@@ -12,7 +12,7 @@ To install and start, follow these steps:
 
 ```bash
 # Get the code
-git clone https://github.com/yourusername/av1-parser-gui.git
+git clone https://github.com/mdakram28/av1-parser-gui.git
 cd av1-parser-gui
 # Build
 npm install
