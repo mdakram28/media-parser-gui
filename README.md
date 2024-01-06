@@ -19,3 +19,14 @@ npm install
 # Run
 npm start
 ```
+
+## Input processing
+
+The input needs to be a raw AV1 bitstream.
+You can extract the raw bitstream from a .mp4/.mov or any other container by using ffmpeg:
+
+```bash
+ffmpeg -i my/input/video.mp4 -t 2 -c:v copy -copy_unknown bitstream.obu
+```
+
+Upload the bitstream in the GUI.
