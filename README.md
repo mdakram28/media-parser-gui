@@ -1,3 +1,3 @@
 # av1-parser-gui
 
-![Demo recording](docs/recording.mov)
+https://github.com/mdakram28/av1-parser-gui/raw/main/docs/recording.mov
