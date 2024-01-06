@@ -1,3 +1,3 @@
 # av1-parser-gui
 
-![Demo](docs/output.gif)
+![Demo recording](docs/recording.mkv)
