@@ -132,8 +132,8 @@ export default function Dashboard() {
               </IconButton>
               
             </a> */}
-            
-          <GitHubButton href="https://github.com/mdakram28/av1-parser-gui" data-color-scheme="no-preference: light; light: light; dark: dark;" data-size="large" aria-label="Star mdakram28/av1-parser-gui on GitHub">Star</GitHubButton>
+
+            <GitHubButton href="https://github.com/mdakram28/av1-parser-gui" data-color-scheme="no-preference: light; light: light; dark: dark;" data-icon="octicon-star" data-size="large" aria-label="Star mdakram28/av1-parser-gui on GitHub">Star</GitHubButton>
           </Toolbar>
         </AppBar>
         <Drawer variant="permanent" open={open}>
