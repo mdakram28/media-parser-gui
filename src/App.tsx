@@ -20,6 +20,7 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import { ListItem } from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import { Av1AnalyzerComponent } from './av1-analyzer/av1-analyzer';
+import GitHubIcon from '@mui/icons-material/GitHub';
 
 function Copyright(props: any) {
   return (
@@ -124,11 +125,11 @@ export default function Dashboard() {
             >
               AV1 Parser
             </Typography>
-            <IconButton color="inherit">
-              <Badge badgeContent={4} color="secondary">
-                <NotificationsIcon />
-              </Badge>
-            </IconButton>
+            <a href="https://github.com/mdakram28/av1-parser-gui">
+              <IconButton color="inherit" style={{color: "white"}}>
+                <GitHubIcon />
+              </IconButton>
+            </a>
           </Toolbar>
         </AppBar>
         <Drawer variant="permanent" open={open}>

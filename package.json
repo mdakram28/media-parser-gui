@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "vite --open",
-    "dev": "vite",
+    "dev": "vite -open",
     "build": "tsc && vite build --base=av1-parser-gui --outDir=docs",
     "preview": "vite preview"
   },
