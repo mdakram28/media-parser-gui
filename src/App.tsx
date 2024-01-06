@@ -21,6 +21,7 @@ import { ListItem } from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import { Av1AnalyzerComponent } from './av1-analyzer/av1-analyzer';
 import GitHubIcon from '@mui/icons-material/GitHub';
+import GitHubButton from 'react-github-btn'
 
 function Copyright(props: any) {
   return (
@@ -131,7 +132,8 @@ export default function Dashboard() {
               </IconButton>
               
             </a> */}
-            <a className="github-button" href="https://github.com/mdakram28/av1-parser-gui" data-color-scheme="no-preference: light; light: light; dark: dark;" data-icon="octicon-star" data-size="large" aria-label="Star mdakram28/av1-parser-gui on GitHub">Star</a>
+            
+          <GitHubButton href="https://github.com/mdakram28/av1-parser-gui" data-color-scheme="no-preference: light; light: light; dark: dark;" data-size="large" aria-label="Star mdakram28/av1-parser-gui on GitHub">Star</GitHubButton>
           </Toolbar>
         </AppBar>
         <Drawer variant="permanent" open={open}>

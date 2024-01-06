@@ -22,6 +22,7 @@
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "@vitejs/plugin-react": "latest",
+    "react-github-btn": "^1.4.0",
     "sass": "^1.69.7",
     "typescript": "latest",
     "vite": "latest"
