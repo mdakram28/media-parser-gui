@@ -1,0 +1,19 @@
+.hex-byte {
+    padding: 4px;
+    &:hover {
+        background-color: rgb(216, 216, 216);
+        cursor: pointer;
+    }
+}
+
+.node-right {
+    float: right;
+    margin-right: 50px;
+    // display: flex;
+    // width: 100px;
+    // justify-content: space-between;
+    & > span {
+        display: inline-block;
+        width: 50px;
+    }
+}
