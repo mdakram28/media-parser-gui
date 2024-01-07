@@ -37,7 +37,7 @@ export function DataTreeComponent({ onSelect, root }: {
                 dfs(child, d+1, maxd);
             }
         }
-        dfs(root, 0, 7);
+        dfs(root, 0, 1);
         setExpanded(allKeys);
     }, [root])
 

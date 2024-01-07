@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { HexEditor } from "../components/hex-editor";
 import { AV1 } from "./av1-bitstream";
-import { Button, Grid } from "@mui/material";
+import { Button, FormControlLabel, Grid, Radio, RadioGroup } from "@mui/material";
 import { DataNode } from "../types/parser.types";
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import styled from "@emotion/styled";
@@ -10,6 +10,8 @@ import { TreeItem } from '@mui/x-tree-view/TreeItem';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { Bitstream } from "../bitstream/parser";
+import { DataTreeComponent } from "../components/syntax-tree";
+import { DataBoxComponent } from "../components/syntax-box";
 
 const VisuallyHiddenInput = styled('input')({
     clip: 'rect(0 0 0 0)',
@@ -24,28 +26,13 @@ const VisuallyHiddenInput = styled('input')({
 });
 
 
-function DataTreeComponent({ node }: { node: DataNode }) {
-    return <>
-        <TreeItem nodeId={node.key} label={<>
-            {node.title}
-            <span className="node-right">
-                <span>{Math.floor(node.start / 8)}</span>
-                <span>{Math.ceil((node.start + node.size) / 8 - 1)}</span>
-            </span>
-        </>}>
-            {(node.children || [])
-                .map(childNode => <DataTreeComponent key={childNode.key} node={childNode} />)
-            }
-        </TreeItem>
-    </>
-}
-
-
 export const Av1AnalyzerComponent = (props: {}) => {
 
     const [buffer, setBuffer] = useState<Uint8Array>(new Uint8Array(0));
-    const [selected, setSelected] = useState<DataNode[]>([]);
+    const [highlighted, setHighlighted] = useState<DataNode[]>([]);
+    const [selected, setSelected] = useState<string[]>([]);
     const [boxColor, setBoxColor] = useState<{ [k: string]: string }>({});
+    const [treeType, setTreeType] = useState<"tree" | "box">("box");
 
     function readFileDataAsBase64(e: React.FormEvent<HTMLInputElement>) {
         // @ts-ignore
@@ -78,8 +65,8 @@ export const Av1AnalyzerComponent = (props: {}) => {
         return ret;
     }, [buffer]);
 
-    const onSelect = (ids: string[]) => {
-        const idSet = new Set(ids);
+    useEffect(() => {
+        const idSet = new Set(selected);
         let selection: DataNode[] = [];
         function dfs(at: DataNode, prev: DataNode[]) {
             if (idSet.has(at.key)) {
@@ -94,8 +81,8 @@ export const Av1AnalyzerComponent = (props: {}) => {
         dfs(syntaxTree, []);
         console.log(selection);
         selection = selection.slice(2);
-        setSelected(selection);
-    }
+        setHighlighted(selection);
+    }, [selected]);
 
     return <>
         <Button component="label" variant="contained" startIcon={<CloudUploadIcon />}>
@@ -106,24 +93,22 @@ export const Av1AnalyzerComponent = (props: {}) => {
             syntaxTree.children && syntaxTree.children[0].children &&
             <Grid container spacing={2}>
                 <Grid item xs={6}>
-                    <TreeView
-                        aria-label="file system navigator"
-                        defaultCollapseIcon={<ExpandMoreIcon />}
-                        defaultExpandIcon={<ChevronRightIcon />}
-                        disableSelection
-                        // onNodeSelect={(event, nodeIds) => onSelect([nodeIds])}
-                        onNodeFocus={(event, nodeIds) => onSelect([nodeIds])}
-                        sx={{ height: "70vh", overflow: "scroll" }}
-                    >
-                        <DataTreeComponent node={syntaxTree.children[0]} />
-                    </TreeView>
+                        <RadioGroup row onChange={ev => setTreeType(ev.target.value as any)} value={treeType}>
+                            <FormControlLabel control={<Radio />} label="Tree" value={"tree"} />
+                            <FormControlLabel control={<Radio />} label="Box" value={"box"} />
+                        </RadioGroup>
+
+                        {treeType == "tree"
+                            ? <DataTreeComponent root={syntaxTree} onSelect={setSelected} />
+                            : <DataBoxComponent root={syntaxTree} onSelect={setSelected} selected={selected} boxColor={boxColor} />
+                        }
                 </Grid>
                 <Grid item xs={6}>
                     <div style={{ height: "70vh", overflow: "scroll" }}>
                         <HexEditor
                             buffer={buffer}
-                            highlight={selected}
-                            setHighlight={setSelected}
+                            highlight={highlighted}
+                            setHighlight={setHighlighted}
                             boxColor={boxColor}
                             setBoxColor={setBoxColor}
                         />
