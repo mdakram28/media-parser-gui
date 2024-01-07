@@ -154,10 +154,10 @@ export default function Dashboard() {
           <List component="nav">
             {[{
               title: "AV1 parser",
-              path: "/av1-parser-gui/av1"
+              path: "av1"
             }, {
               title: "MP4 parser",
-              path: "/av1-parser-gui/mp4"
+              path: "mp4"
             }].map((entry, i) =>
               <ListItemButton LinkComponent={Link} href={entry.path}>
                 <ListItemIcon>
@@ -184,9 +184,9 @@ export default function Dashboard() {
           <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
             <Routes>
               <Route index element={<Av1AnalyzerComponent />} />
-              <Route path="/av1-parser-gui" element={<Av1AnalyzerComponent />} />
-              <Route path="/av1-parser-gui/av1" element={<Av1AnalyzerComponent />} />
-              <Route path="/av1-parser-gui/mp4" element={<Mp4AnalyzerComponent />} />
+              {/* <Route path="/av1-parser-gui" element={<Av1AnalyzerComponent />} /> */}
+              <Route path="av1" element={<Av1AnalyzerComponent />} />
+              <Route path="mp4" element={<Mp4AnalyzerComponent />} />
             </Routes>
 
             <Copyright sx={{ pt: 4 }} />
