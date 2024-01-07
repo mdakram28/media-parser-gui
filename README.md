@@ -1,10 +1,16 @@
 # av1-parser-gui
 
-A browser based AV1 bitstream parser and visualizer.
+A browser based AV1 and MP4 bitstream parser and visualizer.
 Live App: https://mdakram.com/av1-parser-gui/
 
 ### Preview
+
+#### AV1 Demo
 ![](docs/output.gif)
+
+#### MP4 Demo
+![](docs/demo_mp4.gif)
+
 
 ## Usage
 
@@ -20,9 +26,9 @@ npm install
 npm start
 ```
 
-## Input processing
+## AV1 Input
 
-The input needs to be a raw AV1 bitstream.
+For the AV1 parser, the input needs to be a raw AV1 bitstream.
 You can extract the raw bitstream from a .mp4/.mov or any other container by using ffmpeg:
 
 ```bash
