@@ -96,6 +96,7 @@ export default function Dashboard() {
   const toggleDrawer = () => {
     setOpen(!open);
   };
+  const [page, setPage] = React.useState("av1");
 
   return (
     <ThemeProvider theme={defaultTheme}>
@@ -126,7 +127,8 @@ export default function Dashboard() {
               noWrap
               sx={{ flexGrow: 1 }}
             >
-              AV1 Parser
+                { page == "av1" && "AV1 Parser"}
+                { page == "mp4" && "MP4 Parser"}
             </Typography>
             <a href="https://github.com/mdakram28/av1-parser-gui" style={{ marginTop: -8 }}>
               <IconButton color="inherit" style={{ color: "white" }}>
@@ -159,7 +161,7 @@ export default function Dashboard() {
               title: "MP4 parser",
               path: "mp4"
             }].map((entry, i) =>
-              <ListItemButton LinkComponent={Link} href={entry.path}>
+              <ListItemButton onClick={() => setPage(entry.path)}>
                 <ListItemIcon>
                   <DashboardIcon />
                 </ListItemIcon>
@@ -182,12 +184,8 @@ export default function Dashboard() {
         >
           <Toolbar />
           <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
-            <Routes>
-              <Route index element={<Av1AnalyzerComponent />} />
-              {/* <Route path="/av1-parser-gui" element={<Av1AnalyzerComponent />} /> */}
-              <Route path="av1" element={<Av1AnalyzerComponent />} />
-              <Route path="mp4" element={<Mp4AnalyzerComponent />} />
-            </Routes>
+              { page == "av1" && <Av1AnalyzerComponent /> }
+              { page == "mp4" && <Mp4AnalyzerComponent /> }
 
             <Copyright sx={{ pt: 4 }} />
           </Container>
