@@ -22,6 +22,8 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import { Av1AnalyzerComponent } from './av1-analyzer/av1-analyzer';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import GitHubButton from 'react-github-btn'
+import { Route, Routes } from 'react-router-dom';
+import { Mp4AnalyzerComponent } from './mp4/mp4-analyzer';
 
 function Copyright(props: any) {
   return (
@@ -126,8 +128,8 @@ export default function Dashboard() {
             >
               AV1 Parser
             </Typography>
-            <a href="https://github.com/mdakram28/av1-parser-gui" style={{marginTop: -8}}>
-              <IconButton color="inherit" style={{color: "white"}}>
+            <a href="https://github.com/mdakram28/av1-parser-gui" style={{ marginTop: -8 }}>
+              <IconButton color="inherit" style={{ color: "white" }}>
                 <GitHubIcon />
               </IconButton>
             </a>
@@ -150,12 +152,20 @@ export default function Dashboard() {
           </Toolbar>
           <Divider />
           <List component="nav">
-            <ListItemButton>
-              <ListItemIcon>
-                <DashboardIcon />
-              </ListItemIcon>
-              <ListItemText primary="AV1 Parser" />
-            </ListItemButton>
+            {[{
+              title: "AV1 parser",
+              path: "/av1"
+            }, {
+              title: "MP4 parser",
+              path: "/mp4"
+            }].map((entry, i) =>
+              <ListItemButton LinkComponent={Link} href={entry.path}>
+                <ListItemIcon>
+                  <DashboardIcon />
+                </ListItemIcon>
+                <ListItemText primary={entry.title} />
+              </ListItemButton>
+            )}
           </List>
         </Drawer>
         <Box
@@ -172,7 +182,12 @@ export default function Dashboard() {
         >
           <Toolbar />
           <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
-            <Av1AnalyzerComponent />
+            <Routes>
+              <Route index element={<Mp4AnalyzerComponent />} />
+              <Route path="av1" element={<Av1AnalyzerComponent />} />
+              <Route path="mp4" element={<Mp4AnalyzerComponent />} />
+            </Routes>
+
             <Copyright sx={{ pt: 4 }} />
           </Container>
         </Box>

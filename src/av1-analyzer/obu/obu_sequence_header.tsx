@@ -1,4 +1,5 @@
-import { Bitstream, ObuCtx, syntax } from "../av1-bitstream";
+import { Bitstream, syntax } from "../../bitstream/parser";
+import { ObuCtx } from "../av1-bitstream";
 
 const SELECT_SCREEN_CONTENT_TOOLS = 2;
 const SELECT_INTEGER_MV = 2;

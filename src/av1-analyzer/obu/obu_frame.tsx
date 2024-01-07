@@ -1,4 +1,5 @@
-import { Bitstream, ObuCtx, syntax } from "../av1-bitstream";
+import { Bitstream, syntax } from "../../bitstream/parser";
+import { ObuCtx } from "../av1-bitstream";
 import { frame_header_obu } from "./obu_frame_header";
 import { tile_group_obu } from "./obu_tile_group";
 

@@ -1,4 +1,5 @@
-import { Bitstream, ObuCtx, ParserCtx, syntax } from "../av1-bitstream";
+import { Bitstream, syntax } from "../../bitstream/parser";
+import { ObuCtx, ParserCtx } from "../av1-bitstream";
 
 const NUM_REF_FRAMES = 8;
 const REFS_PER_FRAME = 7;

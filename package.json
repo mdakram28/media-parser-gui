@@ -16,7 +16,8 @@
     "@mui/material": "latest",
     "@mui/x-tree-view": "^6.17.0",
     "react": "latest",
-    "react-dom": "latest"
+    "react-dom": "latest",
+    "react-router-dom": "^6.21.1"
   },
   "devDependencies": {
     "@types/react": "latest",

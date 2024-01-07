@@ -1,0 +1,41 @@
+.hex-byte {
+    padding: 4px;
+    &:hover {
+        background-color: rgb(216, 216, 216);
+        cursor: pointer;
+    }
+}
+
+.node-right {
+    float: right;
+    margin-right: 50px;
+    // display: flex;
+    // width: 100px;
+    // justify-content: space-between;
+    & > span {
+        display: inline-block;
+        width: 50px;
+    }
+}
+.data-box {
+    display: block;
+    border: 2px solid grey;
+    padding: 20px;
+    cursor: pointer;
+    pointer-events: fill;
+    // box-sizing: content-box;
+    margin-top: -1px;
+    margin-left: -1px;
+
+    &:hover:not(:has(.data-box:hover)) {
+        border-color: black;
+    }
+
+    .data-box-header {
+        display: flex;
+        user-select: none;
+        &:hover {
+            background-color: grey;
+        }
+    }
+}

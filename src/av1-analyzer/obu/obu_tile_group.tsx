@@ -1,4 +1,5 @@
-import { Bitstream, ObuCtx, syntax } from "../av1-bitstream";
+import { Bitstream, syntax } from "../../bitstream/parser";
+import { ObuCtx } from "../av1-bitstream";
 
 export const tile_group_obu = syntax("tile_group_obu", (bs: Bitstream<ObuCtx>, sz: number) => {
     bs.error("Not implemented")
