@@ -1,6 +1,5 @@
-import { ParserCtx } from "../../av1-analyzer/av1-bitstream";
-import { Bitstream } from "../../bitstream/parser";
-import { Box, Container, utf8_string } from "../box-util";
+import { Bitstream, ParserCtx } from "../../bitstream/parser";
+import { Box, Container } from "../box-util";
 import { BoxCtx } from "../mp4-bitstream";
 
 
@@ -37,7 +36,7 @@ function Box_hdlr(bs: Bitstream<BoxCtx & ParserCtx>, end: number) {
     bs.f("reserved", 32);
     bs.f("reserved", 32);
     bs.f("reserved", 32);
-    utf8_string(bs, "name");
+    bs.utf8String("name");
 }
 
 

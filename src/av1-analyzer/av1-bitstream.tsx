@@ -1,7 +1,7 @@
 import { sequence_header_obu } from "./obu/obu_sequence_header";
 import { frame_obu } from "./obu/obu_frame";
 import { FrameType } from "./obu/obu_frame_header";
-import { Bitstream, syntax } from "../bitstream/parser";
+import { Bitstream, ParserCtx, syntax } from "../bitstream/parser";
 
 enum OBU_TYPE {
     // 0	Reserved
@@ -15,10 +15,6 @@ enum OBU_TYPE {
     OBU_TILE_LIST = 8,
     // 9-14	Reserved
     OBU_PADDING = 15,
-}
-
-export class ParserCtx {
-    SeenFrameHeader = 0;
 }
 
 export class ObuCtx {
@@ -181,8 +177,7 @@ const open_bitstream_unit = syntax("open_bitstream_unit", (bs: Bitstream<ObuCtx 
     } else {
         c.obu_size = sz - 1 - bs.ctx.obu_extension_flag;
     }
-    const obuEndPos = (bs.getPos() + c.obu_size * 8) / 8;
-    // console.log(c.obu_size, obuEndPos);
+    const obuEndPos = bs.getPos() + c.obu_size * 8;
 
     if (c.obu_type != OBU_TYPE.OBU_SEQUENCE_HEADER &&
         c.obu_type != OBU_TYPE.OBU_TEMPORAL_DELIMITER &&

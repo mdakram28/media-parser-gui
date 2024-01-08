@@ -8,6 +8,7 @@ import { Bitstream } from "../bitstream/parser";
 import { ISOBMFF } from "./mp4-bitstream";
 import { DataTreeComponent } from "../components/syntax-tree";
 import { DataBoxComponent } from "../components/syntax-box";
+import { MSBBuffer } from "../bitstream/buffer";
 
 const VisuallyHiddenInput = styled('input')({
     clip: 'rect(0 0 0 0)',
@@ -50,13 +51,15 @@ export const Mp4AnalyzerComponent = (props: {}) => {
     }
 
     const syntaxTree: DataNode = useMemo(() => {
-        if (buffer.byteLength == 0) return {
+        const EMPTY_TREE: DataNode = {
             key: "root",
             title: "Empty bitstream",
             start: 0,
             size: 0
         };
-        const bs = new Bitstream(buffer);
+        if (buffer.byteLength == 0) return EMPTY_TREE;
+        
+        const bs = new Bitstream(new MSBBuffer(buffer));
         ISOBMFF(bs, bs.getEndPos());
         const ret = bs.getCurrent();
         console.log("Parsed : ", ret);
@@ -68,7 +71,7 @@ export const Mp4AnalyzerComponent = (props: {}) => {
         let selection: DataNode[] = [];
         function dfs(at: DataNode, prev: DataNode[]) {
             if (idSet.has(at.key)) {
-                selection.push(...prev, at);
+                selection.push(at);
             }
             prev.push(at);
             for (const child of (at.children || [])) {
@@ -77,7 +80,7 @@ export const Mp4AnalyzerComponent = (props: {}) => {
             prev.pop();
         }
         dfs(syntaxTree, []);
-        selection = selection.slice(2);
+        // selection = selection.slice(2);
         setHighlighted(selection);
     }, [selected]);
 

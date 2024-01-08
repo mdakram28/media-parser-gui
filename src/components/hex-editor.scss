@@ -1,9 +1,18 @@
 .hex-byte {
-    padding: 4px;
+    display: inline-block;
+    width: 25px;
+    height: 25px;
+    // line-height: 25;
+    text-align: center;
     &:hover {
         background-color: rgb(216, 216, 216);
         cursor: pointer;
     }
+}
+
+.hex-pos {
+    width: 25px;
+    height: 25px;
 }
 
 .node-right {
@@ -14,7 +23,7 @@
     // justify-content: space-between;
     & > span {
         display: inline-block;
-        width: 50px;
+        width: 70px;
     }
 }
 .data-box {

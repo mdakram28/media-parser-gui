@@ -11,7 +11,7 @@ function DataBoxNodeComponent({ node, onSelect, selected, boxColor }: {
     boxColor: { [key: string]: string }
 }) {
     const isSelected = selected[0] == node.key;
-    const [collapsed, setCollapsed] = useState(false);
+    const [collapsed, setCollapsed] = useState(true);
 
     return <>
         <div className={`data-box ${isSelected && "selected"}`} onClick={(ev) => {

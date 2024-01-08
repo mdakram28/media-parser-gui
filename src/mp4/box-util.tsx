@@ -1,5 +1,4 @@
-import { ParserCtx } from "../av1-analyzer/av1-bitstream";
-import { Bitstream, syntax } from "../bitstream/parser";
+import { Bitstream, ParserCtx, syntax } from "../bitstream/parser";
 import { BoxCtx } from "./mp4-bitstream";
 
 type NestedBoxes = {
@@ -31,7 +30,7 @@ export function Box(subBoxes: NestedBoxes) {
             bs.setTitle(`box_${boxTypeName} (Unexpected)`);
         }
 
-        bs.gotoPos(Math.floor(boxEndPos / 8));
+        bs.gotoPos(boxEndPos);
     });
 }
 
@@ -45,13 +44,3 @@ export function Container(subBoxes: NestedBoxes) {
         }
     };
 }
-
-export const utf8_string = syntax("utf8_string", (bs: Bitstream<any>, name: string) => {
-    let str: string = "";
-    while (true) {
-        const byte = bs.readByte();
-        if (byte == 0) break;
-        str += String.fromCharCode(byte);
-    }
-    bs.setTitle(`${name}: "${str}"`);
-});

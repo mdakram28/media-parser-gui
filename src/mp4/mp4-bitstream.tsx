@@ -1,11 +1,8 @@
-import { ParserCtx } from "../av1-analyzer/av1-bitstream";
-import { Bitstream, syntax } from "../bitstream/parser";
+import { Bitstream, MAX_ITER, ParserCtx, syntax } from "../bitstream/parser";
 import { Box, Container } from "./box-util";
 import { Container_mdia } from "./boxes/box_mdia";
 
 // https://b.goeswhere.com/ISO_IEC_14496-12_2015.pdf
-
-const MAX_ITER = 500;
 
 export class BoxCtx {
     size: number = 0
