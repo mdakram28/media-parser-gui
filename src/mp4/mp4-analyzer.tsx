@@ -104,14 +104,12 @@ export const Mp4AnalyzerComponent = (props: {}) => {
                     }
                 </Grid>
                 <Grid item xs={6}>
-                    <div style={{ height: "70vh", overflow: "scroll" }}>
                         <HexEditor
                             buffer={buffer}
                             highlight={highlighted}
                             setHighlight={setHighlighted}
                             boxColor={boxColor}
                             setBoxColor={setBoxColor} />
-                    </div>
                 </Grid>
             </Grid>
         }

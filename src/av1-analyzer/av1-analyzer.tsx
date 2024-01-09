@@ -12,6 +12,7 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { Bitstream } from "../bitstream/parser";
 import { DataTreeComponent } from "../components/syntax-tree";
 import { DataBoxComponent } from "../components/syntax-box";
+import { MSBBuffer } from "../bitstream/buffer";
 
 const VisuallyHiddenInput = styled('input')({
     clip: 'rect(0 0 0 0)',
@@ -58,7 +59,7 @@ export const Av1AnalyzerComponent = (props: {}) => {
             start: 0,
             size: 0
         };
-        const bs = new Bitstream(buffer);
+        const bs = new Bitstream(new MSBBuffer(buffer));
         AV1(bs);
         const ret = bs.getCurrent();
         console.log("Parsed : ", ret);
