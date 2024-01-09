@@ -85,11 +85,20 @@ abstract class BitBuffer {
     }
 
     
-    readUtf8String() {
+    readNullEndedString() {
         let str = "";
         while (true) {
             const byte = this.readByte();
             if (byte == 0) break;
+            str += String.fromCharCode(byte);
+        }
+        return str;
+    }
+
+    readString(len: number) {
+        let str = "";
+        for(let i=0; i<len; i++) {
+            const byte = this.readByte();
             str += String.fromCharCode(byte);
         }
         return str;

@@ -29,6 +29,7 @@ export class BoxCtx {
 
 const ROOT_BOX = Box({
     "ftyp": Box_ftyp,
+    "mdat": () => {},
     "moov": Container({
         "mvhd": Box_mvhd,
         "trak": Container({

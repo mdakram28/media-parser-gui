@@ -6,12 +6,14 @@ import { Card, colors } from '@mui/material';
 
 const byteToHex: string[] = [];
 const byteToBin: string[] = [];
+const byteToAscii: string[] = [];
 
 for (let n = 0; n <= 0xff; ++n) {
     const hexOctet = n.toString(16).padStart(2, "0");
     byteToHex.push(hexOctet);
     const bin = n.toString(2).padStart(8, "0");
     byteToBin.push(bin);
+    byteToAscii.push(n>=32 && n<= 127 ? String.fromCharCode(n) : '.');
 }
 
 const range = (start: number, end: number, step: number = 1) => {
@@ -110,13 +112,13 @@ export const HexEditor = ({ buffer, highlight, setHighlight, setBoxColor }: {
         setBitColors(newBitColors);
         setBoxColor(newBoxColors);
         scrollViewRef.current?.scrollTo({
-            top: Math.floor(selected/NUM_COLS) * CELL_HEIGHT,
+            top: Math.floor(selected / NUM_COLS) * CELL_HEIGHT,
             behavior: "smooth"
         });
         // getElementsByClassName("hex-byte")[selected].scrollIntoView({ behavior: "smooth", block: "center" });
     }, [selected, highlight]);
 
-    const renderFrom = Math.max(offset - EXTRA_RENDER_ROWS*NUM_COLS, 0);
+    const renderFrom = Math.max(offset - EXTRA_RENDER_ROWS * NUM_COLS, 0);
     const renderTo = Math.min(offset + (NUM_ROWS + EXTRA_RENDER_ROWS) * NUM_COLS, buffer.length)
 
 
@@ -137,7 +139,7 @@ export const HexEditor = ({ buffer, highlight, setHighlight, setBoxColor }: {
                 setOffset(NUM_COLS * Math.floor(scrollTop / CELL_HEIGHT));
             }}
         >
-            <div style={{ height: (buffer.length/NUM_COLS) * CELL_HEIGHT }}>
+            <div style={{ height: (buffer.length / NUM_COLS) * CELL_HEIGHT }}>
                 <div style={{ position: "relative", top: CELL_HEIGHT * (renderFrom / NUM_COLS) }}>
 
                     <div style={{ display: "inline-block" }}>{
@@ -172,14 +174,14 @@ export const HexEditor = ({ buffer, highlight, setHighlight, setBoxColor }: {
                             </Fragment>
                         )
                     }</div>
-                    {/* <div style={{ display: "inline-block", paddingLeft: 10 }} id="hex-bytes">{
-                    buffer.map((byte, i) => {
-                    return <Fragment key={i}>
-                    {i % numBytesInRow == 0 && <br />}
-                    <span style={{ backgroundColor: byteColors[i] }}>{String.fromCharCode(buffer[i])}</span>
-                    </Fragment>
-                })
-                }</div> */}
+                    <div style={{ display: "inline-block", paddingLeft: 10 }} id="ascii-bytes">{
+                        mapRange(renderFrom, renderTo, 1, ((i) => 
+                            <Fragment key={i}>
+                                {i % NUM_COLS == 0 && <br />}
+                                <span style={{ backgroundColor: byteColors[i] }}>{byteToAscii[buffer[i]]}</span>
+                            </Fragment>
+                        ))}
+                    </div>
                 </div>
             </div>
         </div>

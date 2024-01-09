@@ -1,8 +1,32 @@
 import { Bitstream, ParserCtx } from "../../bitstream/parser";
 import { Box, Container } from "../box-util";
 import { BoxCtx } from "../mp4-bitstream";
+import { AV1Sample } from "./sample_av1";
 
 
+function SampleEntry(bs: Bitstream<BoxCtx & ParserCtx>, end: number) {
+    bs.f("reserved", 8*6);
+    bs.f("data_reference_index", 16);
+}
+
+export function VisualSampleEntry(bs: Bitstream<BoxCtx & ParserCtx>, end: number) {
+    SampleEntry(bs, end);
+
+    bs.f("pre_defined", 16);
+    bs.f("reserved", 16);
+    bs.f("pre_defined[0]", 32);
+    bs.f("pre_defined[1]", 32);
+    bs.f("pre_defined[2]", 32);
+    bs.f("width", 16);
+    bs.f("height", 16);
+    bs.f("horizresolution", 32);
+    bs.f("vertresolution", 32);
+    bs.f("reserved", 32);
+    bs.f("frame_count", 16);
+    bs.fixedWidthString("compressorname", 32);
+    bs.f("depth", 16);
+    bs.f("pre_defined", 16);
+}
 
 function Box_mdhd(bs: Bitstream<BoxCtx & ParserCtx>, end: number) {
     const version = bs.f("version", 8);
@@ -36,11 +60,22 @@ function Box_hdlr(bs: Bitstream<BoxCtx & ParserCtx>, end: number) {
     bs.f("reserved", 32);
     bs.f("reserved", 32);
     bs.f("reserved", 32);
-    bs.utf8String("name");
+    bs.nullEndedString("name");
 }
 
+const SampleEntryBox = Box({
+    "av01": AV1Sample
+});
 
 const Box_stbl = Container({
+    "stsd": (bs: Bitstream<BoxCtx & ParserCtx>, end: number) => {
+        const version = bs.f("version", 8);
+        bs.f("flags", 24);
+        const entry_count = bs.f("entry_count", 32);
+        for(let i=1; i<=entry_count; i++) {
+            SampleEntryBox(bs, end);
+        }
+    },
     // "stts": (bs: Bitstream<BoxCtx & ParserCtx>, end: number) => {
     //     // TODO: (decoding) time-to-sample
     // },

@@ -46,7 +46,7 @@ export class Bitstream<T extends {}> {
         if (title.endsWith("]")) {
             const ind = parseInt(title.substring(title.lastIndexOf('[') + 1, title.length - 1));
             const name = title.substring(0, title.lastIndexOf('['));
-            if (this.ctx[name as keyof T] === undefined)
+            if (!Array.isArray(this.ctx[name as keyof T]))
                 (this.ctx[name as keyof T] as any[]) = [];
             (this.ctx[name as keyof T] as any[])[ind] = value as any;
         } else {
@@ -112,9 +112,9 @@ export class Bitstream<T extends {}> {
     }
 
 
-    utf8String(title: keyof T | string) {
+    nullEndedString(title: keyof T | string) {
         const start = this.getPos();
-        const val = this.buffer.readUtf8String();
+        const val = this.buffer.readNullEndedString();
         this.current.children?.push({
             key: title.toString() + Math.floor(Math.random() * 100000),
             title: `${title.toString()}: ${val}`,
@@ -124,6 +124,22 @@ export class Bitstream<T extends {}> {
         this.setCtx(title, val);
         return val;
     }
+
+
+    fixedWidthString(title: keyof T | string, len: number) {
+        const start = this.getPos();
+        const val = this.buffer.readString(len);
+        this.current.children?.push({
+            key: title.toString() + Math.floor(Math.random() * 100000),
+            title: `${title.toString()}: ${val}`,
+            start,
+            size: this.getPos() - start
+        });
+        this.setCtx(title, val);
+        return val;
+    }
+
+
 
     gotoPos(p: number) {
         this.buffer.gotoPos(p);

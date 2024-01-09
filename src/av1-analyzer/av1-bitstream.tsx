@@ -151,7 +151,7 @@ export const AV1 = syntax("AV1", (bs: Bitstream<ParserCtx>) => {
     }
 });
 
-const open_bitstream_unit = syntax("open_bitstream_unit", (bs: Bitstream<ObuCtx & ParserCtx>, sz: number) => {
+export const open_bitstream_unit = syntax("open_bitstream_unit", (bs: Bitstream<ObuCtx & ParserCtx>, sz: number) => {
     bs.updateCtx(new ObuCtx());
     const c = bs.ctx;
 
