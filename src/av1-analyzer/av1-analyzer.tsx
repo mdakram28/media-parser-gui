@@ -105,7 +105,6 @@ export const Av1AnalyzerComponent = (props: {}) => {
                         }
                 </Grid>
                 <Grid item xs={6}>
-                    <div style={{ height: "70vh", overflow: "scroll" }}>
                         <HexEditor
                             buffer={buffer}
                             highlight={highlighted}
@@ -113,7 +112,6 @@ export const Av1AnalyzerComponent = (props: {}) => {
                             boxColor={boxColor}
                             setBoxColor={setBoxColor}
                         />
-                    </div>
                 </Grid>
             </Grid>
         }
