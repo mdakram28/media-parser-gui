@@ -8,7 +8,7 @@ export const frame_obu = syntax("frame_obu", (bs: Bitstream<ObuCtx>, sz: number)
 
     const startBitPos = bs.getPos()
     frame_header_obu(bs)
-    bs.byte_alignment()
+    bs.byteAlign()
     const endBitPos = bs.getPos()
     const headerBytes = (endBitPos - startBitPos) / 8
     sz -= headerBytes
