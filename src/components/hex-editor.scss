@@ -1,32 +1,53 @@
-.hex-byte {
-    display: inline-block;
-    width: 25px;
-    height: 25px;
-    // line-height: 25;
-    user-select: none;
-    text-align: center;
-    cursor: text;
-    &:hover {
-        background-color: rgb(216, 216, 216);
+.hex-editor {
+    position: relative;
+    width: 100%;
+
+    .infinite-render {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        padding-right: 20px;
+        .hex-bytes {
+            user-select: none;
+            cursor: text;
+
+            & > div {
+                line-height: 25px;
+
+            }
+            & > div > span {
+                display: inline-block;
+                width: 25px;
+                text-align: center;
+
+                &:hover {
+                    background-color: rgb(216, 216, 216);
+                }
+            }
+        }
+
+        .hex-positions {
+            div {
+                line-height: 25px;
+            }
+        }
     }
 }
 
-.hex-pos {
-    width: 25px;
-    height: 25px;
-}
 
 .node-right {
     float: right;
     margin-right: 50px;
+
     // display: flex;
     // width: 100px;
     // justify-content: space-between;
-    & > span {
+    &>span {
         display: inline-block;
         width: 70px;
     }
 }
+
 .data-box {
     display: block;
     border: 2px solid grey;
@@ -44,6 +65,7 @@
     .data-box-header {
         display: flex;
         user-select: none;
+
         &:hover {
             background-color: grey;
         }

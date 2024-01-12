@@ -26,12 +26,13 @@ $border: $border-width solid var(--border-color);
 
 $toolbar-height: 40px;
 
-html, body {
+html,
+body {
     background-color: var(--bg-color);
     color: var(--font-color);
     padding: 0px;
     margin: 0px;
-    font-family: "Roboto","Helvetica","Arial",sans-serif;
+    font-family: "Roboto", "Helvetica", "Arial", sans-serif;
     overflow: hidden;
 }
 
@@ -53,7 +54,7 @@ a {
     flex-direction: row;
     align-items: center;
 
-    & > .toolbar-item {
+    &>.toolbar-item {
         height: $toolbar-height;
         padding: 0px math.div($toolbar-height, 2);
         display: flex;
@@ -63,26 +64,61 @@ a {
         box-sizing: border-box;
         // margin-top: -$border-width -2;
         // margin-bottom: -$border-width -2;
-        
+
         &.active {
             background-color: var(--bg-color);
             border-top: 3px solid var(--primary-color);
             border-bottom: $border-width solid var(--bg-color);
         }
     }
-    & > a.toolbar-item:hover {
+
+    &>a.toolbar-item:hover {
         background-color: var(--bg-color);
         cursor: pointer;
     }
 }
 
+.FilesDragAndDrop {
+    &:hover {
+        background-color: var(--bg-strong-color);
+    }
+
+    .FilesDragAndDrop__area {
+        width: 300px;
+        height: 200px;
+        padding: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-flow: column nowrap;
+        font-size: 24px;
+        color: #555555;
+        border: 2px #c3c3c3 dashed;
+        border-radius: 12px;
+        position: relative;
+        cursor: pointer;
+
+
+        .area__icon {
+            font-size: 64px;
+            margin-top: 20px;
+        }
+    }
+}
+
 .content {
     height: calc(100vh - $toolbar-height);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
 }
 
 .panel {
     border-left: $border;
     box-sizing: border-box;
     padding: 20px;
+    flex: 1;
+    display: flex;
     // margin: -1px;
 }
