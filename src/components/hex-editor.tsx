@@ -1,6 +1,6 @@
 import { DataNode } from "../types/parser.types";
 import "./hex-editor.scss";
-import { Fragment, UIEvent, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, MouseEvent, MouseEventHandler, UIEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Card, colors } from '@mui/material';
 
 
@@ -31,11 +31,18 @@ class Range {
     }
 
     first(count: number) {
-        return this.subRange(this.start, this.start+count);
+        return this.subRange(this.start, this.start + count);
     }
 
     count() {
-        return this.end-this.start;
+        return this.end - this.start;
+    }
+
+    bitToByte() {
+        return new Range(
+            Math.floor(this.start / 8), // Including
+            Math.floor((this.end - 1) / 8) + 1 // Excluding
+        );
     }
 }
 
@@ -51,11 +58,31 @@ for (let n = 0; n <= 0xff; ++n) {
 const COLORS = [colors.purple[700], colors.purple[400], colors.purple[300], colors.purple[200], colors.purple[100], colors.purple[50]];
 
 const NUM_COLS = 16;
-const NUM_ROWS = 15;
+const NUM_ROWS = 25;
 const CELL_HEIGHT = 25;
 const CELL_WIDTH = 25;
 const EXTRA_RENDER_ROWS = 10;
-const NUM_BYTES_IN_BITVIEW = 4;
+const NUM_BYTES_IN_INSPECT = 4;
+
+function ByteInspector({ range, buffer, bitColors }: { range: Range, buffer: Uint8Array, bitColors: string[] }) {
+
+    const inspectBytes = range.first(NUM_BYTES_IN_INSPECT);
+    const inspectValue = inspectBytes.map(1, i => buffer[i]).reduce((prev, val) => prev << 8 | val);
+
+    return <Card variant="outlined" sx={{ padding: 1 }}>
+        Selected: {range.start}:{range.end-1} <br />
+        Showing (First {inspectBytes.count()} bytes) <br />
+        Hex: {inspectValue.toString(16).padStart(inspectBytes.count() * 2, '0')}  <br />
+        Decimal: {inspectValue}  <br />
+        Binary: {
+            inspectBytes.map(1, i => <span key={i} style={{ marginRight: CELL_WIDTH / 2 }}>{
+                [...byteToBin[buffer[i]]].map(
+                    (bit, j) => <span key={i * 8 + j} style={{ width: CELL_WIDTH / 2, backgroundColor: bitColors[i * 8 + j] }}>{bit}</span>
+                )
+            }</span>)
+        }
+    </Card>
+}
 
 export function HexEditor({ buffer, highlight, setHighlight, setBoxColor }: {
     buffer: Uint8Array,
@@ -70,7 +97,6 @@ export function HexEditor({ buffer, highlight, setHighlight, setBoxColor }: {
     const [selected, setSelected] = useState<Range>();
     const [offset, setOffset] = useState(0);
     const [dragStart, setDragStart] = useState<number>();
-    const [dragEnd, setDragEnd] = useState<number>();
     const scrollViewRef = useRef<HTMLDivElement>(null);
 
 
@@ -92,23 +118,20 @@ export function HexEditor({ buffer, highlight, setHighlight, setBoxColor }: {
                 newByteColors[i] = col;
             }
         });
-        const {start: selectStart, size: selectSize} = highlight[highlight.length - 1];
+        const { start: selectStart, size: selectSize } = highlight[highlight.length - 1];
         setSelected(new Range(selectStart, selectStart + selectSize));
         setByteColors(newByteColors);
         setBoxColor(newBoxColors);
     }, [highlight]);
 
     // Drag listeners
-    useEffect(() => {
-        const listener = () => {
-            if (dragStart === undefined || dragEnd === undefined) {
-                setDragStart(undefined);
-                setDragEnd(undefined);
-                return;
-            }
-        };
-        document.addEventListener("mouseup", listener);
-        return () => document.removeEventListener("mouseup", listener);
+    const hexBytesDragged = useCallback((ev: any) => {
+        // if (dragStart === undefined || dragEnd === undefined) {
+        //     setDragStart(undefined);
+        //     setDragEnd(undefined);
+        //     return;
+        // }
+        console.log(ev);
     }, []);
 
     // Set bit colors for first NUM_BYTES_IN_BITVIEW
@@ -117,9 +140,9 @@ export function HexEditor({ buffer, highlight, setHighlight, setBoxColor }: {
             setBitColors([]);
             return;
         }
-        
-        const bitStart = selected.start - selected.start%8;
-        const bitEnd = bitStart + NUM_BYTES_IN_BITVIEW*8; // Not including
+
+        const bitStart = selected.start - selected.start % 8;
+        const bitEnd = bitStart + NUM_BYTES_IN_INSPECT * 8; // Not including
         // if (highlight.length == 0 || selected >= buffer.length) {
         //     setBitColors([]);
         //     return;
@@ -135,13 +158,13 @@ export function HexEditor({ buffer, highlight, setHighlight, setBoxColor }: {
         });
         setBitColors(newBitColors);
 
-        if (dragStart === undefined) {
-            console.log(dragStart);
+        // if (dragStart === undefined) {
+        //     console.log(dragStart);
             scrollViewRef.current?.scrollTo({
-                top: Math.floor(selected.start / (NUM_COLS*8)) * CELL_HEIGHT,
+                top: Math.floor(selected.start / (NUM_COLS * 8)) * CELL_HEIGHT,
                 behavior: "smooth"
             });
-        }
+        // }
         // getElementsByClassName("hex-byte")[selected].scrollIntoView({ behavior: "smooth", block: "center" });
     }, [selected, highlight]);
 
@@ -149,33 +172,12 @@ export function HexEditor({ buffer, highlight, setHighlight, setBoxColor }: {
         Math.max(offset - EXTRA_RENDER_ROWS * NUM_COLS, 0),
         Math.min(offset + (NUM_ROWS + EXTRA_RENDER_ROWS) * NUM_COLS, buffer.length)
     );
-    const selectedBytes = selected && new Range(
-        Math.floor(selected.start/8), // Including
-        Math.floor((selected.end-1)/8)+1 // Excluding
-    );
-    const inspectBytes = selectedBytes && selectedBytes.first(NUM_BYTES_IN_BITVIEW);
-    const inspectValue = inspectBytes?.map(1, i => buffer[i]).reduce((prev, val) => prev<<8 | val);
-    // console.log(inspectBytes);
-    
+
     return <div style={{ position: "relative", fontFamily: "monospace", height: "100%", minWidth: "min-content" }}>
-        <div style={{ position: "absolute", zIndex: 10, left: 0, bottom: 0, right: 0, padding: 20 }}>
-                {
-                    selectedBytes && <Card variant="outlined" sx={{padding: 1}}>
-                        Selected: {selectedBytes.start}:{selectedBytes.end} <br />
-                        Showing (First {inspectBytes?.count()} bytes) <br/>
-                        Hex: {inspectValue!.toString(16).padStart(inspectBytes!.count()*2, '0')}  <br />
-                        Decimal: {inspectValue}  <br />
-                        Binary: {
-                            inspectBytes?.map(1, i => <span key={i} style={{marginRight: CELL_WIDTH/2}}>{
-                                [...byteToBin[buffer[i]]].map(
-                                    (bit, j) => <span key={i*8+j} style={{ width: CELL_WIDTH/2, backgroundColor: bitColors[i*8+j] }}>{bit}</span>
-                                    )
-                                }</span>)
-                            }
-                    </Card>
-                }
+        <div style={{ position: "absolute", zIndex: 10, bottom: 0, width: "100%" }}>
+            {selected && <ByteInspector range={selected.bitToByte()} buffer={buffer} bitColors={bitColors}/>}
         </div>
-        <div ref={scrollViewRef} style={{ height: "100%", overflow: "scroll" }}
+        <div ref={scrollViewRef} style={{ height: "100%", overflowY: "auto" }}
             onScroll={(e: any) => {
                 const { scrollTop } = e.target;
                 setOffset(NUM_COLS * Math.floor(scrollTop / CELL_HEIGHT));
@@ -189,26 +191,45 @@ export function HexEditor({ buffer, highlight, setHighlight, setBoxColor }: {
                             i => <div key={i} className="hex-pos">{byteToHex[(i & 0xFF00) >> 8] + byteToHex[i & 0xFF]}</div>
                         )
                     }</div>
-                    <div style={{ display: "inline-block", paddingLeft: 30 }} id="hex-bytes">{
+                    <div 
+                        style={{ display: "inline-block", paddingLeft: 30 }} 
+                        id="hex-bytes" 
+                        onMouseDown={({target}: any) => {
+                            if (!target.hasAttribute("data-pos")) return;
+                            const pos = target.getAttribute("data-pos");
+                            setDragStart(pos);
+                        }}
+                        onMouseUp={({target}: any) => {
+                            if (!target.hasAttribute("data-pos")) return;
+                            const pos = target.getAttribute("data-pos");
+                            setDragStart(undefined);
+                        }}
+                        onMouseMove={({target}: any) => {
+                            if (!target.hasAttribute("data-pos") || dragStart === undefined) return;
+                            const pos = target.getAttribute("data-pos");
+                            setSelected(new Range(dragStart, pos+1));
+                        }}
+                    >{
                         renderBytes.map(1,
                             (i) => <Fragment key={i}>
                                 {i % NUM_COLS == 0 && <br />}
                                 <span
+                                    data-pos={i}
                                     // onClick={() => setSelected(i)}
-                                    onMouseDown={() => { setDragStart(i); setDragEnd(i); }}
-                                    onMouseEnter={() => {
-                                        if (dragStart !== undefined) {
-                                            setDragEnd(i);
-                                            const h = {
-                                                key: "selection",
-                                                size: (i - dragStart + 1) * 8,
-                                                start: dragStart * 8,
-                                                title: "Selection"
-                                            };
-                                            setHighlight([h]);
-                                        }
-                                    }}
-                                    onMouseLeave={() => { if (dragStart !== undefined) setDragEnd(undefined); }}
+                                    // onMouseDown={() => { setDragStart(i); setDragEnd(i); }}
+                                    // onMouseEnter={() => {
+                                    //     if (dragStart !== undefined) {
+                                    //         setDragEnd(i);
+                                    //         const h = {
+                                    //             key: "selection",
+                                    //             size: (i - dragStart + 1) * 8,
+                                    //             start: dragStart * 8,
+                                    //             title: "Selection"
+                                    //         };
+                                    //         setHighlight([h]);
+                                    //     }
+                                    // }}
+                                    // onMouseLeave={() => { if (dragStart !== undefined) setDragEnd(undefined); }}
                                     className="hex-byte"
                                     style={{ backgroundColor: byteColors[i] }}>
                                     {byteToHex[buffer[i]]}
@@ -218,10 +239,10 @@ export function HexEditor({ buffer, highlight, setHighlight, setBoxColor }: {
                     }</div>
                     <div style={{ display: "inline-block", paddingLeft: 10 }} id="ascii-bytes">{
                         renderBytes.map(NUM_COLS, ((i) =>
-                            <div key={i} style={{height: CELL_HEIGHT }}>
+                            <div key={i} style={{ height: CELL_HEIGHT }}>
                                 {
-                                    new Range(i, i+NUM_COLS).map(1, (j) => 
-                                        <span style={{ backgroundColor: byteColors[j]}}>
+                                    new Range(i, i + NUM_COLS).map(1, (j) =>
+                                        <span key={j} style={{ backgroundColor: byteColors[j] }}>
                                             {byteToAscii[buffer[j]]}
                                         </span>
                                     )

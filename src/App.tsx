@@ -4,6 +4,7 @@ import { Av1AnalyzerComponent } from './av1-analyzer/av1-analyzer';
 import GitHubButton from 'react-github-btn'
 import { Route, Routes } from 'react-router-dom';
 import { Mp4AnalyzerComponent } from './mp4/mp4-analyzer';
+import { Switch } from "@mui/material";
 
 
 export default function Dashboard() {
@@ -16,9 +17,21 @@ export default function Dashboard() {
     title: "MP4 parser"
   }]
 
+  const toggleTheme = () => {
+    const c = document.body.classList;
+    if (c.contains("dark")) {
+      c.remove("dark");
+      c.add("light");
+    } else {
+      c.remove("light");
+      c.add("dark");
+    }
+  }
+
   React.useEffect(() => {
     document.body.classList.add("dark");
   }, []);
+  console.log("Main rendered");
 
   return (
     <main>
@@ -31,6 +44,12 @@ export default function Dashboard() {
               {menu.title}
           </a>
         )}
+        <span style={{flex: 1}}></span>
+        <div className="toolbar-item">
+          Light
+          <Switch inputProps={{'aria-label': "Dark"}} onClick={(ev) => {toggleTheme()}}/>
+          Dark
+        </div>
       </div>
       <div className="content">
         { page == "av1" && <Av1AnalyzerComponent /> }

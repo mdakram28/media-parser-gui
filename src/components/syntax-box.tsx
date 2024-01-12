@@ -65,7 +65,7 @@ export function DataBoxComponent({ onSelect, selected, root, boxColor }: {
     if (!root.children) {
         return <>No data</>
     }
-    return <div style={{ height: "70vh", overflow: "scroll", width: "100%" }}>
+    return <div style={{ flex: 1, overflowY: "auto", width: "100%" }}>
         <DataBoxNodeComponent node={root.children[0]} selected={selected} onSelect={onSelect} boxColor={boxColor} />
     </div>
 }

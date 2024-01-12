@@ -1,9 +1,10 @@
+@use "sass:math";
 
 .light {
-    --primary-color: #302AE6;
+    --primary-color: #5e5bae;
     --secondary-color: #536390;
     --font-color: #424242;
-    --bg-color: #e0e0e0;
+    --bg-color: #f5f5f5;
     --bg-strong-color: #fff;
     --heading-color: #292922;
     --border-color: #2d2d3c;
@@ -17,6 +18,7 @@
     --bg-strong-color: #000000;
     --heading-color: #818cab;
     --border-color: #2d2d3c;
+    color-scheme: dark;
 }
 
 $border-width: 1px;
@@ -30,6 +32,7 @@ html, body {
     padding: 0px;
     margin: 0px;
     font-family: "Roboto","Helvetica","Arial",sans-serif;
+    overflow: hidden;
 }
 
 h1 {
@@ -44,20 +47,27 @@ a {
     background-color: var(--bg-strong-color);
     border-bottom: $border;
     // margin-bottom: -5px;
-    box-sizing: border-box;
+    // box-sizing: border-box;
     // height: $toolbar-height;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
 
     & > .toolbar-item {
-        display: inline-block;
-        line-height: $toolbar-height;
-        padding: 0px $toolbar-height/2;
+        height: $toolbar-height;
+        padding: 0px math.div($toolbar-height, 2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
         border-right: $border;
-
+        box-sizing: border-box;
+        // margin-top: -$border-width -2;
+        // margin-bottom: -$border-width -2;
+        
         &.active {
             background-color: var(--bg-color);
             border-top: 3px solid var(--primary-color);
             border-bottom: $border-width solid var(--bg-color);
-            margin-bottom: -5px;
         }
     }
     & > a.toolbar-item:hover {
@@ -71,6 +81,8 @@ a {
 }
 
 .panel {
-    border: $border;
+    border-left: $border;
     box-sizing: border-box;
+    padding: 20px;
+    // margin: -1px;
 }

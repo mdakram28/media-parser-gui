@@ -87,7 +87,7 @@ export const Av1AnalyzerComponent = (props: {}) => {
 
     return <>
         <div style={{display: "flex", flexDirection: "row", height: "100%"}}>
-            <div style={{flex: 1, height: "100%"}}>
+            <div style={{flex: 1, height: "100%"}} className="panel">
                         {
                             buffer.length == 0 &&
                             <div style={{ height: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center"}}>
