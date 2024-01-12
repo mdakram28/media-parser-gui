@@ -55,7 +55,7 @@ export function DataTreeComponent({ onSelect, root }: {
         }}
         // onNodeSelect={(event, nodeIds) => onSelect([nodeIds])}
         onNodeFocus={(event, nodeIds) => onSelect([nodeIds])}
-        sx={{ height: "70vh", overflow: "scroll" }}
+        sx={{ height: "70vh", overflow: "scroll", width: "100%" }}
     >
         <DataTreeNodeComponent node={root.children[0]} />
     </TreeView>

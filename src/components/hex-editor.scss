@@ -3,6 +3,7 @@
     width: 25px;
     height: 25px;
     // line-height: 25;
+    user-select: none;
     text-align: center;
     &:hover {
         background-color: rgb(216, 216, 216);

@@ -33,7 +33,7 @@ export const Av1AnalyzerComponent = (props: {}) => {
     const [highlighted, setHighlighted] = useState<DataNode[]>([]);
     const [selected, setSelected] = useState<string[]>([]);
     const [boxColor, setBoxColor] = useState<{ [k: string]: string }>({});
-    const [treeType, setTreeType] = useState<"tree" | "box">("box");
+    const [treeType, setTreeType] = useState<"tree" | "box">("tree");
 
     function readFileDataAsBase64(e: React.FormEvent<HTMLInputElement>) {
         // @ts-ignore
@@ -86,35 +86,41 @@ export const Av1AnalyzerComponent = (props: {}) => {
     }, [selected]);
 
     return <>
-        <Button component="label" variant="contained" startIcon={<CloudUploadIcon />}>
-            Upload file
-            <VisuallyHiddenInput type="file" onChange={e => readFileDataAsBase64(e)} />
-        </Button>
-        {
-            syntaxTree.children && syntaxTree.children[0].children &&
-            <Grid container spacing={2}>
-                <Grid item xs={6}>
-                        <RadioGroup row onChange={ev => setTreeType(ev.target.value as any)} value={treeType}>
-                            <FormControlLabel control={<Radio />} label="Tree" value={"tree"} />
-                            <FormControlLabel control={<Radio />} label="Box" value={"box"} />
-                        </RadioGroup>
-
-                        {treeType == "tree"
-                            ? <DataTreeComponent root={syntaxTree} onSelect={setSelected} />
-                            : <DataBoxComponent root={syntaxTree} onSelect={setSelected} selected={selected} boxColor={boxColor} />
+        <div style={{display: "flex", flexDirection: "row", height: "100%"}}>
+            <div style={{flex: 1, height: "100%"}}>
+                        {
+                            buffer.length == 0 &&
+                            <div style={{ height: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center"}}>
+                                <Button component="label" variant="contained" startIcon={<CloudUploadIcon />}>
+                                    Upload file
+                                    <VisuallyHiddenInput type="file" onChange={e => readFileDataAsBase64(e)} />
+                                </Button>
+                            </div>
                         }
-                </Grid>
-                <Grid item xs={6}>
-                        <HexEditor
-                            buffer={buffer}
-                            highlight={highlighted}
-                            setHighlight={setHighlighted}
-                            boxColor={boxColor}
-                            setBoxColor={setBoxColor}
-                        />
-                </Grid>
-            </Grid>
-        }
 
+                        {
+                            buffer.length > 0 && <>
+                                <RadioGroup row onChange={ev => setTreeType(ev.target.value as any)} value={treeType}>
+                                    <FormControlLabel control={<Radio />} label="Tree" value={"tree"} />
+                                    <FormControlLabel control={<Radio />} label="Box" value={"box"} />
+                                </RadioGroup>
+
+                                {treeType == "tree"
+                                    ? <DataTreeComponent root={syntaxTree} onSelect={setSelected} />
+                                    : <DataBoxComponent root={syntaxTree} onSelect={setSelected} selected={selected} boxColor={boxColor} />
+                                }
+                            </>
+                        }
+            </div>
+            <div style={{flex: 1, height: "100%"}} className="panel">
+                <HexEditor
+                    buffer={buffer}
+                    highlight={highlighted}
+                    setHighlight={setHighlighted}
+                    boxColor={boxColor}
+                    setBoxColor={setBoxColor}
+                />
+            </div>
+        </div>
     </>
 }

@@ -134,10 +134,14 @@ export function HexEditor({ buffer, highlight, setHighlight, setBoxColor }: {
             }
         });
         setBitColors(newBitColors);
-        scrollViewRef.current?.scrollTo({
-            top: Math.floor(selected.start / (NUM_COLS*8)) * CELL_HEIGHT,
-            behavior: "smooth"
-        });
+
+        if (dragStart === undefined) {
+            console.log(dragStart);
+            scrollViewRef.current?.scrollTo({
+                top: Math.floor(selected.start / (NUM_COLS*8)) * CELL_HEIGHT,
+                behavior: "smooth"
+            });
+        }
         // getElementsByClassName("hex-byte")[selected].scrollIntoView({ behavior: "smooth", block: "center" });
     }, [selected, highlight]);
 
@@ -153,25 +157,25 @@ export function HexEditor({ buffer, highlight, setHighlight, setBoxColor }: {
     const inspectValue = inspectBytes?.map(1, i => buffer[i]).reduce((prev, val) => prev<<8 | val);
     // console.log(inspectBytes);
     
-    return <div style={{ fontFamily: "monospace" }}>
-        <Card variant="outlined" sx={{ padding: 1 }}>
-            {
-                selectedBytes && <>
-                    Selected: {selectedBytes.start}:{selectedBytes.end} <br />
-                    Showing (First {inspectBytes?.count()} bytes) <br/>
-                    Hex: {inspectValue!.toString(16).padStart(inspectBytes!.count()*2, '0')}  <br />
-                    Decimal: {inspectValue}  <br />
-                    Binary: {
-                        inspectBytes?.map(1, i => <span key={i} style={{marginRight: CELL_WIDTH/2}}>{
-                            [...byteToBin[buffer[i]]].map(
-                                (bit, j) => <span key={i*8+j} style={{ width: CELL_WIDTH/2, backgroundColor: bitColors[i*8+j] }}>{bit}</span>
-                            )
-                        }</span>)
-                    }
-                </>
-            }
-        </Card>
-        <div ref={scrollViewRef} style={{ height: "800px", overflow: "scroll" }}
+    return <div style={{ position: "relative", fontFamily: "monospace", height: "100%", minWidth: "min-content" }}>
+        <div style={{ position: "absolute", zIndex: 10, left: 0, bottom: 0, right: 0, padding: 20 }}>
+                {
+                    selectedBytes && <Card variant="outlined" sx={{padding: 1}}>
+                        Selected: {selectedBytes.start}:{selectedBytes.end} <br />
+                        Showing (First {inspectBytes?.count()} bytes) <br/>
+                        Hex: {inspectValue!.toString(16).padStart(inspectBytes!.count()*2, '0')}  <br />
+                        Decimal: {inspectValue}  <br />
+                        Binary: {
+                            inspectBytes?.map(1, i => <span key={i} style={{marginRight: CELL_WIDTH/2}}>{
+                                [...byteToBin[buffer[i]]].map(
+                                    (bit, j) => <span key={i*8+j} style={{ width: CELL_WIDTH/2, backgroundColor: bitColors[i*8+j] }}>{bit}</span>
+                                    )
+                                }</span>)
+                            }
+                    </Card>
+                }
+        </div>
+        <div ref={scrollViewRef} style={{ height: "100%", overflow: "scroll" }}
             onScroll={(e: any) => {
                 const { scrollTop } = e.target;
                 setOffset(NUM_COLS * Math.floor(scrollTop / CELL_HEIGHT));
@@ -213,11 +217,16 @@ export function HexEditor({ buffer, highlight, setHighlight, setBoxColor }: {
                         )
                     }</div>
                     <div style={{ display: "inline-block", paddingLeft: 10 }} id="ascii-bytes">{
-                        renderBytes.map(1, ((i) =>
-                            <Fragment key={i}>
-                                {i % NUM_COLS == 0 && <br />}
-                                <span style={{ backgroundColor: byteColors[i] }}>{byteToAscii[buffer[i]]}</span>
-                            </Fragment>
+                        renderBytes.map(NUM_COLS, ((i) =>
+                            <div key={i} style={{height: CELL_HEIGHT }}>
+                                {
+                                    new Range(i, i+NUM_COLS).map(1, (j) => 
+                                        <span style={{ backgroundColor: byteColors[j]}}>
+                                            {byteToAscii[buffer[j]]}
+                                        </span>
+                                    )
+                                }
+                            </div>
                         ))}
                     </div>
                 </div>

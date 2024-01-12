@@ -1,0 +1,76 @@
+
+.light {
+    --primary-color: #302AE6;
+    --secondary-color: #536390;
+    --font-color: #424242;
+    --bg-color: #e0e0e0;
+    --bg-strong-color: #fff;
+    --heading-color: #292922;
+    --border-color: #2d2d3c;
+}
+
+.dark {
+    --primary-color: #9A97F3;
+    --secondary-color: #818cab;
+    --font-color: #e1e1ff;
+    --bg-color: #0f0f13;
+    --bg-strong-color: #000000;
+    --heading-color: #818cab;
+    --border-color: #2d2d3c;
+}
+
+$border-width: 1px;
+$border: $border-width solid var(--border-color);
+
+$toolbar-height: 40px;
+
+html, body {
+    background-color: var(--bg-color);
+    color: var(--font-color);
+    padding: 0px;
+    margin: 0px;
+    font-family: "Roboto","Helvetica","Arial",sans-serif;
+}
+
+h1 {
+    color: var(--secondary-color);
+}
+
+a {
+    color: var(--primary-color);
+}
+
+.toolbar {
+    background-color: var(--bg-strong-color);
+    border-bottom: $border;
+    // margin-bottom: -5px;
+    box-sizing: border-box;
+    // height: $toolbar-height;
+
+    & > .toolbar-item {
+        display: inline-block;
+        line-height: $toolbar-height;
+        padding: 0px $toolbar-height/2;
+        border-right: $border;
+
+        &.active {
+            background-color: var(--bg-color);
+            border-top: 3px solid var(--primary-color);
+            border-bottom: $border-width solid var(--bg-color);
+            margin-bottom: -5px;
+        }
+    }
+    & > a.toolbar-item:hover {
+        background-color: var(--bg-color);
+        cursor: pointer;
+    }
+}
+
+.content {
+    height: calc(100vh - $toolbar-height);
+}
+
+.panel {
+    border: $border;
+    box-sizing: border-box;
+}
