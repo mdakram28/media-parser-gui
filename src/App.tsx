@@ -17,15 +17,11 @@ export default function Dashboard() {
     title: "MP4 parser"
   }]
 
-  const toggleTheme = () => {
+  const setTheme = (theme: string) => {
     const c = document.body.classList;
-    if (c.contains("dark")) {
-      c.remove("dark");
-      c.add("light");
-    } else {
-      c.remove("light");
-      c.add("dark");
-    }
+    c.remove("dark");
+    c.remove("light");
+    c.add(theme);
   }
 
   React.useEffect(() => {
@@ -47,7 +43,7 @@ export default function Dashboard() {
         <span style={{flex: 1}}></span>
         <div className="toolbar-item">
           Light
-          <Switch inputProps={{'aria-label': "Dark"}} onClick={(ev) => {toggleTheme()}}/>
+          <Switch inputProps={{'aria-label': "Dark"}} onClick={(ev: any) => setTheme(ev.target.checked ? "dark" : "light")}/>
           Dark
         </div>
       </div>

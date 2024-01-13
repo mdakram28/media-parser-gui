@@ -18,7 +18,7 @@ const VisuallyHiddenInput = styled('input')({
     width: 1,
 });
 
-export function BitstreamUploader({ }: {}) {
+export function BitstreamUploader({ title }: {title: string}) {
     const { readFileUploadData } = useContext(BitstreamExplorerContext);
     return <div className='FilesDragAndDrop'
         onDragOver={(e) => {
@@ -37,7 +37,7 @@ export function BitstreamUploader({ }: {}) {
             }
         }}>
         <label className='FilesDragAndDrop__area'>
-            Drop media file here
+            {title}
             <VisuallyHiddenInput
                 type="file"
                 onChange={e => e.target.files && readFileUploadData(e.target.files[0])}

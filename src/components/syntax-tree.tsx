@@ -14,7 +14,7 @@ function DataTreeNodeComponent({ node }: { node: DataNode }) {
             {node.title}
             <span className="node-right">
                 <span>{Math.floor(node.start / 8)}</span>
-                <span>{Math.ceil((node.start + node.size) / 8 - 1)}</span>
+                <span>{Math.ceil(node.size / 8)}</span>
             </span>
         </>}>
             {(node.children || [])
