@@ -61,7 +61,7 @@ function watch<T extends Function>(name: string, cb: T) {
     }) as any as T;
 }
 
-export function BitstreamExplorer({ children, parser, uploader = <BitstreamUploader /> }: {
+export function BitstreamExplorer({ children, parser, uploader = <BitstreamUploader title="Drop media file here"/> }: {
     children: ReactNode,
     parser: (buffer: Uint8Array) => DataNode,
     uploader?: ReactNode

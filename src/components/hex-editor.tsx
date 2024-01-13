@@ -127,7 +127,7 @@ export function HexEditor({ }: {}) {
         if (top < scrollTop || top > (scrollTop+clientHeight)) {
             scrollViewRef.current?.scrollTo({
                 top,
-                behavior: "auto"
+                behavior: "smooth"
             });
         }
     }, [ranges, dragStart]);
