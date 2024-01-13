@@ -119,12 +119,12 @@ export function HexEditor({ }: {}) {
 
     useEffect(() => {
         if (!ranges[0] || dragStart || !scrollViewRef.current) return;
-        const { scrollTop, scrollHeight } = scrollViewRef.current;
+        const { scrollTop, clientHeight } = scrollViewRef.current;
 
         const top = Math.floor(ranges[0].start / (NUM_COLS * 8)) * CELL_HEIGHT;
-
+        console.log(top, scrollTop, scrollTop+clientHeight);
         // Scroll only if not in view
-        if (top < scrollTop || top > (scrollTop+scrollHeight)) {
+        if (top < scrollTop || top > (scrollTop+clientHeight)) {
             scrollViewRef.current?.scrollTo({
                 top,
                 behavior: "auto"
@@ -141,7 +141,10 @@ export function HexEditor({ }: {}) {
         <div style={{ position: "absolute", zIndex: 10, bottom: 0, width: "100%" }}>
             {ranges[0] && <ByteInspector range={ranges[0].toByteRange()} />}
         </div>
-        <div className="infinite" ref={scrollViewRef} style={{ height: "100%", overflowY: "auto" }}
+        {/* <div style={{ position: "absolute", zIndex: 8, right: 0, height: "100%", width: 50, backgroundColor: "grey" }}>
+            <div style={{border: "black", height}}></div>
+        </div> */}
+        <div className="infinite" ref={scrollViewRef} style={{ height: "100%", overflowY: "auto", paddingRight: 50 }}
             onScroll={(e: any) => {
                 const { scrollTop } = e.target;
                 setOffset(NUM_COLS * Math.floor(scrollTop / CELL_HEIGHT));

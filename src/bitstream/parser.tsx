@@ -71,7 +71,7 @@ export class Bitstream<T extends {}> {
         const start = this.getPos();
         const val = this.buffer.readUvlc();
         this.current.children?.push({
-            key: title.toString() + Math.floor(Math.random() * 100000),
+            key: title.toString() + Math.floor(Math.random() * 1909000000),
             title: `${title.toString()}:    ${val}`,
             start,
             size: this.getPos() - start
@@ -82,7 +82,7 @@ export class Bitstream<T extends {}> {
 
     error(msg: string) {
         this.current.children?.push({
-            key: Math.floor(Math.random() * 100000).toString(),
+            key: Math.floor(Math.random() * 1909000000).toString(),
             title: <>Error: {msg}</>,
             start: this.getPos(),
             size: 0
@@ -102,7 +102,7 @@ export class Bitstream<T extends {}> {
         const start = this.getPos();
         const val = this.buffer.readLeb128();
         this.current.children?.push({
-            key: title.toString() + Math.floor(Math.random() * 100000),
+            key: title.toString() + Math.floor(Math.random() * 1909000000),
             title: `${title.toString()}: ${val}`,
             start,
             size: this.getPos() - start
@@ -116,7 +116,7 @@ export class Bitstream<T extends {}> {
         const start = this.getPos();
         const val = this.buffer.readNullEndedString();
         this.current.children?.push({
-            key: title.toString() + Math.floor(Math.random() * 100000),
+            key: title.toString() + Math.floor(Math.random() * 1909000000),
             title: `${title.toString()}: ${val}`,
             start,
             size: this.getPos() - start
@@ -130,7 +130,7 @@ export class Bitstream<T extends {}> {
         const start = this.getPos();
         const val = this.buffer.readString(len);
         this.current.children?.push({
-            key: title.toString() + Math.floor(Math.random() * 100000),
+            key: title.toString() + Math.floor(Math.random() * 1909000000),
             title: `${title.toString()}: ${val}`,
             start,
             size: this.getPos() - start
@@ -163,7 +163,7 @@ export class Bitstream<T extends {}> {
         return (...args: T) => {
             const parent = this.current;
             this.current = {
-                key: title + Math.floor(Math.random() * 100000),
+                key: title + Math.floor(Math.random() * 1909000000),
                 title,
                 children: [],
                 start: this.getPos(),

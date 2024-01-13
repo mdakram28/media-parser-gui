@@ -115,7 +115,7 @@ export function BitstreamExplorer({ children, parser, uploader = <BitstreamUploa
 
     return <>
         <BitstreamExplorerContext.Provider value={{
-            ranges, setRanges: watch("setRanges", setRanges),
+            ranges, setRanges,
             syntax, setSyntax,
             buffer, setBuffer, 
             syntaxById,
