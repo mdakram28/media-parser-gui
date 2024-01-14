@@ -1,7 +1,7 @@
 import { DataNode } from "../types/parser.types";
-import { LSBBuffer, MSBBuffer } from "./buffer";
+import { MSBBuffer } from "./buffer";
 
-export const MAX_ITER = 50;
+export const MAX_ITER = 100;
 
 export function syntax<BS extends {}, T extends Array<any>, U>(title: string, fn: (bs: Bitstream<BS>, ...args: T) => U) {
     return (bs: Bitstream<any>, ...args: T) => bs.syntax(title, fn)(...args);
@@ -13,7 +13,7 @@ export class ParserCtx {
 
 
 export class Bitstream<T extends {}> {
-    private buffer: LSBBuffer | MSBBuffer;
+    private buffer: MSBBuffer;
     private current: DataNode = {
         title: "ROOT",
         key: "root",
@@ -23,7 +23,7 @@ export class Bitstream<T extends {}> {
     };
     readonly ctx: T;
 
-    constructor(buffer: LSBBuffer | MSBBuffer) {
+    constructor(buffer: MSBBuffer) {
         this.buffer = buffer;
         this.ctx = {} as T;
     }
@@ -43,14 +43,26 @@ export class Bitstream<T extends {}> {
 
     setCtx(_title: keyof T | string, value: any) {
         const title = _title as string;
-        if (title.endsWith("]")) {
-            const ind = parseInt(title.substring(title.lastIndexOf('[') + 1, title.length - 1));
-            const name = title.substring(0, title.lastIndexOf('['));
-            if (!Array.isArray(this.ctx[name as keyof T]))
-                (this.ctx[name as keyof T] as any[]) = [];
-            (this.ctx[name as keyof T] as any[])[ind] = value as any;
+        const names = title.split("[") as string[];
+        if (names.length == 1) {
+            this.ctx[names[0] as keyof T] = value as any;
         } else {
-            this.ctx[title as keyof T] = value as any;
+            if (!Array.isArray(this.ctx[names[0] as keyof T])) {
+                (this.ctx[names[0] as keyof T] as any[]) = [];
+            }
+            let arr = this.ctx[names[0] as keyof T] as any[];
+            for(let i=1; i<names.length-1; i++) {
+                const index = parseInt(names[i] as string);
+                if (!Array.isArray(arr[index])) {
+                    arr[index] = [];
+                }
+                arr = arr[index];
+            }
+            const index = parseInt(names[names.length-1] as string);
+            if (!Array.isArray(arr[index])) {
+                arr[index] = [];
+            }
+            arr[index] = value;
         }
     }
 
@@ -67,9 +79,22 @@ export class Bitstream<T extends {}> {
         return value;
     }
 
-    uvlc(title: keyof T | string) {
+    uvlc(title: keyof T | string, e?: any) {
         const start = this.getPos();
         const val = this.buffer.readUvlc();
+        this.current.children?.push({
+            key: title.toString() + Math.floor(Math.random() * 1909000000),
+            title: `${title.toString()}:    ${val}` + (e ? ` (${e[val]})` : ''),
+            start,
+            size: this.getPos() - start
+        });
+        this.setCtx(title, val);
+        return val;
+    }
+
+    svlc(title: keyof T | string) {
+        const start = this.getPos();
+        const val = this.buffer.readSvlc();
         this.current.children?.push({
             key: title.toString() + Math.floor(Math.random() * 1909000000),
             title: `${title.toString()}:    ${val}`,
@@ -153,6 +178,10 @@ export class Bitstream<T extends {}> {
         this.buffer.assertByteAlign();
     }
 
+    findNextBytes(needle: Uint8Array, endBitPos: number = this.getEndPos()) {
+        return this.buffer.findNextBytes(needle, endBitPos);
+    }
+
     byteAlign() {
         if (this.buffer.getPos()%8 != 0) {
             return this.f("byte_align", (8 - this.buffer.getPos()%8) % 8);
@@ -176,4 +205,5 @@ export class Bitstream<T extends {}> {
             return ret;
         }
     }
+
 }

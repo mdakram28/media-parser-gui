@@ -32,15 +32,27 @@ abstract class BitBuffer {
     protected bitPos = 0;
     protected buffer;
     
-    
-    constructor(data: Uint8Array) {
+    constructor(data: Uint8Array, escapeCode?: Uint8Array) {
         this.buffer = data;
         this.byteLength = data.byteLength;
+        if (escapeCode !== undefined) {
+            this.checkEscapeCode = () => {
+                const start = this.bytePos-(escapeCode.byteLength-1);
+                if (this.bitPos == 0 && start >= 0) {
+                    if (escapeCode.every((val, i) => this.buffer[start+i] == val)) {
+                        this.bytePos++;
+                    }
+                }
+            }
+        }
     }
+
+    checkEscapeCode() {}
 
     gotoPos(p: number) {
         this.bytePos = Math.floor(p / 8);
         this.bitPos = p % 8;
+        this.checkEscapeCode();
     }
 
     getPos() {
@@ -84,6 +96,15 @@ abstract class BitBuffer {
         return value + (1 << leadingZeros) - 1
     }
 
+    readSvlc() {
+        const k = this.readUvlc();
+        if (k%2 == 0) {
+            return Math.ceil(k/2);
+        } else {
+            return -Math.ceil(k/2);
+        }
+    }
+
     
     readNullEndedString() {
         let str = "";
@@ -104,6 +125,20 @@ abstract class BitBuffer {
         return str;
     }
 
+    findNextBytes(needle: Uint8Array, endBitPos: number) {
+        const endBytePos = Math.floor(endBitPos/8);
+        for(let i=this.bytePos; i<endBytePos-needle.byteLength; i++) {
+            let matched = true;
+            for(let j=0; j<needle.byteLength; j++) {
+                if (needle[j] != this.buffer[i+j]) {
+                    matched = false;
+                    break;
+                }
+            }
+            if (matched) return i*8;
+        }
+        return endBitPos;
+    }
 }
 
 
@@ -111,10 +146,12 @@ abstract class BitBuffer {
 export class MSBBuffer extends BitBuffer {
     
     readByte() {
+        this.checkEscapeCode();
         return this.buffer[this.bytePos++];
     }
 
     readBit() {
+        this.checkEscapeCode();
         if (this.bitPos === 7) {
             const ret = this.buffer[this.bytePos++] & 1;
             this.bitPos = 0;
@@ -127,89 +164,95 @@ export class MSBBuffer extends BitBuffer {
     }
 
     readBits(bits: number) {
-        const endBitPos = this.getPos() + bits;
-        const endBytePos = Math.floor(endBitPos / 8);
-        let ret = 0;
-
-        if (endBytePos === this.bytePos) {
-            // Does not cross byte
-            ret = (this.buffer[this.bytePos] >> (8 - this.bitPos - bits)) & ((1 << bits) - 1);
-            this.bitPos += bits;
-        } else {
-            // crosses byte
-
-            // Step 1: Align to byte
-            if (this.bitPos > 0) {
-                const bitsToRead = 8 - this.bitPos;
-                ret = this.buffer[this.bytePos] & ((1 << bitsToRead) - 1);
-                this.bitPos = 0;
-                this.bytePos++;
-            }
-
-            // Step 2: Fast Read full bytes
-            while ((this.bytePos + 1) * 8 <= endBitPos) {
-                ret = ret << 8 | this.buffer[this.bytePos++];
-            }
-
-            // Step 3: Read tail
-            const bitsToRead = endBitPos - this.getPos();
-            ret = ret << bitsToRead | (this.buffer[this.bytePos] >> (8 - bitsToRead));
-            this.bitPos += bitsToRead;
+        let val = 0;
+        for(let i=0; i<bits; i++) {
+            val = val<<1 | this.readBit();
         }
-        return ret;
+        return val;
+        // this.checkEscapeCode();
+        // const endBitPos = this.getPos() + bits;
+        // const endBytePos = Math.floor(endBitPos / 8);
+        // let ret = 0;
+
+        // if (endBytePos === this.bytePos) {
+        //     // Does not cross byte
+        //     ret = (this.buffer[this.bytePos] >> (8 - this.bitPos - bits)) & ((1 << bits) - 1);
+        //     this.bitPos += bits;
+        // } else {
+        //     // crosses byte
+
+        //     // Step 1: Align to byte
+        //     if (this.bitPos > 0) {
+        //         const bitsToRead = 8 - this.bitPos;
+        //         ret = this.buffer[this.bytePos] & ((1 << bitsToRead) - 1);
+        //         this.bitPos = 0;
+        //         this.bytePos++;
+        //     }
+
+        //     // Step 2: Fast Read full bytes
+        //     while ((this.bytePos + 1) * 8 <= endBitPos) {
+        //         ret = ret << 8 | this.buffer[this.bytePos++];
+        //     }
+
+        //     // Step 3: Read tail
+        //     const bitsToRead = endBitPos - this.getPos();
+        //     ret = ret << bitsToRead | (this.buffer[this.bytePos] >> (8 - bitsToRead));
+        //     this.bitPos += bitsToRead;
+        // }
+        // return ret;
     }
 
 }
 
 // Reads LSB from byte first
-export class LSBBuffer extends BitBuffer {
+// export class LSBBuffer extends BitBuffer {
     
-    readByte() {
-        return REV8(this.buffer[this.bytePos++]);
-    }
+//     readByte() {
+//         return REV8(this.buffer[this.bytePos++]);
+//     }
 
-    readBit() {
-        const ret = (this.buffer[this.bytePos] >> this.bitPos) & 1;
-        this.bitPos++;
-        if (this.bitPos === 8) {
-            this.bitPos = 0;
-            this.bytePos++;
-        }
-        return ret;
-    }
+//     readBit() {
+//         const ret = (this.buffer[this.bytePos] >> this.bitPos) & 1;
+//         this.bitPos++;
+//         if (this.bitPos === 8) {
+//             this.bitPos = 0;
+//             this.bytePos++;
+//         }
+//         return ret;
+//     }
 
-    readBits(bits: number) {
-        const endBitPos = this.getPos() + bits;
-        const endBytePos = Math.floor(endBitPos / 8);
-        let ret = 0;
+//     readBits(bits: number) {
+//         const endBitPos = this.getPos() + bits;
+//         const endBytePos = Math.floor(endBitPos / 8);
+//         let ret = 0;
 
-        if (endBytePos === this.bytePos) {
-            // Does not cross byte
-            ret = (this.buffer[this.bytePos] >> this.bitPos) & ((1 << bits) - 1);
-            this.bitPos += bits;
-            ret = REV[ret];
-        } else {
-            // crosses byte
+//         if (endBytePos === this.bytePos) {
+//             // Does not cross byte
+//             ret = (this.buffer[this.bytePos] >> this.bitPos) & ((1 << bits) - 1);
+//             this.bitPos += bits;
+//             ret = REV[ret];
+//         } else {
+//             // crosses byte
 
-            // Step 1: Align to byte
-            if (this.bitPos > 0) {
-                ret = this.buffer[this.bytePos] >> this.bitPos;
-                this.bitPos = 0;
-                this.bytePos++;
-                ret = REV[ret];
-            }
+//             // Step 1: Align to byte
+//             if (this.bitPos > 0) {
+//                 ret = this.buffer[this.bytePos] >> this.bitPos;
+//                 this.bitPos = 0;
+//                 this.bytePos++;
+//                 ret = REV[ret];
+//             }
 
-            // Step 2: Fast Read full bytes
-            while ((this.bytePos + 1) * 8 <= endBitPos) {
-                ret = ret << 8 | this.readByte();
-            }
+//             // Step 2: Fast Read full bytes
+//             while ((this.bytePos + 1) * 8 <= endBitPos) {
+//                 ret = ret << 8 | this.readByte();
+//             }
 
-            // Step 3: Read tail
-            const bitsToRead = endBitPos - this.getPos();
-            ret = ret << bitsToRead | REV[this.buffer[this.bytePos] & ((1<<bitsToRead)-1)];
-            this.bitPos += bitsToRead;
-        }
+//             // Step 3: Read tail
+//             const bitsToRead = endBitPos - this.getPos();
+//             ret = ret << bitsToRead | REV[this.buffer[this.bytePos] & ((1<<bitsToRead)-1)];
+//             this.bitPos += bitsToRead;
+//         }
         
-        return ret;
-    }
-}
+//         return ret;
+//     }
+// }

@@ -1,10 +1,10 @@
 import "./app.scss";
 import * as React from 'react';
-import { Av1AnalyzerComponent } from './av1-analyzer/av1-analyzer';
-import GitHubButton from 'react-github-btn'
-import { Route, Routes } from 'react-router-dom';
-import { Mp4AnalyzerComponent } from './mp4/mp4-analyzer';
+import { Av1AnalyzerComponent } from './formats/av1/av1-analyzer';
+import { Mp4AnalyzerComponent } from './formats/mp4/mp4-analyzer';
 import { Switch } from "@mui/material";
+import { RawAnalyzerComponent } from "./formats/raw/raw-analyzer";
+import { HevcAnalyzerComponent } from "./formats/hevc/hevc-analyzer";
 
 
 export default function Dashboard() {
@@ -15,6 +15,12 @@ export default function Dashboard() {
   },{
     page: "mp4",
     title: "MP4 parser"
+  },{
+    page: "raw",
+    title: "Raw viewer"
+  },{
+    page: "hevc",
+    title: "HEVC parser"
   }]
 
   const setTheme = (theme: string) => {
@@ -50,6 +56,8 @@ export default function Dashboard() {
       <div className="content">
         { page == "av1" && <Av1AnalyzerComponent /> }
         { page == "mp4" && <Mp4AnalyzerComponent /> }
+        { page == "hevc" && <HevcAnalyzerComponent /> }
+        { page == "raw" && <RawAnalyzerComponent /> }
       </div>
     </main>
   );
