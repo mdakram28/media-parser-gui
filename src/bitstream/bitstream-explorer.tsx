@@ -1,4 +1,4 @@
-import { ReactNode, createContext, useCallback, useMemo, useState } from "react";
+import { ReactNode, createContext, useCallback, useEffect, useMemo, useState } from "react";
 import { DataNode } from "../types/parser.types";
 import { BitstreamUploader } from "./uploader";
 import { BitRange } from "./range";
@@ -126,7 +126,6 @@ export function BitstreamExplorer({ children, parser, uploader = <BitstreamUploa
             const buff = new Uint8Array(event.target?.result as ArrayBuffer);
             if (buff.length === 0) return;
             setBuffer(buff);
-            setSyntax(parser(buff));
         };
 
         reader.onerror = (err) => {
@@ -135,6 +134,10 @@ export function BitstreamExplorer({ children, parser, uploader = <BitstreamUploa
 
         reader.readAsArrayBuffer(file);
     }, []);
+
+    useEffect(() => {
+        setSyntax(parser(buffer));
+    }, [buffer]);
 
     const filteredSyntax = useMemo(() => {
         if (!filter.text) return syntax;

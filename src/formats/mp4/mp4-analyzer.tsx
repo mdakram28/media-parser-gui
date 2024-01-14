@@ -14,7 +14,9 @@ export const Mp4AnalyzerComponent = (props: {}) => {
             return bs.getCurrent();
         }}
 
-        uploader={<BitstreamUploader title="Drop MP4 file here"/>}
+        uploader={<BitstreamUploader title="Drop MP4 file here" samples={{
+            "big_buck_bunny.mp4": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/test-data/big_buck_bunny.mp4"
+        }}/>}
     >
         <div style={{ flex: 1, display: "flex", flexDirection: "row", height: "100%" }}>
 

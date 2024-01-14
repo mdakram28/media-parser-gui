@@ -14,7 +14,9 @@ export const Av1AnalyzerComponent = (props: {}) => {
             return bs.getCurrent();
         }}
 
-        uploader={<BitstreamUploader title="Drop AV1 raw bitstream file"/>}
+        uploader={<BitstreamUploader title="Drop AV1 raw bitstream file" samples={{
+            "big_buck_bunny.mp4": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/test-data/big_buck_bunny.mp4"
+        }}/>}
     >
         <div style={{ flex: 1, display: "flex", flexDirection: "row", height: "100%" }}>
 

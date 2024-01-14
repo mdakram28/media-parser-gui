@@ -15,7 +15,9 @@ export const HevcAnalyzerComponent = (props: {}) => {
             return bs.getCurrent();
         }}
 
-        uploader={<BitstreamUploader title="Drop HEVC raw bitstream file"/>}
+        uploader={<BitstreamUploader title="Drop HEVC raw bitstream file" samples={{
+            "aspen.hevc": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/test-data/aspen.hevc"
+        }} />}
     >
         <div style={{ flex: 1, display: "flex", flexDirection: "row", height: "100%" }}>
 

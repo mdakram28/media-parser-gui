@@ -88,6 +88,7 @@ a {
         top: 100%;
         // left: -2%;
         right: -3%;
+
         &:not(.visible) {
             display: none;
         }
@@ -149,6 +150,19 @@ a {
     // margin: -1px;
 }
 
-.gh > span {
+.gh>span {
     margin-bottom: -3px;
+}
+
+.url-uploader {
+    width: 100%;
+    display: flex;
+
+    input, select {
+        margin-right: 20px;
+        flex: 1;
+        height: 30px;
+        line-height: 30px;
+        padding: 0 10px;
+    }
 }
