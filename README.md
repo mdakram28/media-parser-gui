@@ -1,4 +1,4 @@
-# av1-parser-gui
+# media-parser-gui
 
 A browser based AV1, HEVC and MP4 bitstream parser and visualizer capable of handling large files.
 Live App: https://mdakram.com/av1-parser-gui/
