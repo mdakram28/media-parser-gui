@@ -41,70 +41,152 @@ export class Bitstream<T extends {}> {
     }
 
 
-    setCtx(_title: keyof T | string, value: any) {
-        const title = _title as string;
-        const names = title.split("[") as string[];
+    // private setCtxVar(_title: keyof T | string, value: any) {
+        
+    // }
+
+    addSyntaxValue(varPath: string, title: string, value: number | string, startBitPos: number, hidden: boolean) {
+        const names = varPath.split("[") as string[];
         if (names.length == 1) {
             this.ctx[names[0] as keyof T] = value as any;
+            this.current.children?.push({
+                key: Math.floor(Math.random() * 1909000000).toString(),
+                title,
+                start: startBitPos,
+                size: this.getPos() - startBitPos,
+                value,
+                hidden
+            });
         } else {
-            if (!Array.isArray(this.ctx[names[0] as keyof T])) {
-                (this.ctx[names[0] as keyof T] as any[]) = [];
+            const varName = names[0] as keyof T;
+            if (!Array.isArray(this.ctx[varName])) {
+                (this.ctx[varName] as any[]) = [];
             }
-            let arr = this.ctx[names[0] as keyof T] as any[];
+            
+            let syntaxDataNode = this.current.children?.find(child => child.title === varName);
+            if (!syntaxDataNode) {
+                syntaxDataNode = {
+                    key: Math.floor(Math.random() * 1909000000).toString(),
+                    title: varName.toString(),
+                    start: startBitPos,
+                    size: this.getPos() - startBitPos,
+                    value: [],
+                    hidden
+                };
+                this.current.children?.push(syntaxDataNode);
+            }
+
+            
+            let arr = this.ctx[varName] as any[];
+            let syntaxArr = syntaxDataNode.value as any[];
+
             for(let i=1; i<names.length-1; i++) {
                 const index = parseInt(names[i] as string);
                 if (!Array.isArray(arr[index])) {
                     arr[index] = [];
                 }
                 arr = arr[index];
+                if (!Array.isArray(syntaxArr[index])) {
+                    syntaxArr[index] = [];
+                }
+                syntaxArr = syntaxArr[index];
             }
             const index = parseInt(names[names.length-1] as string);
             if (!Array.isArray(arr[index])) {
                 arr[index] = [];
             }
             arr[index] = value;
+            if (!Array.isArray(syntaxArr[index])) {
+                syntaxArr[index] = [];
+            }
+            syntaxArr[index] = value;
         }
+
+
+
+
     }
 
-    f(title: keyof T | string, bits: number, e?: any) {
+    f(varPath: string, bits: number, {e, hidden = false}: {e?: any, hidden?: boolean} = {}) {
         const startBitPos = this.getPos();
         const value = bits === 1 ? this.buffer.readBit() : this.buffer.readBits(bits);
-        this.current.children?.push({
-            key: title.toString() + Math.floor(Math.random() * 1909000000),
-            title: `${title.toString()}(${bits}):    ${value}` + (e ? ` (${e[value]})` : ''),
-            start: startBitPos,
-            size: bits
-        });
-        this.setCtx(title, value);
+        this.addSyntaxValue(
+            varPath,
+            `${varPath.toString()}(${bits})` + (e ? `: (${e[value]})` : ''),
+            value,
+            startBitPos,
+            hidden
+        );
         return value;
     }
 
-    uvlc(title: keyof T | string, e?: any) {
+    uvlc(varPath: string, {e, hidden = false}: {e?: any, hidden?: boolean} = {}) {
         const start = this.getPos();
-        const val = this.buffer.readUvlc();
-        this.current.children?.push({
-            key: title.toString() + Math.floor(Math.random() * 1909000000),
-            title: `${title.toString()}:    ${val}` + (e ? ` (${e[val]})` : ''),
+        const value = this.buffer.readUvlc();
+        this.addSyntaxValue(
+            varPath,
+            (typeof varPath === "string" && e) ? (`${varPath.toString()}` + (e ? `: (${e[value]})` : '')) : varPath,
+            value,
             start,
-            size: this.getPos() - start
-        });
-        this.setCtx(title, val);
-        return val;
+            hidden
+        );
+        return value;
     }
 
-    svlc(title: keyof T | string) {
+    svlc(varPath: string, {e, hidden = false}: {e?: any, hidden?: boolean} = {}) {
         const start = this.getPos();
-        const val = this.buffer.readSvlc();
-        this.current.children?.push({
-            key: title.toString() + Math.floor(Math.random() * 1909000000),
-            title: `${title.toString()}:    ${val}`,
+        const value = this.buffer.readSvlc();
+        this.addSyntaxValue(
+            varPath,
+            (typeof varPath === "string" && e) ? (`${varPath.toString()}` + (e ? `: (${e[value]})` : '')) : varPath,
+            value,
             start,
-            size: this.getPos() - start
-        });
-        this.setCtx(title, val);
-        return val;
+            hidden
+        );
+        return value;
     }
 
+    leb128(varPath: string, {e, hidden = false}: {e?: any, hidden?: boolean} = {}) {
+        // console.log(`Reading leb128 ${title.toString()} from ${this.getPos()}`);
+        const start = this.getPos();
+        const value = this.buffer.readLeb128();
+        this.addSyntaxValue(
+            varPath,
+            (typeof varPath === "string" && e) ? (`${varPath.toString()}` + (e ? `: (${e[value]})` : '')) : varPath,
+            value,
+            start,
+            hidden
+        );
+        return value;
+    }
+
+
+    nullEndedString(varPath: string, {e, hidden = false}: {e?: any, hidden?: boolean} = {}) {
+        const start = this.getPos();
+        const value = this.buffer.readNullEndedString();
+        this.addSyntaxValue(
+            varPath,
+            (typeof varPath === "string" && e) ? (`${varPath.toString()}` + (e ? `: (${e[value]})` : '')) : varPath,
+            value,
+            start,
+            hidden
+        );
+        return value;
+    }
+
+
+    fixedWidthString(varPath: string, len: number, {e, hidden = false}: {e?: any, hidden?: boolean} = {}) {
+        const start = this.getPos();
+        const value = this.buffer.readString(len);
+        this.addSyntaxValue(
+            varPath,
+            (typeof varPath === "string" && e) ? (`${varPath.toString()}` + (e ? `: (${e[value]})` : '')) : varPath,
+            value,
+            start,
+            hidden
+        );
+        return value;
+    }
     error(msg: string) {
         this.current.children?.push({
             key: Math.floor(Math.random() * 1909000000).toString(),
@@ -122,47 +204,6 @@ export class Bitstream<T extends {}> {
         this.current.title += " (DROPPED)";
     }
 
-    leb128(title: keyof T) {
-        // console.log(`Reading leb128 ${title.toString()} from ${this.getPos()}`);
-        const start = this.getPos();
-        const val = this.buffer.readLeb128();
-        this.current.children?.push({
-            key: title.toString() + Math.floor(Math.random() * 1909000000),
-            title: `${title.toString()}: ${val}`,
-            start,
-            size: this.getPos() - start
-        });
-        this.setCtx(title, val);
-        return val;
-    }
-
-
-    nullEndedString(title: keyof T | string) {
-        const start = this.getPos();
-        const val = this.buffer.readNullEndedString();
-        this.current.children?.push({
-            key: title.toString() + Math.floor(Math.random() * 1909000000),
-            title: `${title.toString()}: ${val}`,
-            start,
-            size: this.getPos() - start
-        });
-        this.setCtx(title, val);
-        return val;
-    }
-
-
-    fixedWidthString(title: keyof T | string, len: number) {
-        const start = this.getPos();
-        const val = this.buffer.readString(len);
-        this.current.children?.push({
-            key: title.toString() + Math.floor(Math.random() * 1909000000),
-            title: `${title.toString()}: ${val}`,
-            start,
-            size: this.getPos() - start
-        });
-        this.setCtx(title, val);
-        return val;
-    }
 
 
 

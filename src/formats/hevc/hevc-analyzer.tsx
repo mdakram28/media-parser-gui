@@ -5,6 +5,7 @@ import { BitstreamExplorer } from "../../bitstream/bitstream-explorer";
 import { BitstreamUploader } from "../../bitstream/uploader";
 import { SyntaxViewer } from "../../bitstream/syntax-viewer";
 import { HEVC } from "./hevc-bitstream";
+import { SyntaxTable } from "../../components/syntax-table";
 
 export const HevcAnalyzerComponent = (props: {}) => {
     return <BitstreamExplorer

@@ -142,14 +142,14 @@ export class ObuCtx {
     ref_frame_idx: number[] = []
 };
 
-export const AV1 = syntax("AV1", (bs: Bitstream<ParserCtx>) => {
+export const AV1 = (bs: Bitstream<any>) => {
     bs.updateCtx(new ParserCtx());
     let i = 0;
     while (bs.getPos() < bs.getEndPos()) {
         if (i++ > 1000) break;
         open_bitstream_unit(bs, 0);
     }
-});
+};
 
 export const open_bitstream_unit = syntax("open_bitstream_unit", (bs: Bitstream<ObuCtx & ParserCtx>, sz: number) => {
     bs.updateCtx(new ObuCtx());
@@ -157,16 +157,16 @@ export const open_bitstream_unit = syntax("open_bitstream_unit", (bs: Bitstream<
 
     const obu_header = bs.syntax("obu_header", () => {
         const obu_extension_header = bs.syntax("obu_extension_header", () => {
-            bs.f("temporal_id", 3)
-            bs.f("spatial_id", 2)
-            bs.f("extension_header_reserved_3bits", 3)
+            bs.f("temporal_id", 3);
+            bs.f("spatial_id", 2);
+            bs.f("extension_header_reserved_3bits", 3, {hidden: true});
         });
 
         bs.f("obu_forbidden_bit", 1);
         bs.f("obu_type", 4);
         bs.f("obu_extension_flag", 1);
         bs.f("obu_has_size_field", 1);
-        bs.f("obu_reserved_1bit", 1);
+        bs.f("obu_reserved_1bit", 1, {hidden: true});
         if (c.obu_extension_flag == 1)
             obu_extension_header();
     });

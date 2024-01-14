@@ -108,7 +108,7 @@ const nal_unit = syntax("NAL_UNIT", (bs: NaluCtx, end: number) => {
 
     // nal_unit_header
     bs.f("forbidden_zero_bit", 1);
-    bs.f("nal_unit_type", 6, NALU_TYPE);
+    bs.f("nal_unit_type", 6, {e: NALU_TYPE});
     bs.f("nuh_layer_id", 6);
     bs.f("nuh_temporal_id_plus1", 3);
 

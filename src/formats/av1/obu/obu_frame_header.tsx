@@ -200,7 +200,7 @@ const uncompressed_header = syntax("uncompressed_header", (bs: Bitstream<ObuCtx>
             }
             return
         }
-        bs.f("frame_type", 2, FrameType)
+        bs.f("frame_type", 2, {e: FrameType})
         c.FrameIsIntra = (c.frame_type == FrameType.INTRA_ONLY_FRAME || c.frame_type == FrameType.KEY_FRAME) ? 1 : 0
         bs.f("show_frame", 1)
         if (c.show_frame && c.decoder_model_info_present_flag && !c.equal_picture_interval) {

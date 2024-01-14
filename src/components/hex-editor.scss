@@ -71,3 +71,62 @@
         }
     }
 }
+
+
+.syntax-table {
+    width: 100%;
+    table-layout: auto !important;
+    tr {
+        &:hover {
+            background-color: var(--bg-strong-color);
+        }
+        &:focus {
+            outline: auto;
+        }
+    }
+    th {
+        text-align: left;
+        padding: 3px 20px;
+    }
+    td {
+        border-right: 1px solid var(--border-color);
+        text-align: left;
+        vertical-align: middle;
+        padding: 3px 20px;
+        width: 1%;
+        white-space: nowrap;
+        min-width: 100px;
+    }
+    td:first-child {
+        width: auto !important;
+    }
+
+    .tab-space {
+        display: inline-block;
+    }
+    .expand-btn {
+        cursor: pointer;
+        display: inline-block;
+        margin-right: 10px;
+        line-height: 1;
+        // background: none;
+        // border: none;
+        transition: transform 0.1s;
+        vertical-align: middle;
+        &:hover {
+            color: var(--heading-color);
+        }
+        
+        &.expanded {
+            transform: rotate(90deg);
+        }
+    }
+    .expand-space{
+        width: 23px;
+        display: inline-block;
+    }
+
+    .value {
+        font-family: monospace;
+    }
+}

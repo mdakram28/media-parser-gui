@@ -49,7 +49,7 @@ export default function Dashboard() {
         <span style={{flex: 1}}></span>
         <div className="toolbar-item">
           Light
-          <Switch inputProps={{'aria-label': "Dark"}} onClick={(ev: any) => setTheme(ev.target.checked ? "dark" : "light")}/>
+          <Switch defaultChecked={true} inputProps={{'aria-label': "Dark"}} onClick={(ev: any) => setTheme(ev.target.checked ? "dark" : "light")}/>
           Dark
         </div>
       </div>

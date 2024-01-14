@@ -3,7 +3,7 @@ import "./hex-editor.scss";
 import { Fragment, MouseEvent, MouseEventHandler, UIEvent, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Card, colors } from '@mui/material';
 import { BitRange, ByteRange } from "../bitstream/range";
-import { BitstreamExplorerContext } from "../bitstream/bitstream-explorer";
+import { BitstreamExplorerContext, BitstreamSelectionContext } from "../bitstream/bitstream-explorer";
 
 
 const byteToHex: string[] = [];
@@ -30,7 +30,8 @@ const NUM_BYTES_IN_INSPECT = 4;
 
 function ByteInspector({ range }: { range: ByteRange }) {
 
-    const { buffer, getBitColor } = useContext(BitstreamExplorerContext);
+    const { buffer } = useContext(BitstreamExplorerContext);
+    const { getBitColor } = useContext(BitstreamSelectionContext);
 
     const inspectBytes = range.first(NUM_BYTES_IN_INSPECT);
     const inspectValue = inspectBytes.map(1, i => buffer[i]).reduce((prev, val) => prev << 8 | val);
@@ -51,80 +52,21 @@ function ByteInspector({ range }: { range: ByteRange }) {
 }
 
 export function HexEditor({ }: {}) {
-    const { ranges, setRanges, buffer, getByteColor } = useContext(BitstreamExplorerContext);
-
-    // const [byteColors, setByteColors] = useState<string[]>([]);
-    // const [bitColors, setBitColors] = useState<string[]>([]);
-    // const [selected, setSelected] = useState<Range>();
+    const { buffer } = useContext(BitstreamExplorerContext);
+    const { ranges, setRanges, getByteColor } = useContext(BitstreamSelectionContext);
     const [offset, setOffset] = useState(0);
     const [dragStart, setDragStart] = useState<number>();
     const scrollViewRef = useRef<HTMLDivElement>(null);
 
     console.log("Hex editor rendered");
 
-
-    // Set byte colors and box colors and selection range on highlight change
-    // useEffect(() => {
-    //     if (highlight.length == 0) {
-    //         setByteColors([]);
-    //         return;
-    //     }
-    //     const newByteColors: string[] = [];
-    //     const newBoxColors: { [k: string]: string } = {};
-    //     highlight.forEach((node, nodeIdx) => {
-    //         const start = Math.floor(node.start / 8);
-    //         const end = Math.ceil((node.start + node.size) / 8);
-    //         const col = COLORS[highlight.length - nodeIdx - 1];
-    //         newBoxColors[node.key] = col;
-    //         // console.log(start, end, COLORS[nodeI]);
-    //         for (let i = start; i < end; i++) {
-    //             newByteColors[i] = col;
-    //         }
-    //     });
-    //     const { start: selectStart, size: selectSize } = highlight[highlight.length - 1];
-    //     setSelected(new Range(selectStart, selectStart + selectSize));
-    //     setByteColors(newByteColors);
-    //     setBoxColor(newBoxColors);
-    // }, [highlight]);
-
-    // Set bit colors for first NUM_BYTES_IN_BITVIEW
-    // useEffect(() => {
-    //     if (!selected) {
-    //         setBitColors([]);
-    //         return;
-    //     }
-
-    //     const bitStart = selected.start - selected.start % 8;
-    //     const bitEnd = bitStart + NUM_BYTES_IN_INSPECT * 8; // Not including
-    //     // if (highlight.length == 0 || selected >= buffer.length) {
-    //     //     setBitColors([]);
-    //     //     return;
-    //     // }
-    //     const newBitColors: string[] = [];
-    //     highlight.forEach((node, nodeIdx) => {
-    //         const col = COLORS[highlight.length - nodeIdx - 1];
-    //         for (let i = bitStart; i < bitEnd; i++) {
-    //             if (i >= node.start && i < (node.start + node.size)) {
-    //                 newBitColors[i] = col;
-    //             }
-    //         }
-    //     });
-    //     setBitColors(newBitColors);
-
-    //     // if (dragStart === undefined) {
-    //     //     console.log(dragStart);
-    //     // }
-    //     // getElementsByClassName("hex-byte")[selected].scrollIntoView({ behavior: "smooth", block: "center" });
-    // }, [selected, highlight]);
-
     useEffect(() => {
         if (!ranges[0] || dragStart || !scrollViewRef.current) return;
         const { scrollTop, clientHeight } = scrollViewRef.current;
 
         const top = Math.floor(ranges[0].start / (NUM_COLS * 8)) * CELL_HEIGHT;
-        console.log(top, scrollTop, scrollTop+clientHeight);
         // Scroll only if not in view
-        if (top < scrollTop || top > (scrollTop+clientHeight)) {
+        if (top < scrollTop || top > (scrollTop + clientHeight)) {
             scrollViewRef.current?.scrollTo({
                 top,
                 behavior: "smooth"
@@ -163,7 +105,7 @@ export function HexEditor({ }: {}) {
                             if (!target.hasAttribute("data-pos")) return;
                             const pos = parseInt(target.getAttribute("data-pos"));
                             setDragStart(pos);
-                            const newRange = new BitRange(pos*8, (pos+1)*8);
+                            const newRange = new BitRange(pos * 8, (pos + 1) * 8);
                             if (ranges.length == 1 && newRange.equals(ranges[0])) return;
                             setRanges([newRange]);
                         }}
@@ -187,6 +129,7 @@ export function HexEditor({ }: {}) {
                                     {
                                         new ByteRange(i, i + NUM_COLS).map(1, (j) =>
                                             <span
+                                                key={j}
                                                 data-pos={j}
                                                 style={{ backgroundColor: getByteColor(j) }}>
                                                 {byteToHex[buffer[j]]}

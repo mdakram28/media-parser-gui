@@ -80,7 +80,7 @@ export const scaling_list_data = syntax("scaling_list_data", (bs: NaluCtx) => {
                     limit_iter(i);
                     bs.svlc("scaling_list_delta_coef");
                     nextCoef = (nextCoef + c.scaling_list_delta_coef + 256) % 256
-                    bs.setCtx(`ScalingList[${sizeId}][${matrixId}][${i}]`, nextCoef);
+                    bs.addSyntaxValue(`ScalingList[${sizeId}][${matrixId}][${i}]`, "Not from bitstream", nextCoef, bs.getPos(), true);
                 }
             }
         }
