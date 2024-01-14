@@ -6,7 +6,7 @@
   "scripts": {
     "start": "vite --open",
     "dev": "vite -open",
-    "build": "tsc && vite build --base=av1-parser-gui --outDir=docs",
+    "build": "tsc && vite build --base=media-parser-gui --outDir=docs",
     "preview": "vite preview"
   },
   "dependencies": {
