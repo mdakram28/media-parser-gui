@@ -5,6 +5,7 @@ import { Mp4AnalyzerComponent } from './formats/mp4/mp4-analyzer';
 import { Switch } from "@mui/material";
 import { RawAnalyzerComponent } from "./formats/raw/raw-analyzer";
 import { HevcAnalyzerComponent } from "./formats/hevc/hevc-analyzer";
+import { Link, NavLink, Route, Routes } from "react-router-dom";
 
 
 export default function Dashboard() {
@@ -40,11 +41,10 @@ export default function Dashboard() {
       <div className="toolbar">
         <div className="toolbar-item"><b>Multimedia Explorer</b></div>
         {menuItems.map((menu) => 
-          <a key={menu.page} 
-            className={"toolbar-item " + (page === menu.page && "active")}
-            onClick={() => setPage(menu.page)}>
+          <NavLink to={"/av1-parser-gui//"+menu.page} key={menu.page} 
+            className={({isActive}) => "toolbar-item " + (isActive && "active")}>
               {menu.title}
-          </a>
+          </NavLink>
         )}
         <span style={{flex: 1}}></span>
         <div className="toolbar-item">
@@ -54,10 +54,12 @@ export default function Dashboard() {
         </div>
       </div>
       <div className="content">
-        { page == "av1" && <Av1AnalyzerComponent /> }
-        { page == "mp4" && <Mp4AnalyzerComponent /> }
-        { page == "hevc" && <HevcAnalyzerComponent /> }
-        { page == "raw" && <RawAnalyzerComponent /> }
+        <Routes>
+          <Route path="/av1-parser-gui//mp4" element={<Mp4AnalyzerComponent />} />
+          <Route path="/av1-parser-gui//hevc" element={<HevcAnalyzerComponent />} />
+          <Route path="/av1-parser-gui//raw" element={<RawAnalyzerComponent />} />
+          <Route path="*" element={<Av1AnalyzerComponent />} />
+        </Routes>
       </div>
     </main>
   );

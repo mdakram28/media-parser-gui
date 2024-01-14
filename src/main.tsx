@@ -9,8 +9,8 @@ import { MemoryRouter } from 'react-router-dom'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <>
-    <MemoryRouter>
+    <BrowserRouter>
       <App />
-    </MemoryRouter>
+    </BrowserRouter>
   </>,
 );
