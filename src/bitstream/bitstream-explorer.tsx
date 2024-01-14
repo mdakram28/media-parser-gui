@@ -35,9 +35,10 @@ export const BitstreamExplorerContext = createContext<
     & State<"buffer", Uint8Array>
     & State<"syntax", DataNode>
     & State<"showHiddenSyntax", boolean>
+    & State<"filter", { text: string }>
     & {
         readFileUploadData: (file: File) => void,
-        syntaxById: { [nodeId: string]: DataNode },
+        reset: () => void,
     }
 >({
     buffer: new Uint8Array,
@@ -45,9 +46,11 @@ export const BitstreamExplorerContext = createContext<
     readFileUploadData: () => { },
     syntax: EMPTY_TREE,
     setSyntax: () => { },
-    syntaxById: {},
     showHiddenSyntax: false,
-    setShowHiddenSyntax: () => undefined
+    setShowHiddenSyntax: () => undefined,
+    filter: { text: "" },
+    setFilter: () => undefined,
+    reset: () => undefined
 });
 
 function forEachPreOrder(node: DataNode, cb: (node: DataNode) => void) {
@@ -111,15 +114,9 @@ export function BitstreamExplorer({ children, parser, uploader = <BitstreamUploa
 }) {
     const [syntax, setSyntax] = useState<DataNode>(EMPTY_TREE);
     const [buffer, setBuffer] = useState<Uint8Array>(() => new Uint8Array());
+    const [filter, setFilter] = useState<{text: string}>({text: ""});
     const [showHiddenSyntax, setShowHiddenSyntax] = useState<boolean>(false);
 
-    const syntaxById = useMemo(() => {
-        const ret: { [nodeId: string]: DataNode } = {};
-        forEachPreOrder(syntax, (node) => {
-            ret[node.key] = node;
-        });
-        return ret;
-    }, [syntax]);
 
 
     const readFileUploadData = useCallback((file: File) => {
@@ -139,13 +136,43 @@ export function BitstreamExplorer({ children, parser, uploader = <BitstreamUploa
         reader.readAsArrayBuffer(file);
     }, []);
 
+    const filteredSyntax = useMemo(() => {
+        if (!filter.text) return syntax;
+        const text = filter.text.toLowerCase();
+        function dfs(node: DataNode): DataNode | undefined {
+            const take = node.title!.toString().toLowerCase().indexOf(text) >= 0;
+            if (take) return node;
+            const children: DataNode[] = []
+            for (const child of (node.children || [])) {
+                const takeChild = dfs(child);
+                if (takeChild !== undefined) {
+                    children.push(takeChild);
+                }
+            }
+            if (children.length > 0) {
+                return {
+                    ...node,
+                    children
+                }
+            }
+            return undefined;
+        }
+
+        return dfs(syntax) || EMPTY_TREE;
+    }, [syntax, filter]);
+
+    const reset = useCallback(() => {
+        setSyntax(parser(buffer));
+    }, [setSyntax, parser, buffer]);
+
     return <>
         <BitstreamExplorerContext.Provider value={{
-            syntax, setSyntax,
+            syntax: filteredSyntax, setSyntax,
             buffer, setBuffer,
-            syntaxById,
             readFileUploadData,
-            showHiddenSyntax, setShowHiddenSyntax
+            showHiddenSyntax, setShowHiddenSyntax,
+            filter, setFilter,
+            reset
         }}>
             <BitstreamSelection>
                 {

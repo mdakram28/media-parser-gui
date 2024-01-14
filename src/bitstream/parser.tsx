@@ -1,7 +1,7 @@
 import { DataNode } from "../types/parser.types";
 import { MSBBuffer } from "./buffer";
 
-export const MAX_ITER = 100;
+export const MAX_ITER = 10000;
 
 export function syntax<BS extends {}, T extends Array<any>, U>(title: string, fn: (bs: Bitstream<BS>, ...args: T) => U) {
     return (bs: Bitstream<any>, ...args: T) => bs.syntax(title, fn)(...args);
@@ -255,7 +255,7 @@ export class Bitstream<T extends {}> {
 
     byteAlign() {
         if (this.buffer.getPos() % 8 != 0) {
-            return this.f("byte_align", (8 - this.buffer.getPos() % 8) % 8);
+            return this.f("byte_align", (8 - this.buffer.getPos() % 8) % 8, {hidden: true});
         }
     }
 

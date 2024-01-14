@@ -1,4 +1,5 @@
 import "./app.scss";
+import "./common.scss";
 import * as React from 'react';
 import { Av1AnalyzerComponent } from './formats/av1/av1-analyzer';
 import { Mp4AnalyzerComponent } from './formats/mp4/mp4-analyzer';

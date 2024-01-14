@@ -66,6 +66,7 @@ a {
         box-sizing: border-box;
         white-space: nowrap;
         text-decoration: none;
+        z-index: 100;
 
         // margin-top: -$border-width -2;
         // margin-bottom: -$border-width -2;
@@ -85,7 +86,8 @@ a {
         background-color: var(--bg-strong-color);
         position: absolute;
         top: 100%;
-        left: -2%;
+        // left: -2%;
+        right: -3%;
         &:not(.visible) {
             display: none;
         }

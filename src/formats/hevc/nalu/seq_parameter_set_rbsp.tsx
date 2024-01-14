@@ -4,7 +4,7 @@ import { profile_tier_level } from "./profile_tier_level";
 import { hrd_parameters } from "./hrd_parameters";
 
 function limit_iter(i: number) {
-    if (i > 500) {
+    if (i > MAX_ITER) {
         const err = Error("Max iteration reached");
         console.error(err);
         throw err;

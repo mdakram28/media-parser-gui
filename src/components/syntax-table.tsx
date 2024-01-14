@@ -65,7 +65,7 @@ function DataTreeNode({ node, level = 0 }: { node: DataNode, level?: number }) {
             }}
         >
             <td>
-                <div style={{display: "flex"}}>
+                <div style={{ display: "flex" }}>
                     <span className="tab-space" style={{ width: 25 * level }}></span>
                     {node.children?.length
                         ? <div
@@ -85,9 +85,12 @@ function DataTreeNode({ node, level = 0 }: { node: DataNode, level?: number }) {
             <td>{node.size}</td>
         </tr>
         {expanded && node.children?.length &&
-            node.children.filter(child => showHiddenSyntax || !child.hidden).map(childNode =>
-                <DataTreeNode key={childNode.key} node={childNode} level={level + 1} />
-            )
+            node.children
+                .filter(child => showHiddenSyntax || !child.hidden)
+                .filter(child => !child.filtered)
+                .map(childNode =>
+                    <DataTreeNode key={childNode.key} node={childNode} level={level + 1} />
+                )
         }
     </>
 }
@@ -96,7 +99,7 @@ export function SyntaxTable({ }: {}
 ) {
     const ctx = useContext(BitstreamExplorerContext);
     useTraceUpdate(ctx);
-    const { syntax: root, showHiddenSyntax, setShowHiddenSyntax } = ctx;
+    const { syntax: root, showHiddenSyntax, setShowHiddenSyntax, setFilter, reset } = ctx;
 
     console.log("Syntax table rendered");
 
@@ -106,7 +109,22 @@ export function SyntaxTable({ }: {}
 
     return <div style={{ flex: "1 1 auto", height: 0, overflowY: "auto", width: "100%", display: "flex", flexDirection: "column" }}>
         <div className="toolbar">
-            <a className="toolbar-item" onClick={(ev: any) => {
+            <div data-tooltip="Filter by title" className="toolbar-item" style={{ verticalAlign: "middle" }}>
+                🔍&nbsp;&nbsp;
+                <form onSubmit={(e: any) => {
+                    e.preventDefault();
+                    const search = new FormData(e.target).get("search")?.toString() || "";
+                    setFilter(f => ({ ...f, text: search }))
+                }}>
+                    <input name="search" />
+                </form>
+            </div>
+            <span className="toolbar-item" style={{ flex: 1 }}></span>
+            <a className="toolbar-item"
+                data-tooltip="Reset"
+                style={{ fontSize: 25 }}
+                onClick={reset}>↺</a>
+            <a data-tooltip="Settings" className="toolbar-item" onClick={(ev: any) => {
                 const menu: HTMLElement = ev.target.getElementsByClassName("toolbar-menu")[0];
                 if (!menu) return;
                 menu.classList.toggle("visible");
@@ -136,20 +154,6 @@ export function SyntaxTable({ }: {}
             <table
                 className="syntax-table"
                 cellSpacing={0}
-            // disableSelection
-            // expanded={expanded}
-            // onNodeToggle={(ev: any, nodeIds: string[]) => {
-            //     setExpanded(nodeIds);
-            // }}
-            // onNodeSelect={(event, nodeIds) => onSelect([nodeIds])}
-            // onNodeFocus={(event, nodeId) => {
-            //     console.log(nodeId);
-            //     const node = syntaxById[nodeId];
-            //     if (!node || node.size == 0) return;
-            //     const newRange = new BitRange(node.start, node.start+node.size);
-            //     if (ranges.length == 1 && ranges[0].equals(newRange)) return;
-            //     setRanges([newRange]);
-            // }}
             >
                 <thead>
                     <tr>

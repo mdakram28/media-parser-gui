@@ -1,4 +1,4 @@
-import { Bitstream, ParserCtx, syntax } from "../../bitstream/parser";
+import { Bitstream, MAX_ITER, ParserCtx, syntax } from "../../bitstream/parser";
 import { BoxCtx } from "./mp4-bitstream";
 
 type NestedBoxes = {
@@ -39,7 +39,7 @@ export function Container(subBoxes: NestedBoxes) {
     return (bs: Bitstream<BoxCtx & ParserCtx>, end: number) => {
         let i = 0;
         while (bs.getPos() < end) {
-            if (i++ > 500) break;
+            if (i++ > MAX_ITER) break;
             subBoxSyntax(bs, end);
         }
     };
