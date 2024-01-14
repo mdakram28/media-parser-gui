@@ -1,5 +1,9 @@
 import { Bitstream, ParserCtx, syntax } from "../../../bitstream/parser";
 import { ObuCtx } from "../av1-bitstream";
+import { constant } from "./constants";
+import { Default_Angle_Delta_Cdf, Default_Cfl_Alpha_Cdf, Default_Cfl_Sign_Cdf, Default_Comp_Bwd_Ref_Cdf, Default_Comp_Group_Idx_Cdf, Default_Comp_Mode_Cdf, Default_Comp_Ref_Cdf, Default_Comp_Ref_Type_Cdf, Default_Compound_Idx_Cdf, Default_Compound_Mode_Cdf, Default_Compound_Type_Cdf, Default_Delta_Lf_Cdf, Default_Delta_Q_Cdf, Default_Drl_Mode_Cdf, Default_Filter_Intra_Cdf, Default_Filter_Intra_Mode_Cdf, Default_Inter_Intra_Cdf, Default_Inter_Intra_Mode_Cdf, Default_Inter_Tx_Type_Set1_Cdf, Default_Inter_Tx_Type_Set2_Cdf, Default_Inter_Tx_Type_Set3_Cdf, Default_Interp_Filter_Cdf, Default_Intra_Tx_Type_Set1_Cdf, Default_Intra_Tx_Type_Set2_Cdf, Default_Intrabc_Cdf, Default_Is_Inter_Cdf, Default_Motion_Mode_Cdf, Default_New_Mv_Cdf, Default_Palette_Size_2_Uv_Color_Cdf, Default_Palette_Size_2_Y_Color_Cdf, Default_Palette_Size_3_Uv_Color_Cdf, Default_Palette_Size_3_Y_Color_Cdf, Default_Palette_Size_4_Uv_Color_Cdf, Default_Palette_Size_4_Y_Color_Cdf, Default_Palette_Size_5_Uv_Color_Cdf, Default_Palette_Size_5_Y_Color_Cdf, Default_Palette_Size_6_Uv_Color_Cdf, Default_Palette_Size_6_Y_Color_Cdf, Default_Palette_Size_7_Uv_Color_Cdf, Default_Palette_Size_7_Y_Color_Cdf, Default_Palette_Size_8_Uv_Color_Cdf, Default_Palette_Size_8_Y_Color_Cdf, Default_Palette_Uv_Mode_Cdf, Default_Palette_Uv_Size_Cdf, Default_Palette_Y_Mode_Cdf, Default_Palette_Y_Size_Cdf, Default_Partition_W128_Cdf, Default_Partition_W16_Cdf, Default_Partition_W32_Cdf, Default_Partition_W64_Cdf, Default_Partition_W8_Cdf, Default_Ref_Mv_Cdf, Default_Restoration_Type_Cdf, Default_Segment_Id_Cdf, Default_Segment_Id_Predicted_Cdf, Default_Single_Ref_Cdf, Default_Skip_Cdf, Default_Skip_Mode_Cdf, Default_Tx_16x16_Cdf, Default_Tx_32x32_Cdf, Default_Tx_64x64_Cdf, Default_Tx_8x8_Cdf, Default_Txfm_Split_Cdf, Default_Uni_Comp_Ref_Cdf, Default_Use_Obmc_Cdf, Default_Use_Sgrproj_Cdf, Default_Use_Wiener_Cdf, Default_Uv_Mode_Cfl_Allowed_Cdf, Default_Uv_Mode_Cfl_Not_Allowed_Cdf, Default_Wedge_Index_Cdf, Default_Wedge_Inter_Intra_Cdf, Default_Y_Mode_Cdf, Default_Zero_Mv_Cdf } from "./default_cdf_tables";
+import { cdef_params, delta_lf_params, delta_q_params, frame_reference_mode, global_motion_params, loop_filter_params, lr_params, quantization_params, read_tx_mode, segmentation_params, skip_mode_params } from "./frame_params";
+import { tile_info } from "./tile_info";
 
 const NUM_REF_FRAMES = 8;
 const REFS_PER_FRAME = 7;
@@ -166,6 +170,97 @@ const get_relative_dist = (bs: Bitstream<ObuCtx>, a: number, b: number) => {
 }
 
 
+
+
+function init_non_coeff_cdfs(bs: Bitstream<ObuCtx>) {
+    const c: any = bs.ctx;
+
+    c.YModeCdf = Default_Y_Mode_Cdf;
+    c.UVModeCflNotAllowedCdf = Default_Uv_Mode_Cfl_Not_Allowed_Cdf;
+    c.UVModeCflAllowedCdf = Default_Uv_Mode_Cfl_Allowed_Cdf;
+    c.AngleDeltaCdf = Default_Angle_Delta_Cdf;
+    c.IntrabcCdf = Default_Intrabc_Cdf;
+    c.PartitionW8Cdf = Default_Partition_W8_Cdf;
+    c.PartitionW16Cdf = Default_Partition_W16_Cdf;
+    c.PartitionW32Cdf = Default_Partition_W32_Cdf;
+    c.PartitionW64Cdf = Default_Partition_W64_Cdf;
+    c.PartitionW128Cdf = Default_Partition_W128_Cdf;
+    c.SegmentIdCdf = Default_Segment_Id_Cdf;
+    c.SegmentIdPredictedCdf = Default_Segment_Id_Predicted_Cdf;
+    c.Tx8x8Cdf = Default_Tx_8x8_Cdf;
+    c.Tx16x16Cdf = Default_Tx_16x16_Cdf;
+    c.Tx32x32Cdf = Default_Tx_32x32_Cdf;
+    c.Tx64x64Cdf = Default_Tx_64x64_Cdf;
+    c.TxfmSplitCdf = Default_Txfm_Split_Cdf;
+    c.FilterIntraModeCdf = Default_Filter_Intra_Mode_Cdf;
+    c.FilterIntraCdf = Default_Filter_Intra_Cdf;
+    c.InterpFilterCdf = Default_Interp_Filter_Cdf;
+    c.MotionModeCdf = Default_Motion_Mode_Cdf;
+    c.NewMvCdf = Default_New_Mv_Cdf;
+    c.ZeroMvCdf = Default_Zero_Mv_Cdf;
+    c.RefMvCdf = Default_Ref_Mv_Cdf;
+    c.CompoundModeCdf = Default_Compound_Mode_Cdf;
+    c.DrlModeCdf = Default_Drl_Mode_Cdf;
+    c.IsInterCdf = Default_Is_Inter_Cdf;
+    c.CompModeCdf = Default_Comp_Mode_Cdf;
+    c.SkipModeCdf = Default_Skip_Mode_Cdf;
+    c.SkipCdf = Default_Skip_Cdf;
+    c.CompRefCdf = Default_Comp_Ref_Cdf;
+    c.CompBwdRefCdf = Default_Comp_Bwd_Ref_Cdf;
+    c.SingleRefCdf = Default_Single_Ref_Cdf;
+    // MvJointCdf[i] is set to a copy of Default_Mv_Joint_Cdf for i = 0..MV_CONTEXTS - 1
+    // MvClassCdf[i] is set to a copy of Default_Mv_Class_Cdf for i = 0..MV_CONTEXTS - 1
+    // MvClass0BitCdf[i][comp] is set to a copy of Default_Mv_Class0_Bit_Cdf for i = 0..MV_CONTEXTS - 1 and comp = 0..1
+    // MvFrCdf[i] is set to a copy of Default_Mv_Fr_Cdf for i = 0..MV_CONTEXTS - 1
+    // MvClass0FrCdf[i] is set to a copy of Default_Mv_Class0_Fr_Cdf for i = 0..MV_CONTEXTS - 1
+    // MvClass0HpCdf[i][comp] is set to a copy of Default_Mv_Class0_Hp_Cdf for i = 0..MV_CONTEXTS - 1 and comp = 0..1
+    // MvSignCdf[i][comp] is set to a copy of Default_Mv_Sign_Cdf for i = 0..MV_CONTEXTS - 1 and comp = 0..1
+    // MvBitCdf[i][comp] is set to a copy of Default_Mv_Bit_Cdf for i = 0..MV_CONTEXTS - 1 and comp = 0..1
+    // MvHpCdf[i][comp] is set to a copy of Default_Mv_Hp_Cdf for i = 0..MV_CONTEXTS - 1 and comp = 0..1
+    c.PaletteYModeCdf = Default_Palette_Y_Mode_Cdf;
+    c.PaletteUVModeCdf = Default_Palette_Uv_Mode_Cdf;
+    c.PaletteYSizeCdf = Default_Palette_Y_Size_Cdf;
+    c.PaletteUVSizeCdf = Default_Palette_Uv_Size_Cdf;
+    c.PaletteSize2YColorCdf = Default_Palette_Size_2_Y_Color_Cdf;
+    c.PaletteSize2UVColorCdf = Default_Palette_Size_2_Uv_Color_Cdf;
+    c.PaletteSize3YColorCdf = Default_Palette_Size_3_Y_Color_Cdf;
+    c.PaletteSize3UVColorCdf = Default_Palette_Size_3_Uv_Color_Cdf;
+    c.PaletteSize4YColorCdf = Default_Palette_Size_4_Y_Color_Cdf;
+    c.PaletteSize4UVColorCdf = Default_Palette_Size_4_Uv_Color_Cdf;
+    c.PaletteSize5YColorCdf = Default_Palette_Size_5_Y_Color_Cdf;
+    c.PaletteSize5UVColorCdf = Default_Palette_Size_5_Uv_Color_Cdf;
+    c.PaletteSize6YColorCdf = Default_Palette_Size_6_Y_Color_Cdf;
+    c.PaletteSize6UVColorCdf = Default_Palette_Size_6_Uv_Color_Cdf;
+    c.PaletteSize7YColorCdf = Default_Palette_Size_7_Y_Color_Cdf;
+    c.PaletteSize7UVColorCdf = Default_Palette_Size_7_Uv_Color_Cdf;
+    c.PaletteSize8YColorCdf = Default_Palette_Size_8_Y_Color_Cdf;
+    c.PaletteSize8UVColorCdf = Default_Palette_Size_8_Uv_Color_Cdf;
+    c.DeltaQCdf = Default_Delta_Q_Cdf;
+    c.DeltaLFCdf = Default_Delta_Lf_Cdf;
+    // DeltaLFMultiCdf[i] is set to a copy of Default_Delta_Lf_Cdf for i = 0..FRAME_LF_COUNT - 1
+    c.IntraTxTypeSet1Cdf = Default_Intra_Tx_Type_Set1_Cdf;
+    c.IntraTxTypeSet2Cdf = Default_Intra_Tx_Type_Set2_Cdf;
+    c.InterTxTypeSet1Cdf = Default_Inter_Tx_Type_Set1_Cdf;
+    c.InterTxTypeSet2Cdf = Default_Inter_Tx_Type_Set2_Cdf;
+    c.InterTxTypeSet3Cdf = Default_Inter_Tx_Type_Set3_Cdf;
+    c.UseObmcCdf = Default_Use_Obmc_Cdf;
+    c.InterIntraCdf = Default_Inter_Intra_Cdf;
+    c.CompRefTypeCdf = Default_Comp_Ref_Type_Cdf;
+    c.CflSignCdf = Default_Cfl_Sign_Cdf;
+    c.UniCompRefCdf = Default_Uni_Comp_Ref_Cdf;
+    c.WedgeInterIntraCdf = Default_Wedge_Inter_Intra_Cdf;
+    c.CompGroupIdxCdf = Default_Comp_Group_Idx_Cdf;
+    c.CompoundIdxCdf = Default_Compound_Idx_Cdf;
+    c.CompoundTypeCdf = Default_Compound_Type_Cdf;
+    c.InterIntraModeCdf = Default_Inter_Intra_Mode_Cdf;
+    c.WedgeIndexCdf = Default_Wedge_Index_Cdf;
+    c.CflAlphaCdf = Default_Cfl_Alpha_Cdf;
+    c.UseWienerCdf = Default_Use_Wiener_Cdf;
+    c.UseSgrprojCdf = Default_Use_Sgrproj_Cdf;
+    c.RestorationTypeCdf = Default_Restoration_Type_Cdf;
+}
+
+
 const uncompressed_header = syntax("uncompressed_header", (bs: Bitstream<ObuCtx>) => {
     const c = bs.ctx;
     if (c.frame_id_numbers_present_flag) {
@@ -200,7 +295,7 @@ const uncompressed_header = syntax("uncompressed_header", (bs: Bitstream<ObuCtx>
             }
             return
         }
-        bs.f("frame_type", 2, {e: FrameType})
+        bs.f("frame_type", 2, { e: FrameType })
         c.FrameIsIntra = (c.frame_type == FrameType.INTRA_ONLY_FRAME || c.frame_type == FrameType.KEY_FRAME) ? 1 : 0
         bs.f("show_frame", 1)
         if (c.show_frame && c.decoder_model_info_present_flag && !c.equal_picture_interval) {
@@ -361,33 +456,33 @@ const uncompressed_header = syntax("uncompressed_header", (bs: Bitstream<ObuCtx>
             }
         }
     }
-    // if (reduced_still_picture_header || disable_cdf_update)
-    //     disable_frame_end_update_cdf = 1
-    // else
-    //     bs.f("disable_frame_end_update_cdf", 1)
-    // if (primary_ref_frame == PRIMARY_REF_NONE) {
-    //     init_non_coeff_cdfs()
-    //     setup_past_independence()
-    // } else {
-    //     load_cdfs(ref_frame_idx[primary_ref_frame])
-    //     load_previous()
-    // }
-    // if (use_ref_frame_mvs == 1)
+    if (c.reduced_still_picture_header || c.disable_cdf_update)
+        c.disable_frame_end_update_cdf = 1
+    else
+        bs.f(`disable_frame_end_update_cdf`, 1);
+    if (c.primary_ref_frame == PRIMARY_REF_NONE) {
+        init_non_coeff_cdfs(bs);
+        // setup_past_independence()
+    } else {
+        // load_cdfs(c.ref_frame_idx[c.primary_ref_frame])
+        // load_previous()
+    }
+    // if (c.use_ref_frame_mvs == 1)
     //     motion_field_estimation()
-    // tile_info()
-    // quantization_params()
-    // segmentation_params()
-    // delta_q_params()
-    // delta_lf_params()
-    // if (primary_ref_frame == PRIMARY_REF_NONE) {
+    tile_info(bs);
+    quantization_params(bs);
+    segmentation_params(bs);
+    delta_q_params(bs);
+    delta_lf_params(bs);
+    // if (c.primary_ref_frame == PRIMARY_REF_NONE) {
     //     init_coeff_cdfs()
     // } else {
     //     load_previous_segment_ids()
     // }
-    // CodedLossless = 1
-    // for (segmentId = 0; segmentId < MAX_SEGMENTS; segmentId++) {
-    //     qindex = get_qindex(1, segmentId)
-    //     LosslessArray[segmentId] = qindex == 0 && DeltaQYDc == 0 &&
+    // c.CodedLossless = 1
+    // for (let segmentId = 0; segmentId < constant.MAX_SEGMENTS; segmentId++) {
+    //     // c.qindex = get_qindex(1, segmentId)
+    //     c.LosslessArray[segmentId] = c.qindex == 0 && DeltaQYDc == 0 &&
     //         DeltaQUAc == 0 && DeltaQUDc == 0 &&
     //         DeltaQVAc == 0 && DeltaQVDc == 0
     //     if (!LosslessArray[segmentId])
@@ -405,21 +500,21 @@ const uncompressed_header = syntax("uncompressed_header", (bs: Bitstream<ObuCtx>
     //     }
     // }
     // AllLossless = CodedLossless && (FrameWidth == UpscaledWidth)
-    // loop_filter_params()
-    // cdef_params()
-    // lr_params()
-    // read_tx_mode()
-    // frame_reference_mode()
-    // skip_mode_params()
-    // if (FrameIsIntra ||
-    //     error_resilient_mode ||
-    //     !enable_warped_motion)
-    //     allow_warped_motion = 0
-    // else
-    //     bs.f("allow_warped_motion", 1)
-    // bs.f("reduced_tx_set", 1)
-    // global_motion_params()
-    // film_grain_params()
+    loop_filter_params(bs);
+    cdef_params(bs);
+    lr_params(bs);
+    read_tx_mode(bs);
+    frame_reference_mode(bs);
+    skip_mode_params(bs);
+    if (c.FrameIsIntra ||
+        c.error_resilient_mode ||
+        !c.enable_warped_motion)
+        c.allow_warped_motion = 0
+    else
+        bs.f(`allow_warped_motion`, 1);
+    bs.f(`reduced_tx_set`, 1);
+    global_motion_params(bs)
+    // film_grain_params(bs)
 
 
 

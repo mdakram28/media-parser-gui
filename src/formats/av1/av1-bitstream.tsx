@@ -3,6 +3,8 @@ import { frame_obu } from "./obu/obu_frame";
 import { FrameType } from "./obu/obu_frame_header";
 import { Bitstream, ParserCtx, syntax } from "../../bitstream/parser";
 
+export type Av1Bs = Bitstream<ObuCtx>;
+
 enum OBU_TYPE {
     // 0	Reserved
     OBU_SEQUENCE_HEADER = 1,
@@ -140,6 +142,28 @@ export class ObuCtx {
     interpolation_filter = 0;
     RefFrameSignBias: number[] = []
     ref_frame_idx: number[] = []
+    MiColStarts = []
+    MiRowStarts = []
+
+
+    // Frame params
+    FeatureEnabled = [[], [], [], [], [], [], [], [], [], [], [], [], [], []]
+    Segmentation_Feature_Bits = []
+    Segmentation_Feature_Signed = []
+    FeatureData = [[], [], [], [], [], [], [], [], [], [], [], [], [], []]
+    cdef_y_pri_strength = []
+    cdef_y_sec_strength = []
+    cdef_uv_pri_strength = []
+    cdef_uv_sec_strength = []
+    FrameRestorationType = []
+    LoopRestorationSize = []
+    SkipModeFrame = []
+    PrevGmParams = [[], [], [], [], [], [], [], [], [], [], [], [], [], []]
+    gm_params = [[], [], [], [], [], [], [], [], [], [], [], [], [], []]
+    GmType = []
+    loop_filter_ref_deltas = []
+    loop_filter_level = []
+    Segmentation_Feature_Max = []
 };
 
 export const AV1 = (bs: Bitstream<any>) => {

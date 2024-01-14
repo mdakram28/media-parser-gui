@@ -42,7 +42,7 @@ export class Bitstream<T extends {}> {
 
 
     // private setCtxVar(_title: keyof T | string, value: any) {
-        
+
     // }
 
     addSyntaxValue(varPath: string, title: string, value: number | string, startBitPos: number, hidden: boolean) {
@@ -62,7 +62,7 @@ export class Bitstream<T extends {}> {
             if (!Array.isArray(this.ctx[varName])) {
                 (this.ctx[varName] as any[]) = [];
             }
-            
+
             let syntaxDataNode = this.current.children?.find(child => child.title === varName);
             if (!syntaxDataNode) {
                 syntaxDataNode = {
@@ -76,11 +76,11 @@ export class Bitstream<T extends {}> {
                 this.current.children?.push(syntaxDataNode);
             }
 
-            
+
             let arr = this.ctx[varName] as any[];
             let syntaxArr = syntaxDataNode.value as any[];
 
-            for(let i=1; i<names.length-1; i++) {
+            for (let i = 1; i < names.length - 1; i++) {
                 const index = parseInt(names[i] as string);
                 if (!Array.isArray(arr[index])) {
                     arr[index] = [];
@@ -91,7 +91,7 @@ export class Bitstream<T extends {}> {
                 }
                 syntaxArr = syntaxArr[index];
             }
-            const index = parseInt(names[names.length-1] as string);
+            const index = parseInt(names[names.length - 1] as string);
             if (!Array.isArray(arr[index])) {
                 arr[index] = [];
             }
@@ -107,7 +107,7 @@ export class Bitstream<T extends {}> {
 
     }
 
-    f(varPath: string, bits: number, {e, hidden = false}: {e?: any, hidden?: boolean} = {}) {
+    f(varPath: string, bits: number, { e, hidden = false }: { e?: any, hidden?: boolean } = {}) {
         const startBitPos = this.getPos();
         const value = bits === 1 ? this.buffer.readBit() : this.buffer.readBits(bits);
         this.addSyntaxValue(
@@ -120,7 +120,37 @@ export class Bitstream<T extends {}> {
         return value;
     }
 
-    uvlc(varPath: string, {e, hidden = false}: {e?: any, hidden?: boolean} = {}) {
+    ns(varPath: string, n: number, { e, hidden = false }: { e?: any, hidden?: boolean } = {}) {
+        const startBitPos = this.getPos();
+        const value = this.buffer.readURanged(n);
+        this.addSyntaxValue(
+            varPath,
+            `${varPath.toString()}  (ns${n})` + (e ? `: (${e[value]})` : ''),
+            value,
+            startBitPos,
+            hidden
+        );
+        return value;
+    }
+
+    su(varPath: string, n: number, { e, hidden = false }: { e?: any, hidden?: boolean } = {}) {
+        const startBitPos = this.getPos();
+        let value = this.buffer.readBits(n);
+        const signMask = 1 << (n - 1)
+        if (value & signMask)
+            value = value - 2 * signMask;
+
+        this.addSyntaxValue(
+            varPath,
+            `${varPath.toString()}  (su${n})` + (e ? `: (${e[value]})` : ''),
+            value,
+            startBitPos,
+            hidden
+        );
+        return value;
+    }
+
+    uvlc(varPath: string, { e, hidden = false }: { e?: any, hidden?: boolean } = {}) {
         const start = this.getPos();
         const value = this.buffer.readUvlc();
         this.addSyntaxValue(
@@ -133,7 +163,7 @@ export class Bitstream<T extends {}> {
         return value;
     }
 
-    svlc(varPath: string, {e, hidden = false}: {e?: any, hidden?: boolean} = {}) {
+    svlc(varPath: string, { e, hidden = false }: { e?: any, hidden?: boolean } = {}) {
         const start = this.getPos();
         const value = this.buffer.readSvlc();
         this.addSyntaxValue(
@@ -146,7 +176,7 @@ export class Bitstream<T extends {}> {
         return value;
     }
 
-    leb128(varPath: string, {e, hidden = false}: {e?: any, hidden?: boolean} = {}) {
+    leb128(varPath: string, { e, hidden = false }: { e?: any, hidden?: boolean } = {}) {
         // console.log(`Reading leb128 ${title.toString()} from ${this.getPos()}`);
         const start = this.getPos();
         const value = this.buffer.readLeb128();
@@ -161,7 +191,7 @@ export class Bitstream<T extends {}> {
     }
 
 
-    nullEndedString(varPath: string, {e, hidden = false}: {e?: any, hidden?: boolean} = {}) {
+    nullEndedString(varPath: string, { e, hidden = false }: { e?: any, hidden?: boolean } = {}) {
         const start = this.getPos();
         const value = this.buffer.readNullEndedString();
         this.addSyntaxValue(
@@ -175,7 +205,7 @@ export class Bitstream<T extends {}> {
     }
 
 
-    fixedWidthString(varPath: string, len: number, {e, hidden = false}: {e?: any, hidden?: boolean} = {}) {
+    fixedWidthString(varPath: string, len: number, { e, hidden = false }: { e?: any, hidden?: boolean } = {}) {
         const start = this.getPos();
         const value = this.buffer.readString(len);
         this.addSyntaxValue(
@@ -224,8 +254,8 @@ export class Bitstream<T extends {}> {
     }
 
     byteAlign() {
-        if (this.buffer.getPos()%8 != 0) {
-            return this.f("byte_align", (8 - this.buffer.getPos()%8) % 8);
+        if (this.buffer.getPos() % 8 != 0) {
+            return this.f("byte_align", (8 - this.buffer.getPos() % 8) % 8);
         }
     }
 

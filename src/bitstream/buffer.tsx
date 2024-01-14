@@ -24,6 +24,15 @@ for (let i=0; i<=0xFF; i++) {
     REV[i] = parseInt([...i.toString(2)].reverse().join(""), 2);
 }
 
+function FloorLog2( x: number ) {
+    let s = 0
+    while ( x != 0 ) {
+      x = x >> 1
+      s++
+    }
+    return s - 1
+}
+
 abstract class BitBuffer {
     public byteLength;
     
@@ -139,6 +148,17 @@ abstract class BitBuffer {
         }
         return endBitPos;
     }
+
+
+    readURanged(n: number) {
+        const w = FloorLog2(n) + 1;
+        const m = (1 << w) - n;
+        const v = this.readBits(w-1);
+        if ( v < m )	 
+            return v	 
+        const extra_bit = this.readBit();
+        return (v << 1) - m + extra_bit	 ;
+    }
 }
 
 
@@ -169,90 +189,6 @@ export class MSBBuffer extends BitBuffer {
             val = val<<1 | this.readBit();
         }
         return val;
-        // this.checkEscapeCode();
-        // const endBitPos = this.getPos() + bits;
-        // const endBytePos = Math.floor(endBitPos / 8);
-        // let ret = 0;
-
-        // if (endBytePos === this.bytePos) {
-        //     // Does not cross byte
-        //     ret = (this.buffer[this.bytePos] >> (8 - this.bitPos - bits)) & ((1 << bits) - 1);
-        //     this.bitPos += bits;
-        // } else {
-        //     // crosses byte
-
-        //     // Step 1: Align to byte
-        //     if (this.bitPos > 0) {
-        //         const bitsToRead = 8 - this.bitPos;
-        //         ret = this.buffer[this.bytePos] & ((1 << bitsToRead) - 1);
-        //         this.bitPos = 0;
-        //         this.bytePos++;
-        //     }
-
-        //     // Step 2: Fast Read full bytes
-        //     while ((this.bytePos + 1) * 8 <= endBitPos) {
-        //         ret = ret << 8 | this.buffer[this.bytePos++];
-        //     }
-
-        //     // Step 3: Read tail
-        //     const bitsToRead = endBitPos - this.getPos();
-        //     ret = ret << bitsToRead | (this.buffer[this.bytePos] >> (8 - bitsToRead));
-        //     this.bitPos += bitsToRead;
-        // }
-        // return ret;
     }
 
 }
-
-// Reads LSB from byte first
-// export class LSBBuffer extends BitBuffer {
-    
-//     readByte() {
-//         return REV8(this.buffer[this.bytePos++]);
-//     }
-
-//     readBit() {
-//         const ret = (this.buffer[this.bytePos] >> this.bitPos) & 1;
-//         this.bitPos++;
-//         if (this.bitPos === 8) {
-//             this.bitPos = 0;
-//             this.bytePos++;
-//         }
-//         return ret;
-//     }
-
-//     readBits(bits: number) {
-//         const endBitPos = this.getPos() + bits;
-//         const endBytePos = Math.floor(endBitPos / 8);
-//         let ret = 0;
-
-//         if (endBytePos === this.bytePos) {
-//             // Does not cross byte
-//             ret = (this.buffer[this.bytePos] >> this.bitPos) & ((1 << bits) - 1);
-//             this.bitPos += bits;
-//             ret = REV[ret];
-//         } else {
-//             // crosses byte
-
-//             // Step 1: Align to byte
-//             if (this.bitPos > 0) {
-//                 ret = this.buffer[this.bytePos] >> this.bitPos;
-//                 this.bitPos = 0;
-//                 this.bytePos++;
-//                 ret = REV[ret];
-//             }
-
-//             // Step 2: Fast Read full bytes
-//             while ((this.bytePos + 1) * 8 <= endBitPos) {
-//                 ret = ret << 8 | this.readByte();
-//             }
-
-//             // Step 3: Read tail
-//             const bitsToRead = endBitPos - this.getPos();
-//             ret = ret << bitsToRead | REV[this.buffer[this.bytePos] & ((1<<bitsToRead)-1)];
-//             this.bitPos += bitsToRead;
-//         }
-        
-//         return ret;
-//     }
-// }
