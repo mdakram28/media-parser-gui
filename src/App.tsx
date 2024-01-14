@@ -41,7 +41,7 @@ export default function Dashboard() {
       <div className="toolbar">
         <div className="toolbar-item"><b>Multimedia Explorer</b></div>
         {menuItems.map((menu) => 
-          <NavLink to={"/av1-parser-gui//"+menu.page} key={menu.page} 
+          <NavLink to={"/"+menu.page} key={menu.page} 
             className={({isActive}) => "toolbar-item " + (isActive && "active")}>
               {menu.title}
           </NavLink>
@@ -55,9 +55,9 @@ export default function Dashboard() {
       </div>
       <div className="content">
         <Routes>
-          <Route path="/av1-parser-gui//mp4" element={<Mp4AnalyzerComponent />} />
-          <Route path="/av1-parser-gui//hevc" element={<HevcAnalyzerComponent />} />
-          <Route path="/av1-parser-gui//raw" element={<RawAnalyzerComponent />} />
+          <Route path="/mp4" element={<Mp4AnalyzerComponent />} />
+          <Route path="/hevc" element={<HevcAnalyzerComponent />} />
+          <Route path="/raw" element={<RawAnalyzerComponent />} />
           <Route path="*" element={<Av1AnalyzerComponent />} />
         </Routes>
       </div>
