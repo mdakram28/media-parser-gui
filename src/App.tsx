@@ -50,10 +50,10 @@ export default function Dashboard() {
         <span style={{ flex: 1 }}></span>
         <div className="toolbar-item gh">
           <GitHubButton
-            href="https://github.com/mdakram28/av1-parser-gui"
+            href="https://github.com/mdakram28/media-parser-gui"
             data-color-scheme="no-preference: dark; light: dark; dark: dark;"
             data-size="large"
-            aria-label="Star mdakram28/av1-parser-gui on GitHub"
+            aria-label="Star mdakram28/media-parser-gui on GitHub"
           >Star</GitHubButton>
         </div>
         <div className="toolbar-item">
