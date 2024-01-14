@@ -79,14 +79,12 @@ export function HexEditor({ }: {}) {
         Math.min(offset + (NUM_ROWS + EXTRA_RENDER_ROWS) * NUM_COLS, buffer.length)
     ), [buffer, offset]);
 
-    return <div className="hex-editor" style={{ position: "relative", fontFamily: "monospace", height: "100%", minWidth: "min-content" }}>
-        <div style={{ position: "absolute", zIndex: 10, bottom: 0, width: "100%" }}>
-            {ranges[0] && <ByteInspector range={ranges[0].toByteRange()} />}
-        </div>
+    return <div className="hex-editor" style={{ position: "relative", fontFamily: "monospace", height: "100%", minWidth: "min-content", display: "flex", flexDirection: "column" }}>
+        
         {/* <div style={{ position: "absolute", zIndex: 8, right: 0, height: "100%", width: 50, backgroundColor: "grey" }}>
             <div style={{border: "black", height}}></div>
         </div> */}
-        <div className="infinite" ref={scrollViewRef} style={{ height: "100%", overflowY: "auto", paddingRight: 50 }}
+        <div className="infinite" ref={scrollViewRef} style={{ flex: "1 1 auto", height: 0, overflowY: "auto", paddingRight: 50 }}
             onScroll={(e: any) => {
                 const { scrollTop } = e.target;
                 setOffset(NUM_COLS * Math.floor(scrollTop / CELL_HEIGHT));
@@ -153,6 +151,9 @@ export function HexEditor({ }: {}) {
                     </div>
                 </div>
             </div>
+        </div>
+        <div style={{  width: "100%", marginTop: 10 }}>
+            {ranges[0] && <ByteInspector range={ranges[0].toByteRange()} />}
         </div>
     </div>
 }
