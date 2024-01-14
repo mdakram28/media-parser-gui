@@ -1,18 +1,18 @@
 # media-parser-gui
 
 A browser based AV1, HEVC and MP4 bitstream parser and visualizer capable of handling large files.
-Live App: https://mdakram.com/av1-parser-gui/
+Live App: https://mdakram.com/media-parser-gui/
 
 #### AV1 Demo
-https://mdakram.com/av1-parser-gui/#/av1
+https://mdakram.com/media-parser-gui/#/av1
 ![](public/ss_av1.png)
 
 #### MP4 Demo
-https://mdakram.com/av1-parser-gui/#/mp4
+https://mdakram.com/media-parser-gui/#/mp4
 ![](public/ss_mp4.png)
 
 #### HEVC Demo
-https://mdakram.com/av1-parser-gui/#/hevc
+https://mdakram.com/media-parser-gui/#/hevc
 ![](public/ss_hevc.png)
 
 
@@ -22,8 +22,8 @@ To install and start, follow these steps:
 
 ```bash
 # Get the code
-git clone https://github.com/mdakram28/av1-parser-gui.git
-cd av1-parser-gui
+git clone https://github.com/mdakram28/media-parser-gui.git
+cd media-parser-gui
 # Build
 npm install
 # Run
