@@ -88,8 +88,10 @@
         text-align: left;
         padding: 3px 20px;
     }
-    td {
+    td:not(:last-child) {
         border-right: 1px solid var(--border-color);
+    }
+    td {
         text-align: left;
         vertical-align: middle;
         padding: 3px 20px;

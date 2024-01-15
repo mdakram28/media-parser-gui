@@ -109,7 +109,7 @@ export function SyntaxTable({ }: {}
         return <>No data</>
     }
 
-    return <div style={{ flex: "1 1 auto", height: 0, width: "100%", display: "flex", flexDirection: "column", overflow: "auto" }}>
+    return <div style={{ flex: "1 1 auto", height: "100%", width: "100%", display: "flex", flexDirection: "column", overflow: "auto" }}>
         <div className="toolbar">
             <div data-tooltip="Filter by title" className="toolbar-item" style={{ verticalAlign: "middle" }}>
                 <i className="fas fa-search"></i>&nbsp;&nbsp;

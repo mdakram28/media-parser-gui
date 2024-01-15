@@ -4,20 +4,24 @@
     --primary-color: #5e5bae;
     --secondary-color: #536390;
     --font-color: #242424;
+    --font-secondary-color: #474747;
     --bg-color: #f5f5f5;
     --bg-strong-color: #fff;
     --heading-color: #292922;
     --border-color: #2d2d3c;
+    --border-strong-color: #1e1e28;
 }
 
 .dark {
     --primary-color: #9A97F3;
     --secondary-color: #818cab;
     --font-color: #e1e1ff;
+    --font-secondary-color: #9797ae;
     --bg-color: #0f0f13;
     --bg-strong-color: #000000;
     --heading-color: #818cab;
     --border-color: #2d2d3c;
+    --border-strong-color: #494960;
     color-scheme: dark;
 }
 
@@ -141,10 +145,31 @@ a {
     width: 100%;
 }
 
+.resize-handle {
+    width: 2px;
+    border: 2px solid var(--bg-color);
+    border-top-width: 0;
+    border-bottom-width: 0;
+
+    background-color: var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    &:before {
+        color: var(--font-secondary-color);
+    }
+    transition: background-color 0.1s;
+    transition: border-color 0.1s;
+    &:hover {
+        background-color: var(--border-strong-color);
+        border-color: transparent;
+    }
+}
+
 .panel {
-    border-left: $border;
+    // border-left: $border;
     box-sizing: border-box;
-    padding: 20px;
+    padding: 10px;
     flex: 1;
     display: flex;
     // margin: -1px;

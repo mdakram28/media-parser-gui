@@ -4,6 +4,7 @@ import { MSBBuffer } from "../../bitstream/buffer";
 import { BitstreamExplorer } from "../../bitstream/bitstream-explorer";
 import { BitstreamUploader } from "../../bitstream/uploader";
 import { SyntaxViewer } from "../../bitstream/syntax-viewer";
+import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 
 export const RawAnalyzerComponent = (props: {}) => {
     return <BitstreamExplorer
@@ -23,14 +24,14 @@ export const RawAnalyzerComponent = (props: {}) => {
             "aspen.hevc": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/test-data/aspen.hevc",
         }}/>}
     >
-        <div style={{ flex: 1, display: "flex", flexDirection: "row", height: "100%" }}>
-
-            <div style={{ flex: 1, height: "100%", display: "flex", flexDirection: "column" }} className="panel">
-                <SyntaxViewer />
-            </div>
-            <div style={{ flex: 1, height: "100%" }} className="panel">
-                <HexEditor />
-            </div>
-        </div >
+    <PanelGroup autoSaveId="example" direction="horizontal">
+        <Panel defaultSize={50} className="panel">
+            {/* <SyntaxViewer /> */}
+        </Panel>
+        <PanelResizeHandle className="resize-handle fa-solid fa-ellipsis-vertical"/>
+        <Panel className="panel">
+            <HexEditor />
+        </Panel>
+    </PanelGroup>
     </BitstreamExplorer>
 }

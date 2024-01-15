@@ -5,6 +5,7 @@ import { BitstreamExplorer, EMPTY_TREE } from "../../bitstream/bitstream-explore
 import { BitstreamUploader } from "../../bitstream/uploader";
 import { SyntaxViewer } from "../../bitstream/syntax-viewer";
 import { AV1 } from "./av1-bitstream";
+import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 
 export const Av1AnalyzerComponent = (props: {}) => {
     return <BitstreamExplorer
@@ -17,16 +18,16 @@ export const Av1AnalyzerComponent = (props: {}) => {
 
         uploader={<BitstreamUploader title="Drop AV1 raw bitstream file" samples={{
             "big_buck_bunny.obu": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/test-data/big_buck_bunny.obu"
-        }}/>}
+        }} />}
     >
-        <div style={{ flex: 1, display: "flex", flexDirection: "row", height: "100%" }}>
-
-            <div style={{ flex: 1, height: "100%", display: "flex", flexDirection: "column" }} className="panel">
+        <PanelGroup autoSaveId="example" direction="horizontal">
+            <Panel defaultSize={50} className="panel">
                 <SyntaxViewer />
-            </div>
-            <div style={{ flex: 1, height: "100%" }} className="panel">
+            </Panel>
+            <PanelResizeHandle className="resize-handle fa-solid fa-ellipsis-vertical"/>
+            <Panel className="panel">
                 <HexEditor />
-            </div>
-        </div >
+            </Panel>
+        </PanelGroup>
     </BitstreamExplorer>
 }

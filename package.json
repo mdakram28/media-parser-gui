@@ -20,6 +20,7 @@
     "@mui/x-tree-view": "^6.17.0",
     "react": "latest",
     "react-dom": "latest",
+    "react-resizable-panels": "^1.0.9",
     "react-router-dom": "^6.21.1"
   },
   "devDependencies": {
