@@ -128,5 +128,7 @@
 
     .value {
         font-family: monospace;
+        overflow: auto;
+        max-width: 400px;
     }
 }

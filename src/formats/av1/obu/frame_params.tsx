@@ -68,9 +68,9 @@ export function segmentation_params(bs: Av1Bs) {
         if (c.segmentation_update_data == 1) {
             for (let i = 0; i < constant.MAX_SEGMENTS; i++) {
                 for (let j = 0; j < constant.SEG_LVL_MAX; j++) {
-                    bs.f(`feature_enabled`, 1);
-                    c.FeatureEnabled[i][j] = c.feature_enabled
-                    c.clippedValue = 0
+                    c.feature_enabled = bs.f(`feature_enabled[${i}][${j}]`, 1);
+                    c.FeatureEnabled[i][j] = c.feature_enabled;
+                    c.clippedValue = 0;
                     if (c.feature_enabled == 1) {
                         c.bitsToRead = c.Segmentation_Feature_Bits[j]
                         c.limit = c.Segmentation_Feature_Max[j]

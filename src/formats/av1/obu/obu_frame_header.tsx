@@ -261,7 +261,7 @@ function init_non_coeff_cdfs(bs: Bitstream<ObuCtx>) {
 }
 
 
-const uncompressed_header = syntax("uncompressed_header", (bs: Bitstream<ObuCtx>) => {
+const uncompressed_header = (bs: Bitstream<ObuCtx>) => {
     const c = bs.ctx;
     if (c.frame_id_numbers_present_flag) {
         c.idLen = (c.additional_frame_id_length_minus_1 + c.delta_frame_id_length_minus_2 + 3)
@@ -516,9 +516,7 @@ const uncompressed_header = syntax("uncompressed_header", (bs: Bitstream<ObuCtx>
     global_motion_params(bs)
     // film_grain_params(bs)
 
-
-
-});
+};
 
 export const frame_header_obu = syntax("frame_header_obu", (bs: Bitstream<ObuCtx & ParserCtx>) => {
     const c = bs.ctx;

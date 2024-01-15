@@ -8,7 +8,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 
 function ValueFormat({ value }: { value: DataNodeValue }) {
-    if (typeof value == "string" || typeof value == "number") {
+    if (typeof value !== "object") {
         return <>{value}</>
     } else if (Array.isArray(value)) {
         return <div style={{ display: "inline-block" }}>
@@ -16,7 +16,7 @@ function ValueFormat({ value }: { value: DataNodeValue }) {
             {value.map((val, i) => <>
                 <ValueFormat value={val} />
                 {i != value.length - 1 && ", "}
-                {(i + 1) % 8 == 0 && i != value.length - 1 && <>
+                {((i + 1) % 8 == 0 || typeof val === "object") && i != value.length - 1 && <>
                     <br />
                     &nbsp;
                 </>}
@@ -109,7 +109,7 @@ export function SyntaxTable({ }: {}
         return <>No data</>
     }
 
-    return <div style={{ flex: "1 1 auto", height: 0, width: "100%", display: "flex", flexDirection: "column" }}>
+    return <div style={{ flex: "1 1 auto", height: 0, width: "100%", display: "flex", flexDirection: "column", overflow: "auto" }}>
         <div className="toolbar">
             <div data-tooltip="Filter by title" className="toolbar-item" style={{ verticalAlign: "middle" }}>
                 <i className="fas fa-search"></i>&nbsp;&nbsp;
