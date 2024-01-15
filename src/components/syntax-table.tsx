@@ -4,6 +4,7 @@ import { BitstreamExplorerContext, BitstreamSelectionContext } from "../bitstrea
 import { BitRange } from "../bitstream/range";
 import { FormControlLabel, Switch } from "@mui/material";
 import { useTraceUpdate } from "../react-util";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 
 function ValueFormat({ value }: { value: DataNodeValue }) {
@@ -71,7 +72,8 @@ function DataTreeNode({ node, level = 0 }: { node: DataNode, level?: number }) {
                         ? <div
                             onClick={toggleExpand}
                             className={(expanded ? "expanded " : "") + "expand-btn"}
-                        >⮞</div>
+                        >  <i className="fas fa-angle-right" />
+                        </div>
                         : <div className="expand-space" />
                     }
                     {node.title} {
