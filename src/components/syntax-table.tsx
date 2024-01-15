@@ -27,7 +27,7 @@ function ValueFormat({ value }: { value: DataNodeValue }) {
 }
 
 function DataTreeNode({ node, level = 0 }: { node: DataNode, level?: number }) {
-    const [expanded, setExpanded] = useState(false);
+    const [expanded, setExpanded] = useState(() => level == 0 ? true : false);
     const { showHiddenSyntax } = useContext(BitstreamExplorerContext);
     const { setRanges } = useContext(BitstreamSelectionContext);
 

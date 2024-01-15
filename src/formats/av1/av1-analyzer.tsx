@@ -1,7 +1,7 @@
 import { HexEditor } from "../../components/hex-editor";
 import { Bitstream } from "../../bitstream/parser";
 import { MSBBuffer } from "../../bitstream/buffer";
-import { BitstreamExplorer } from "../../bitstream/bitstream-explorer";
+import { BitstreamExplorer, EMPTY_TREE } from "../../bitstream/bitstream-explorer";
 import { BitstreamUploader } from "../../bitstream/uploader";
 import { SyntaxViewer } from "../../bitstream/syntax-viewer";
 import { AV1 } from "./av1-bitstream";
@@ -11,6 +11,7 @@ export const Av1AnalyzerComponent = (props: {}) => {
         parser={(buffer: Uint8Array) => {
             const bs = new Bitstream(new MSBBuffer(buffer));
             AV1(bs);
+            // return (bs.getCurrent().children || [EMPTY_TREE])[0];
             return bs.getCurrent();
         }}
 

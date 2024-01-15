@@ -2,7 +2,7 @@ import { HexEditor } from "../../components/hex-editor";
 import { Bitstream } from "../../bitstream/parser";
 import { ISOBMFF } from "./mp4-bitstream";
 import { MSBBuffer } from "../../bitstream/buffer";
-import { BitstreamExplorer } from "../../bitstream/bitstream-explorer";
+import { BitstreamExplorer, EMPTY_TREE } from "../../bitstream/bitstream-explorer";
 import { BitstreamUploader } from "../../bitstream/uploader";
 import { SyntaxViewer } from "../../bitstream/syntax-viewer";
 
@@ -11,7 +11,7 @@ export const Mp4AnalyzerComponent = (props: {}) => {
         parser={(buffer: Uint8Array) => {
             const bs = new Bitstream(new MSBBuffer(buffer));
             ISOBMFF(bs, bs.getEndPos());
-            return bs.getCurrent();
+            return (bs.getCurrent().children || [EMPTY_TREE])[0];
         }}
 
         uploader={<BitstreamUploader title="Drop MP4 file here" samples={{
