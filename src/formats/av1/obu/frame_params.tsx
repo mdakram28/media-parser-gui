@@ -1,6 +1,6 @@
 import { Av1Bs } from "../av1-bitstream";
 import { Clip3, decode_signed_subexp_with_ref, get_relative_dist } from "./common";
-import { constant } from "./constants";
+import { Av1Const } from "./constants";
 import { RefFrame0 } from "./obu_frame_header";
 
 export function read_delta_q(bs: Av1Bs) {
@@ -55,7 +55,7 @@ export function segmentation_params(bs: Av1Bs) {
     const c: any = bs.ctx;
     bs.f(`segmentation_enabled`, 1);
     if (c.segmentation_enabled == 1) {
-        if (c.primary_ref_frame == constant.PRIMARY_REF_NONE) {
+        if (c.primary_ref_frame == Av1Const.PRIMARY_REF_NONE) {
             c.segmentation_update_map = 1
             c.segmentation_temporal_update = 0
             c.segmentation_update_data = 1
@@ -66,8 +66,8 @@ export function segmentation_params(bs: Av1Bs) {
             bs.f(`segmentation_update_data`, 1);
         }
         if (c.segmentation_update_data == 1) {
-            for (let i = 0; i < constant.MAX_SEGMENTS; i++) {
-                for (let j = 0; j < constant.SEG_LVL_MAX; j++) {
+            for (let i = 0; i < Av1Const.MAX_SEGMENTS; i++) {
+                for (let j = 0; j < Av1Const.SEG_LVL_MAX; j++) {
                     c.feature_enabled = bs.f(`feature_enabled[${i}][${j}]`, 1);
                     c.FeatureEnabled[i][j] = c.feature_enabled;
                     c.clippedValue = 0;
@@ -87,8 +87,8 @@ export function segmentation_params(bs: Av1Bs) {
             }
         }
     } else {
-        for (let i = 0; i < constant.MAX_SEGMENTS; i++) {
-            for (let j = 0; j < constant.SEG_LVL_MAX; j++) {
+        for (let i = 0; i < Av1Const.MAX_SEGMENTS; i++) {
+            for (let j = 0; j < Av1Const.SEG_LVL_MAX; j++) {
                 c.FeatureEnabled[i][j] = 0
                 c.FeatureData[i][j] = 0
             }
@@ -96,11 +96,11 @@ export function segmentation_params(bs: Av1Bs) {
     }
     c.SegIdPreSkip = 0
     c.LastActiveSegId = 0
-    for (let i = 0; i < constant.MAX_SEGMENTS; i++) {
-        for (let j = 0; j < constant.SEG_LVL_MAX; j++) {
+    for (let i = 0; i < Av1Const.MAX_SEGMENTS; i++) {
+        for (let j = 0; j < Av1Const.SEG_LVL_MAX; j++) {
             if (c.FeatureEnabled[i][j]) {
                 c.LastActiveSegId = i
-                if (j >= constant.SEG_LVL_REF_FRAME) {
+                if (j >= Av1Const.SEG_LVL_REF_FRAME) {
                     c.SegIdPreSkip = 1
                 }
             }
@@ -198,7 +198,7 @@ export function lr_params(bs: Av1Bs) {
                 c.lr_unit_shift += c.lr_unit_extra_shift
             }
         }
-        c.LoopRestorationSize[0] = constant.RESTORATION_TILESIZE_MAX >> (2 - c.lr_unit_shift)
+        c.LoopRestorationSize[0] = Av1Const.RESTORATION_TILESIZE_MAX >> (2 - c.lr_unit_shift)
         if (c.subsampling_x && c.subsampling_y && c.usesChromaLr) {
             bs.f(`lr_uv_shift`, 1);
         } else {
@@ -240,7 +240,7 @@ export function skip_mode_params(bs: Av1Bs) {
     } else {
         c.forwardIdx = -1
         c.backwardIdx = -1
-        for (let i = 0; i < constant.REFS_PER_FRAME; i++) {
+        for (let i = 0; i < Av1Const.REFS_PER_FRAME; i++) {
             c.refHint = c.RefOrderHint[c.ref_frame_idx[i]]
             if (get_relative_dist(bs, c.refHint, c.OrderHint) < 0) {
                 if (c.forwardIdx < 0 ||
@@ -264,7 +264,7 @@ export function skip_mode_params(bs: Av1Bs) {
             c.SkipModeFrame[1] = RefFrame0.LAST_FRAME + Math.max(c.forwardIdx, c.backwardIdx)
         } else {
             c.secondForwardIdx = -1
-            for (let i = 0; i < constant.REFS_PER_FRAME; i++) {
+            for (let i = 0; i < Av1Const.REFS_PER_FRAME; i++) {
                 c.refHint = c.RefOrderHint[c.ref_frame_idx[i]]
                 if (get_relative_dist(bs, c.refHint, c.forwardHint) < 0) {
                     if (c.secondForwardIdx < 0 ||
@@ -302,19 +302,19 @@ export function frame_reference_mode(bs: Av1Bs) {
 
 export function read_global_param(bs: Av1Bs, type: number, ref: number, idx: number) {
     const c: any = bs.ctx;
-    c.absBits = constant.GM_ABS_ALPHA_BITS
-    c.precBits = constant.GM_ALPHA_PREC_BITS
+    c.absBits = Av1Const.GM_ABS_ALPHA_BITS
+    c.precBits = Av1Const.GM_ALPHA_PREC_BITS
     if (idx < 2) {
-        if (type == constant.TRANSLATION) {
-            c.absBits = constant.GM_ABS_TRANS_ONLY_BITS - (1 - c.allow_high_precision_mv)
-            c.precBits = constant.GM_TRANS_ONLY_PREC_BITS - (1 - c.allow_high_precision_mv)
+        if (type == Av1Const.TRANSLATION) {
+            c.absBits = Av1Const.GM_ABS_TRANS_ONLY_BITS - (1 - c.allow_high_precision_mv)
+            c.precBits = Av1Const.GM_TRANS_ONLY_PREC_BITS - (1 - c.allow_high_precision_mv)
         } else {
-            c.absBits = constant.GM_ABS_TRANS_BITS
-            c.precBits = constant.GM_TRANS_PREC_BITS
+            c.absBits = Av1Const.GM_ABS_TRANS_BITS
+            c.precBits = Av1Const.GM_TRANS_PREC_BITS
         }
     }
-    c.precDiff = constant.WARPEDMODEL_PREC_BITS - c.precBits
-    c.round = (idx % 3) == 2 ? (1 << constant.WARPEDMODEL_PREC_BITS) : 0
+    c.precDiff = Av1Const.WARPEDMODEL_PREC_BITS - c.precBits
+    c.round = (idx % 3) == 2 ? (1 << Av1Const.WARPEDMODEL_PREC_BITS) : 0
     c.sub = (idx % 3) == 2 ? (1 << c.precBits) : 0
     c.mx = (1 << c.absBits)
     c.r = (c.PrevGmParams[ref][idx] >> c.precDiff) - c.sub
@@ -325,10 +325,10 @@ export function read_global_param(bs: Av1Bs, type: number, ref: number, idx: num
 export function global_motion_params(bs: Av1Bs) {
     const c: any = bs.ctx;
     for (let ref = RefFrame0.LAST_FRAME; ref <= RefFrame0.ALTREF_FRAME; ref++) {
-        c.GmType[ref] = constant.IDENTITY
+        c.GmType[ref] = Av1Const.IDENTITY
         for (let i = 0; i < 6; i++) {
             c.gm_params[ref][i] = ((i % 3 == 2) ?
-                1 << constant.WARPEDMODEL_PREC_BITS : 0)
+                1 << Av1Const.WARPEDMODEL_PREC_BITS : 0)
         }
     }
     if (c.FrameIsIntra)
@@ -338,20 +338,20 @@ export function global_motion_params(bs: Av1Bs) {
         if (c.is_global) {
             bs.f(`is_rot_zoom`, 1);
             if (c.is_rot_zoom) {
-                c.type = constant.ROTZOOM
+                c.type = Av1Const.ROTZOOM
             } else {
                 bs.f(`is_translation`, 1);
-                c.type = c.is_translation ? constant.TRANSLATION : constant.AFFINE
+                c.type = c.is_translation ? Av1Const.TRANSLATION : Av1Const.AFFINE
             }
         } else {
-            c.type = constant.IDENTITY
+            c.type = Av1Const.IDENTITY
         }
         c.GmType[ref] = c.type
 
-        if (c.type >= constant.ROTZOOM) {
+        if (c.type >= Av1Const.ROTZOOM) {
             read_global_param(bs, c.type, ref, 2)
             read_global_param(bs, c.type, ref, 3)
-            if (c.type == constant.AFFINE) {
+            if (c.type == Av1Const.AFFINE) {
                 read_global_param(bs, c.type, ref, 4)
                 read_global_param(bs, c.type, ref, 5)
             } else {
@@ -359,7 +359,7 @@ export function global_motion_params(bs: Av1Bs) {
                 c.gm_params[ref][5] = c.gm_params[ref][2]
             }
         }
-        if (c.type >= constant.TRANSLATION) {
+        if (c.type >= Av1Const.TRANSLATION) {
             read_global_param(bs, c.type, ref, 0);
             read_global_param(bs, c.type, ref, 1);
         }
@@ -400,7 +400,7 @@ export function loop_filter_params(bs: Av1Bs) {
     if (c.loop_filter_delta_enabled == 1) {
         bs.f(`loop_filter_delta_update`, 1);
         if (c.loop_filter_delta_update == 1) {
-            for (let i = 0; i < constant.TOTAL_REFS_PER_FRAME; i++) {
+            for (let i = 0; i < Av1Const.TOTAL_REFS_PER_FRAME; i++) {
                 bs.f(`update_ref_delta`, 1);
                 if (c.update_ref_delta == 1)
                     bs.su(`loop_filter_ref_deltas[${i}]`, 1 + 6);

@@ -1,43 +1,47 @@
-loop_filter_params( ) {	Type
-    if ( CodedLossless || allow_intrabc ) {	 
-        loop_filter_level[ 0 ] = 0	 
-        loop_filter_level[ 1 ] = 0	 
-        loop_filter_ref_deltas[ INTRA_FRAME ] = 1	 
-        loop_filter_ref_deltas[ LAST_FRAME ] = 0	 
-        loop_filter_ref_deltas[ LAST2_FRAME ] = 0	 
-        loop_filter_ref_deltas[ LAST3_FRAME ] = 0	 
-        loop_filter_ref_deltas[ BWDREF_FRAME ] = 0	 
-        loop_filter_ref_deltas[ GOLDEN_FRAME ] = -1	 
-        loop_filter_ref_deltas[ ALTREF_FRAME ] = -1	 
-        loop_filter_ref_deltas[ ALTREF2_FRAME ] = -1	 
-        for ( i = 0; i < 2; i++ ) {	 
-            loop_filter_mode_deltas[ i ] = 0	 
-        }	 
-        return	 
+tile_group_obu( sz ) {	Type
+    NumTiles = TileCols * TileRows	 
+    startBitPos = get_position( )	 
+    tile_start_and_end_present_flag = 0	 
+    if ( NumTiles > 1 )	 
+        tile_start_and_end_present_flag	f(1)
+    if ( NumTiles == 1 || !tile_start_and_end_present_flag ) {	 
+        tg_start = 0	 
+        tg_end = NumTiles - 1	 
+    } else {	 
+        tileBits = TileColsLog2 + TileRowsLog2	 
+        tg_start	f(tileBits)
+        tg_end	f(tileBits)
     }	 
-    loop_filter_level[ 0 ]	f(6)
-    loop_filter_level[ 1 ]	f(6)
-    if ( NumPlanes > 1 ) {	 
-        if ( loop_filter_level[ 0 ] || loop_filter_level[ 1 ] ) {	 
-            loop_filter_level[ 2 ]	f(6)
-            loop_filter_level[ 3 ]	f(6)
+    byte_alignment( )	 
+    endBitPos = get_position( )	 
+    headerBytes = (endBitPos - startBitPos) / 8	 
+    sz -= headerBytes	 
+ 	 
+    for ( TileNum = tg_start; TileNum <= tg_end; TileNum++ ) {	 
+        tileRow = TileNum / TileCols	 
+        tileCol = TileNum % TileCols	 
+        lastTile = TileNum == tg_end	 
+        if ( lastTile ) {	 
+            tileSize = sz	 
+        } else {	 
+            tile_size_minus_1	le(TileSizeBytes)
+            tileSize = tile_size_minus_1 + 1	 
+            sz -= tileSize + TileSizeBytes	 
         }	 
+        MiRowStart = MiRowStarts[ tileRow ]	 
+        MiRowEnd = MiRowStarts[ tileRow + 1 ]	 
+        MiColStart = MiColStarts[ tileCol ]	 
+        MiColEnd = MiColStarts[ tileCol + 1 ]	 
+        CurrentQIndex = base_q_idx	 
+        init_symbol( tileSize )	 
+        decode_tile( )	 
+        exit_symbol( )	 
     }	 
-    loop_filter_sharpness	f(3)
-    loop_filter_delta_enabled	f(1)
-    if ( loop_filter_delta_enabled == 1 ) {	 
-        loop_filter_delta_update	f(1)
-        if ( loop_filter_delta_update == 1 ) {	 
-            for ( i = 0; i < TOTAL_REFS_PER_FRAME; i++ ) {	 
-                update_ref_delta	f(1)
-                if ( update_ref_delta == 1 )	 
-                    loop_filter_ref_deltas[ i ]	su(1+6)
-            }	 
-            for ( i = 0; i < 2; i++ ) {	 
-                update_mode_delta	f(1)
-                if ( update_mode_delta == 1 )	 
-                    loop_filter_mode_deltas[ i ]	su(1+6)
-            }	 
+    if ( tg_end == NumTiles - 1 ) {	 
+        if ( !disable_frame_end_update_cdf ) {	 
+            frame_end_update_cdf( )	 
         }	 
+        decode_frame_wrapup( )	 
+        SeenFrameHeader = 0	 
     }	 
 }

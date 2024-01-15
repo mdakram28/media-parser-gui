@@ -2,6 +2,7 @@ import { sequence_header_obu } from "./obu/obu_sequence_header";
 import { frame_obu } from "./obu/obu_frame";
 import { FrameType } from "./obu/obu_frame_header";
 import { Bitstream, ParserCtx, syntax } from "../../bitstream/parser";
+import { Av1Const } from "./obu/constants";
 
 export type Av1Bs = Bitstream<ObuCtx>;
 
@@ -148,8 +149,6 @@ export class ObuCtx {
 
     // Frame params
     FeatureEnabled = [[], [], [], [], [], [], [], [], [], [], [], [], [], []]
-    Segmentation_Feature_Bits = []
-    Segmentation_Feature_Signed = []
     FeatureData = [[], [], [], [], [], [], [], [], [], [], [], [], [], []]
     cdef_y_pri_strength = []
     cdef_y_sec_strength = []
@@ -163,7 +162,12 @@ export class ObuCtx {
     GmType = []
     loop_filter_ref_deltas = []
     loop_filter_level = []
-    Segmentation_Feature_Max = []
+    Segmentation_Feature_Bits = [8, 6, 6, 6, 6, 3, 0, 0]
+    Segmentation_Feature_Signed = [1, 1, 1, 1, 1, 0, 0, 0]
+    Segmentation_Feature_Max = [
+        255, Av1Const.MAX_LOOP_FILTER, Av1Const.MAX_LOOP_FILTER,
+        Av1Const.MAX_LOOP_FILTER, Av1Const.MAX_LOOP_FILTER, 7,
+        0, 0]
 };
 
 export const AV1 = (bs: Bitstream<any>) => {
@@ -179,21 +183,21 @@ export const open_bitstream_unit = syntax("open_bitstream_unit", (bs: Bitstream<
     bs.updateCtx(new ObuCtx());
     const c = bs.ctx;
 
-    const obu_header = bs.syntax("obu_header", () => {
+    const obu_header = () => {
         const obu_extension_header = bs.syntax("obu_extension_header", () => {
             bs.f("temporal_id", 3);
             bs.f("spatial_id", 2);
-            bs.f("extension_header_reserved_3bits", 3, {hidden: true});
+            bs.f("extension_header_reserved_3bits", 3, { hidden: true });
         });
 
         bs.f("obu_forbidden_bit", 1);
         bs.f("obu_type", 4);
         bs.f("obu_extension_flag", 1);
         bs.f("obu_has_size_field", 1);
-        bs.f("obu_reserved_1bit", 1, {hidden: true});
+        bs.f("obu_reserved_1bit", 1, { hidden: true });
         if (c.obu_extension_flag == 1)
             obu_extension_header();
-    });
+    };
 
     obu_header();
     if (c.obu_has_size_field) {

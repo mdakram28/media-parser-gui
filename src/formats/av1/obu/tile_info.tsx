@@ -1,19 +1,20 @@
+import { syntax } from "../../../bitstream/parser";
 import { Av1Bs } from "../av1-bitstream"
 import { tile_log2 } from "./common";
-import { constant } from "./constants";
+import { Av1Const } from "./constants";
 
-export function tile_info(bs: Av1Bs) {
+export const tile_info = syntax("tile_info", (bs: Av1Bs) => {
     const c: any = bs.ctx;
 
     c.sbCols = c.use_128x128_superblock ? ((c.MiCols + 31) >> 5) : ((c.MiCols + 15) >> 4)
     c.sbRows = c.use_128x128_superblock ? ((c.MiRows + 31) >> 5) : ((c.MiRows + 15) >> 4)
     c.sbShift = c.use_128x128_superblock ? 5 : 4
     c.sbSize = c.sbShift + 2
-    c.maxTileWidthSb = constant.MAX_TILE_WIDTH >> c.sbSize
-    c.maxTileAreaSb = constant.MAX_TILE_AREA >> (2 * c.sbSize)
+    c.maxTileWidthSb = Av1Const.MAX_TILE_WIDTH >> c.sbSize
+    c.maxTileAreaSb = Av1Const.MAX_TILE_AREA >> (2 * c.sbSize)
     c.minLog2TileCols = tile_log2(c.maxTileWidthSb, c.sbCols)
-    c.maxLog2TileCols = tile_log2(1, Math.min(c.sbCols, constant.MAX_TILE_COLS))
-    c.maxLog2TileRows = tile_log2(1, Math.min(c.sbRows, constant.MAX_TILE_ROWS))
+    c.maxLog2TileCols = tile_log2(1, Math.min(c.sbCols, Av1Const.MAX_TILE_COLS))
+    c.maxLog2TileRows = tile_log2(1, Math.min(c.sbRows, Av1Const.MAX_TILE_ROWS))
     c.minLog2Tiles = Math.max(c.minLog2TileCols,
         tile_log2(c.maxTileAreaSb, c.sbRows * c.sbCols))
 
@@ -94,7 +95,7 @@ export function tile_info(bs: Av1Bs) {
     } else {
         c.context_update_tile_id = 0
     }
-}	 
+});	 
 
 
 

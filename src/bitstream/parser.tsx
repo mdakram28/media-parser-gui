@@ -125,7 +125,7 @@ export class Bitstream<T extends {}> {
         const value = this.buffer.readURanged(n);
         this.addSyntaxValue(
             varPath,
-            `${varPath.toString()}  (ns${n})` + (e ? `: (${e[value]})` : ''),
+            `${varPath.toString()}  ns(${n})` + (e ? `: (${e[value]})` : ''),
             value,
             startBitPos,
             hidden
@@ -142,7 +142,24 @@ export class Bitstream<T extends {}> {
 
         this.addSyntaxValue(
             varPath,
-            `${varPath.toString()}  (su${n})` + (e ? `: (${e[value]})` : ''),
+            `${varPath.toString()}  su(${n})` + (e ? `: (${e[value]})` : ''),
+            value,
+            startBitPos,
+            hidden
+        );
+        return value;
+    }
+
+    le(varPath: string, n: number, { e, hidden = false }: { e?: any, hidden?: boolean } = {}) {
+        const startBitPos = this.getPos();
+        let value = 0;
+        for (let i=0; i<n; i++) {
+            value |= this.buffer.readByte() << (i*8);
+        }
+
+        this.addSyntaxValue(
+            varPath,
+            `${varPath.toString()}  le(${n})` + (e ? `: (${e[value]})` : ''),
             value,
             startBitPos,
             hidden
@@ -269,11 +286,17 @@ export class Bitstream<T extends {}> {
                 start: this.getPos(),
                 size: 0
             }
-            const ret = fn(this as any, ...args);
-            this.current.size = this.getPos() - this.current.start;
-            parent.children?.push(this.current);
-            this.current = parent;
-            return ret;
+            let ret = undefined;
+            try {
+                ret = fn(this as any, ...args);
+            } catch(e: any) {
+                this.current.title = <>{this.current.title}&nbsp;<span className="error">{e.toString()}</span></>;
+            } finally {
+                this.current.size = this.getPos() - this.current.start;
+                parent.children?.push(this.current);
+                this.current = parent;
+                return ret;
+            }
         }
     }
 

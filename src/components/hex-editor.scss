@@ -131,6 +131,11 @@
     .value {
         font-family: monospace;
         overflow: auto;
-        max-width: 400px;
+        max-width: 500px;
+        white-space: break-word;
     }
+}
+
+.error {
+    color: var(--color-danger)
 }

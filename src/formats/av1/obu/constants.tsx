@@ -1,5 +1,5 @@
 
-export const constant = {
+export const Av1Const = {
 
     REFS_PER_FRAME: 7, //	Number of reference frames that can be used for inter prediction
     TOTAL_REFS_PER_FRAME: 8, //	Number of reference frame types (including intra type)

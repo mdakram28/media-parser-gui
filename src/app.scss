@@ -1,5 +1,9 @@
 @use "sass:math";
 
+body {
+    --color-danger: red
+}
+
 .light {
     --primary-color: #5e5bae;
     --secondary-color: #536390;
