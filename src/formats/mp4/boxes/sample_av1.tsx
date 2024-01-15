@@ -2,8 +2,12 @@ import { open_bitstream_unit } from "../../av1/av1-bitstream";
 import { Bitstream, MAX_ITER, ParserCtx } from "../../../bitstream/parser";
 import { Box } from "../box-util";
 import { BoxCtx } from "../mp4-bitstream";
-import { VisualSampleEntry } from "./box_mdia";
+import { VisualSampleEntry } from "./box_stbl";
 
+export function AV1Sample(bs: Bitstream<BoxCtx & ParserCtx>, end: number) {
+  VisualSampleEntry(bs, end);
+  AV1CodecConfigurationRecordBox(bs, end);
+}
 
 
 const AV1CodecConfigurationRecordBox = Box({
@@ -40,9 +44,3 @@ const AV1CodecConfigurationRecordBox = Box({
     bs.gotoPos(end);
   }
 });
-
-
-export function AV1Sample(bs: Bitstream<BoxCtx & ParserCtx>, end: number) {
-  VisualSampleEntry(bs, end);
-  AV1CodecConfigurationRecordBox(bs, end);
-}

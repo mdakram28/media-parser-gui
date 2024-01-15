@@ -11,6 +11,15 @@ dependencies:
   '@emotion/styled':
     specifier: latest
     version: 11.11.0(@emotion/react@11.11.3)(@types/react@18.2.47)(react@18.2.0)
+  '@fortawesome/fontawesome-svg-core':
+    specifier: ^6.5.1
+    version: 6.5.1
+  '@fortawesome/free-solid-svg-icons':
+    specifier: ^6.5.1
+    version: 6.5.1
+  '@fortawesome/react-fontawesome':
+    specifier: ^0.2.0
+    version: 0.2.0(@fortawesome/fontawesome-svg-core@6.5.1)(react@18.2.0)
   '@mui/icons-material':
     specifier: latest
     version: 5.15.3(@mui/material@5.15.3)(@types/react@18.2.47)(react@18.2.0)
@@ -26,6 +35,9 @@ dependencies:
   react-dom:
     specifier: latest
     version: 18.2.0(react@18.2.0)
+  react-resizable-panels:
+    specifier: ^1.0.9
+    version: 1.0.9(react-dom@18.2.0)(react@18.2.0)
   react-router-dom:
     specifier: ^6.21.1
     version: 6.21.1(react-dom@18.2.0)(react@18.2.0)
@@ -636,6 +648,39 @@ packages:
     peerDependencies:
       react: '>=16.8.0'
     dependencies:
+      react: 18.2.0
+    dev: false
+
+  /@fortawesome/fontawesome-common-types@6.5.1:
+    resolution: {integrity: sha512-GkWzv+L6d2bI5f/Vk6ikJ9xtl7dfXtoRu3YGE6nq0p/FFqA1ebMOAWg3XgRyb0I6LYyYkiAo+3/KrwuBp8xG7A==}
+    engines: {node: '>=6'}
+    requiresBuild: true
+    dev: false
+
+  /@fortawesome/fontawesome-svg-core@6.5.1:
+    resolution: {integrity: sha512-MfRCYlQPXoLlpem+egxjfkEuP9UQswTrlCOsknus/NcMoblTH2g0jPrapbcIb04KGA7E2GZxbAccGZfWoYgsrQ==}
+    engines: {node: '>=6'}
+    requiresBuild: true
+    dependencies:
+      '@fortawesome/fontawesome-common-types': 6.5.1
+    dev: false
+
+  /@fortawesome/free-solid-svg-icons@6.5.1:
+    resolution: {integrity: sha512-S1PPfU3mIJa59biTtXJz1oI0+KAXW6bkAb31XKhxdxtuXDiUIFsih4JR1v5BbxY7hVHsD1RKq+jRkVRaf773NQ==}
+    engines: {node: '>=6'}
+    requiresBuild: true
+    dependencies:
+      '@fortawesome/fontawesome-common-types': 6.5.1
+    dev: false
+
+  /@fortawesome/react-fontawesome@0.2.0(@fortawesome/fontawesome-svg-core@6.5.1)(react@18.2.0):
+    resolution: {integrity: sha512-uHg75Rb/XORTtVt7OS9WoK8uM276Ufi7gCzshVWkUJbHhh3svsUUeqXerrM96Wm7fRiDzfKRwSoahhMIkGAYHw==}
+    peerDependencies:
+      '@fortawesome/fontawesome-svg-core': ~1 || ~6
+      react: '>=16.3'
+    dependencies:
+      '@fortawesome/fontawesome-svg-core': 6.5.1
+      prop-types: 15.8.1
       react: 18.2.0
     dev: false
 
@@ -1502,6 +1547,16 @@ packages:
     resolution: {integrity: sha512-wViHqhAd8OHeLS/IRMJjTSDHF3U9eWi62F/MledQGPdJGDhodXJ9PBLNGr6WWL7qlH12Mt3TyTpbS+hGXMjCzQ==}
     engines: {node: '>=0.10.0'}
     dev: true
+
+  /react-resizable-panels@1.0.9(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-QPfW3L7yetEC6z04G9AYYFz5kBklh8rTWcOsVFImYMNUVhr1Y1r9Qc/20Yks2tA+lXMBWCUz4fkGEvbS7tpBSg==}
+    peerDependencies:
+      react: ^16.14.0 || ^17.0.0 || ^18.0.0
+      react-dom: ^16.14.0 || ^17.0.0 || ^18.0.0
+    dependencies:
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+    dev: false
 
   /react-router-dom@6.21.1(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-QCNrtjtDPwHDO+AO21MJd7yIcr41UetYt5jzaB9Y1UYaPTCnVuJq6S748g1dE11OQlCFIQg+RtAA1SEZIyiBeA==}
