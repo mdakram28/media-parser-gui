@@ -95,7 +95,11 @@ export function HexEditor({ }: {}) {
 
                     <div className="hex-positions">{
                         renderBytes.map(NUM_COLS,
-                            i => <div key={i}>{byteToHex[(i & 0xFF00) >> 8] + byteToHex[i & 0xFF]}</div>
+                            i => <div key={i}>{
+                                byteToHex[(i & 0xFF0000) >> 16] + 
+                                byteToHex[(i & 0xFF00) >> 8] + 
+                                byteToHex[i & 0xFF]
+                            }</div>
                         )
                     }</div>
                     <div className="hex-bytes"

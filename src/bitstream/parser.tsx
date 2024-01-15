@@ -1,5 +1,6 @@
 import { DataNode } from "../types/parser.types";
 import { MSBBuffer } from "./buffer";
+import { ByteRange } from "./range";
 
 export const MAX_ITER = 10000;
 
@@ -12,7 +13,7 @@ export class ParserCtx {
 }
 
 
-export class Bitstream<T extends {}> {
+export class Bitstream<T extends {} = ParserCtx> {
     private buffer: MSBBuffer;
     private current: DataNode = {
         title: "ROOT",
@@ -40,6 +41,9 @@ export class Bitstream<T extends {}> {
         return this.buffer.byteLength * 8;
     }
 
+    slice(range: ByteRange) {
+        return this.buffer.slice(range);
+    }
 
     // private setCtxVar(_title: keyof T | string, value: any) {
 
@@ -290,6 +294,7 @@ export class Bitstream<T extends {}> {
             try {
                 ret = fn(this as any, ...args);
             } catch(e: any) {
+                console.error(e);
                 this.current.title = <>{this.current.title}&nbsp;<span className="error">{e.toString()}</span></>;
             } finally {
                 this.current.size = this.getPos() - this.current.start;

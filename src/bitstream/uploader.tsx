@@ -19,7 +19,25 @@ const VisuallyHiddenInput = styled('input')({
 });
 
 export function BitstreamUploader({ title, samples }: { title: string, samples?: { [name: string]: string } }) {
-    const { readFileUploadData, setBuffer } = useContext(BitstreamExplorerContext);
+    const { setBuffer, containerFormat, setContainerFormat, containers } = useContext(BitstreamExplorerContext);
+
+
+    const readFileUploadData = useCallback((file: File) => {
+        const reader = new FileReader();
+
+        reader.onload = (event) => {
+            const buff = new Uint8Array(event.target?.result as ArrayBuffer);
+            if (buff.length === 0) return;
+            setBuffer(buff);
+        };
+
+        reader.onerror = (err) => {
+            console.error(err);
+        };
+
+        reader.readAsArrayBuffer(file);
+    }, []);
+
     return <div>
         <div className='FilesDragAndDrop'
             onDragOver={(e) => {
@@ -69,7 +87,7 @@ export function BitstreamUploader({ title, samples }: { title: string, samples?:
                     <button type="submit" >Load</button>
                 </form></>
         }
-        
+
         <br />
         From URL:
         <form className="url-uploader" onSubmit={async (e: any) => {
@@ -81,5 +99,17 @@ export function BitstreamUploader({ title, samples }: { title: string, samples?:
             <input name="url" />
             <button type="submit" >Load</button>
         </form>
+
+        {containers &&
+            <>
+            <br />
+            Container Format:
+            <div className="url-uploader">
+                <select name="url" value={containerFormat} onChange={e => setContainerFormat(e.target.value)}>
+                    {containers.map((c) => <option value={c}>{c}</option>)}
+                </select>
+            </div>
+            </>
+        }
     </div>
 }

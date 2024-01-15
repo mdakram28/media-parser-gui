@@ -17,7 +17,6 @@ export const RawAnalyzerComponent = (props: {}) => {
                 size: bs.getEndPos()
             };
         }}
-
         uploader={<BitstreamUploader title="Drop binary file" samples={{
             "big_buck_bunny.mp4": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/test-data/big_buck_bunny.mp4",
             "big_buck_bunny.obu": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/test-data/big_buck_bunny.obu",

@@ -1,3 +1,4 @@
+import { ByteRange } from "./range";
 
 function REV64(x: number) {
     x = ((x >> 1) & 0x55555555) | ((x & 0x55555555) << 1);
@@ -54,6 +55,10 @@ abstract class BitBuffer {
                 }
             }
         }
+    }
+
+    slice(range: ByteRange) {
+        return this.buffer.slice(range.start, range.end);
     }
 
     checkEscapeCode() {}
@@ -190,5 +195,4 @@ export class MSBBuffer extends BitBuffer {
         }
         return val;
     }
-
 }

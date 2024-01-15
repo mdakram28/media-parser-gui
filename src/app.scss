@@ -186,9 +186,9 @@ a {
 .url-uploader {
     width: 100%;
     display: flex;
+    gap: 20px;
 
     input, select {
-        margin-right: 20px;
         flex: 1;
         height: 30px;
         line-height: 30px;

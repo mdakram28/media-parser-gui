@@ -14,7 +14,6 @@ export const Mp4AnalyzerComponent = (props: {}) => {
             ISOBMFF(bs, bs.getEndPos());
             return (bs.getCurrent().children || [EMPTY_TREE])[0];
         }}
-
         uploader={<BitstreamUploader title="Drop MP4 file here" samples={{
             "big_buck_bunny.mp4": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/test-data/big_buck_bunny.mp4"
         }}/>}

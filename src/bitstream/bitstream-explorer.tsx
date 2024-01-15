@@ -36,21 +36,24 @@ export const BitstreamExplorerContext = createContext<
     & State<"syntax", DataNode>
     & State<"showHiddenSyntax", boolean>
     & State<"filter", { text: string }>
+    & State<"containerFormat", string>
     & {
-        readFileUploadData: (file: File) => void,
         reset: () => void,
+        unpack?: (buffer: Uint8Array) => Uint8Array,
+        containers?: string[]
     }
 >({
     buffer: new Uint8Array,
     setBuffer: () => { },
-    readFileUploadData: () => { },
     syntax: EMPTY_TREE,
     setSyntax: () => { },
     showHiddenSyntax: false,
     setShowHiddenSyntax: () => undefined,
     filter: { text: "" },
     setFilter: () => undefined,
-    reset: () => undefined
+    reset: () => undefined,
+    containerFormat: "detect",
+    setContainerFormat: () => {}
 });
 
 function forEachPreOrder(node: DataNode, cb: (node: DataNode) => void) {
@@ -107,37 +110,29 @@ function BitstreamSelection({ children }: {
     </BitstreamSelectionContext.Provider>
 }
 
-export function BitstreamExplorer({ children, parser, uploader = <BitstreamUploader title="Drop media file here" /> }: {
+export function BitstreamExplorer({ 
+    children, 
+    parser, 
+    uploader = <BitstreamUploader title="Drop media file here" />,
+    containers,
+    unpack
+}: {
     children: ReactNode,
     parser: (buffer: Uint8Array) => DataNode,
-    uploader?: ReactNode
+    uploader?: ReactNode,
+    containers?: string[],
+    unpack?: (buffer: Uint8Array, format: string) => Uint8Array
 }) {
     const [syntax, setSyntax] = useState<DataNode>(EMPTY_TREE);
     const [buffer, setBuffer] = useState<Uint8Array>(() => new Uint8Array());
     const [filter, setFilter] = useState<{text: string}>({text: ""});
+    const [containerFormat, setContainerFormat] = useState<string>((containers && containers[0]) || "Detect");
     const [showHiddenSyntax, setShowHiddenSyntax] = useState<boolean>(false);
 
-
-
-    const readFileUploadData = useCallback((file: File) => {
-        const reader = new FileReader();
-
-        reader.onload = (event) => {
-            const buff = new Uint8Array(event.target?.result as ArrayBuffer);
-            if (buff.length === 0) return;
-            setBuffer(buff);
-        };
-
-        reader.onerror = (err) => {
-            console.error(err);
-        };
-
-        reader.readAsArrayBuffer(file);
-    }, []);
-
-    useEffect(() => {
-        setSyntax(parser(buffer));
-    }, [buffer]);
+    const unPackedBuffer = useMemo(() => {
+        if (unpack && containerFormat) return unpack(buffer, containerFormat);
+        return buffer;
+    }, [buffer, unpack])
 
     const filteredSyntax = useMemo(() => {
         if (!filter.text) return syntax;
@@ -163,19 +158,25 @@ export function BitstreamExplorer({ children, parser, uploader = <BitstreamUploa
 
         return dfs(syntax) || EMPTY_TREE;
     }, [syntax, filter]);
+    
 
     const reset = useCallback(() => {
-        setSyntax(parser(buffer));
-    }, [setSyntax, parser, buffer]);
+        setSyntax(parser(unPackedBuffer));
+    }, [setSyntax, parser, unPackedBuffer]);
+
+    useEffect(() => {
+        reset();
+    }, [unPackedBuffer]);
+
 
     return <>
         <BitstreamExplorerContext.Provider value={{
             syntax: filteredSyntax, setSyntax,
-            buffer, setBuffer,
-            readFileUploadData,
+            buffer: unPackedBuffer, setBuffer,
             showHiddenSyntax, setShowHiddenSyntax,
             filter, setFilter,
-            reset
+            containerFormat, setContainerFormat,
+            reset, containers
         }}>
             <BitstreamSelection>
                 {

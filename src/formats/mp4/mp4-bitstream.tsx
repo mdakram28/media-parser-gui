@@ -1,6 +1,8 @@
+import { BitRange, ByteRange } from "../../bitstream/range";
 import { Bitstream, MAX_ITER, ParserCtx, syntax } from "../../bitstream/parser";
 import { Box, Container } from "./box-util";
 import { Container_mdia } from "./boxes/box_mdia";
+import { MSBBuffer } from "../../bitstream/buffer";
 
 // https://b.goeswhere.com/ISO_IEC_14496-12_2015.pdf
 
@@ -25,11 +27,9 @@ export class BoxCtx {
     // mdhd
 }
 
-
-
-const ROOT_BOX = Box({
+const RootBoxMap = {
     "ftyp": Box_ftyp,
-    "mdat": () => {},
+    "mdat": () => { },
     "moov": Container({
         "mvhd": Box_mvhd,
         "trak": Container({
@@ -60,7 +60,42 @@ const ROOT_BOX = Box({
     "meco": Container({
         "mere": Container({}),
     })
-})
+}
+const ROOT_BOX = Box(RootBoxMap);
+
+export const isMP4Format = (buffer: Uint8Array) => {
+    const bs = new Bitstream(new MSBBuffer(buffer));
+    try {
+        bs.gotoPos(4 * 8);
+        const boxTypeName = bs.fixedWidthString("type", 4);
+        return (RootBoxMap as any)[boxTypeName] !== undefined;
+    } catch (e) {
+        return false;
+    }
+}
+
+export const extractMp4Data = (buffer: Uint8Array) => {
+    const bs = new Bitstream(new MSBBuffer(buffer));
+    const mdats: Uint8Array[] = [];
+    const mdat = Box({"mdat": (bs: Bitstream, end: number) => {
+        mdats.push(bs.slice(new BitRange(bs.getPos(), end).toByteRange()));
+    }});
+    for(let i=0; i<MAX_ITER; i++) {
+        mdat(bs, bs.getEndPos());
+    }
+
+    const totalSize = mdats.reduce((prev, val) => prev+val.byteLength, 0);
+    const ret = new Uint8Array(totalSize);
+    let offset = 0;
+    for(const mdat of mdats) {
+        ret.set(mdat, offset);
+        offset += mdat.byteLength;
+    }
+    console.log(ret);
+    return ret;
+}
+
+
 
 export const ISOBMFF = syntax("ISOBMFF", (bs: Bitstream<BoxCtx & ParserCtx>, end: number) => {
     let i = 0;
@@ -72,14 +107,6 @@ export const ISOBMFF = syntax("ISOBMFF", (bs: Bitstream<BoxCtx & ParserCtx>, end
 
 
 function Box_ftyp(bs: Bitstream<BoxCtx & ParserCtx>, end: number) {
-    /*
-    aligned(8) class FileTypeBox
-        extends Box(‘ftyp’) {
-        unsigned int(32) major_brand;
-        unsigned int(32) minor_version;
-        unsigned int(32) compatible_brands[]; // to end of the box
-    } 
-    */
     bs.f("major_brand", 32);
     bs.f("minor_version", 32);
 
@@ -92,30 +119,6 @@ function Box_ftyp(bs: Bitstream<BoxCtx & ParserCtx>, end: number) {
 }
 
 function Box_mvhd(bs: Bitstream<BoxCtx & ParserCtx>, end: number) {
-    /*
-    aligned(8) class MovieHeaderBox extends FullBox(‘mvhd’, version, 0) {
-        if (version==1) {
-            unsigned int(64) creation_time;
-            unsigned int(64) modification_time;
-            unsigned int(32) timescale;
-            unsigned int(64) duration;
-        } else { // version==0
-            unsigned int(32) creation_time;
-            unsigned int(32) modification_time;
-            unsigned int(32) timescale;
-            unsigned int(32) duration;
-        }
-        template int(32) rate = 0x00010000; // typically 1.0
-        template int(16) volume = 0x0100; // typically, full volume
-        const bit(16) reserved = 0;
-        const unsigned int(32)[2] reserved = 0;
-        template int(32)[9] matrix =
-        { 0x00010000,0,0,0,0x00010000,0,0,0,0x40000000 };
-        // Unity matrix
-        bit(32)[6] pre_defined = 0;
-        unsigned int(32) next_track_ID;
-    } 
-    */
     const version = bs.f("version", 8);
     bs.f("flags", 24);
     if (version == 1) {
@@ -145,34 +148,6 @@ function Box_mvhd(bs: Bitstream<BoxCtx & ParserCtx>, end: number) {
 }
 
 function Box_tkhd(bs: Bitstream<BoxCtx & ParserCtx>, end: number) {
-    /*
-    aligned(8) class TrackHeaderBox
-        extends FullBox(‘tkhd’, version, flags){
-        if (version==1) {
-            unsigned int(64) creation_time;
-            unsigned int(64) modification_time;
-            unsigned int(32) track_ID;
-            const unsigned int(32) reserved = 0;
-            unsigned int(64) duration;
-        } else { // version==0
-            unsigned int(32) creation_time;
-            unsigned int(32) modification_time;
-            unsigned int(32) track_ID;
-            const unsigned int(32) reserved = 0;
-            unsigned int(32) duration;
-        }
-        const unsigned int(32)[2] reserved = 0;
-        template int(16) layer = 0;
-        template int(16) alternate_group = 0;
-        template int(16) volume = {if track_is_audio 0x0100 else 0};
-        const unsigned int(16) reserved = 0;
-        template int(32)[9] matrix=
-        { 0x00010000,0,0,0,0x00010000,0,0,0,0x40000000 };
-        // unity matrix
-        unsigned int(32) width;
-        unsigned int(32) height;
-    }
-    */
 
     const version = bs.f("version", 8);
     bs.f("flags", 24);
