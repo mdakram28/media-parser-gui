@@ -4,6 +4,8 @@ import { FrameType } from "./obu/obu_frame_header";
 import { Bitstream, ParserCtx, syntax } from "../../bitstream/parser";
 import { Av1Const } from "./obu/constants";
 
+
+// https://aomediacodec.github.io/av1-spec
 export type Av1Bs = Bitstream<ObuCtx>;
 
 enum OBU_TYPE {
