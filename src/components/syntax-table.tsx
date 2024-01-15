@@ -112,7 +112,7 @@ export function SyntaxTable({ }: {}
     return <div style={{ flex: "1 1 auto", height: 0, width: "100%", display: "flex", flexDirection: "column" }}>
         <div className="toolbar">
             <div data-tooltip="Filter by title" className="toolbar-item" style={{ verticalAlign: "middle" }}>
-                🔍&nbsp;&nbsp;
+                <i className="fas fa-search"></i>&nbsp;&nbsp;
                 <form onSubmit={(e: any) => {
                     e.preventDefault();
                     const search = new FormData(e.target).get("search")?.toString() || "";
@@ -124,8 +124,7 @@ export function SyntaxTable({ }: {}
             <span className="toolbar-item" style={{ flex: 1 }}></span>
             <a className="toolbar-item"
                 data-tooltip="Reset"
-                style={{ fontSize: 25 }}
-                onClick={reset}>↺</a>
+                onClick={reset}><i className="fas fa-redo"></i></a>
             <a data-tooltip="Settings" className="toolbar-item" onClick={(ev: any) => {
                 const menu: HTMLElement = ev.target.getElementsByClassName("toolbar-menu")[0];
                 if (!menu) return;
@@ -140,7 +139,7 @@ export function SyntaxTable({ }: {}
                     setTimeout(() => document.addEventListener("click", closeListener), 0);
                 }
             }}>
-                ⚙
+                <i className="fas fa-sliders-h"></i>
                 <div className="toolbar-menu">
                     <div className="toolbar-item">
 
