@@ -1,4 +1,4 @@
-# media-parser-gui
+# Multimedia Explorer
 
 A browser based AV1, HEVC, MP4, IVF bitstream parser.
 
@@ -36,13 +36,9 @@ npm install
 npm start
 ```
 
-## AV1 Input
+## License
 
-For the AV1 parser, the input needs to be a raw AV1 bitstream.
-You can extract the raw bitstream from a .mp4/.mov or any other container by using ffmpeg:
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
 
-```bash
-ffmpeg -i my/input/video.mp4 -t 2 -c:v copy -copy_unknown bitstream.obu
-```
 
-Upload the bitstream in the GUI.
+
