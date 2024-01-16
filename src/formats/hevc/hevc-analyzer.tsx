@@ -55,7 +55,15 @@ export const HevcAnalyzerComponent = (props: {}) => {
     >
         <PanelGroup autoSaveId="example" direction="horizontal">
             <Panel defaultSize={50} className="panel">
-                <SyntaxToolbar />
+                <SyntaxToolbar
+                    leftItems={
+                        tracks && <div className="toolbar-item" data-tooltip="Select track to parse">
+                            Track
+                            <select value={selectedTrack} onChange={e => setSelectedTrack(e.target.value)}>
+                                {Object.keys(tracks).map(id => <option key={id} value={id}>{id}</option>)}
+                            </select>
+                        </div>
+                    } />
                 <SyntaxTable />
             </Panel>
             <PanelResizeHandle className="resize-handle fa-solid fa-ellipsis-vertical" />
