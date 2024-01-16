@@ -107,6 +107,8 @@ export const extractMp4Tracks = (buffer: Uint8Array, codecs?: string[]): Record<
                             }
                         });
 
+                        console.log(`Found track type: ${track.samplesType}`);
+
                         // Discard unwanted tracks
                         if (codecs && codecs.indexOf(track.samplesType) === -1) return;
                         

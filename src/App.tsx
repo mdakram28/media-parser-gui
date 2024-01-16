@@ -8,21 +8,25 @@ import { RawAnalyzerComponent } from "./formats/raw/raw-analyzer";
 import { HevcAnalyzerComponent } from "./formats/hevc/hevc-analyzer";
 import { Link, NavLink, Route, Routes } from "react-router-dom";
 import GitHubButton from 'react-github-btn';
+import { IvfAnalyzerComponent } from "./formats/ivf/ivf-analyzer";
 
 export default function Dashboard() {
   const [page, setPage] = React.useState("av1");
   const menuItems = [{
     page: "av1",
     title: "AV1 parser"
+  },  {
+    page: "hevc",
+    title: "HEVC parser"
   }, {
     page: "mp4",
     title: "MP4 parser"
+  },{
+    page: "ivf",
+    title: "IVF parser"
   }, {
     page: "raw",
     title: "Raw viewer"
-  }, {
-    page: "hevc",
-    title: "HEVC parser"
   }]
 
   const setTheme = (theme: string) => {
@@ -64,10 +68,11 @@ export default function Dashboard() {
       </div>
       <div className="content">
         <Routes>
+          <Route path="*" element={<Av1AnalyzerComponent />} />
           <Route path="/mp4" element={<Mp4AnalyzerComponent />} />
           <Route path="/hevc" element={<HevcAnalyzerComponent />} />
           <Route path="/raw" element={<RawAnalyzerComponent />} />
-          <Route path="*" element={<Av1AnalyzerComponent />} />
+          <Route path="/ivf" element={<IvfAnalyzerComponent />} />
         </Routes>
       </div>
     </main>

@@ -2,19 +2,20 @@ import { ReactElement, useContext } from "react";
 import { BitstreamExplorerContext } from "../bitstream/bitstream-explorer";
 import { FormControlLabel, Switch } from "@mui/material";
 import { MediaTrack } from "../types/media.types";
+import { downloadBlob } from "../browser-util";
 
 
 
-export function SyntaxToolbar({ leftItems, rightItems }: {
+export function SyntaxToolbar({ leftItems, rightItems}: {
     rightItems?: ReactElement,
-    leftItems?: ReactElement
+    leftItems?: ReactElement,
 }) {
     const {
         syntax: root,
         showHiddenSyntax,
         setShowHiddenSyntax,
         setFilter,
-        reset
+        reset,
     } = useContext(BitstreamExplorerContext);
 
     return <>
@@ -29,8 +30,8 @@ export function SyntaxToolbar({ leftItems, rightItems }: {
                     <input name="search" />
                 </form>
             </div>
-
             {leftItems}
+
             <span className="toolbar-item" style={{ flex: 1 }}></span>
             {rightItems}
 

@@ -55,6 +55,11 @@ export class BitBuffer {
         this.bitPos = 0;
     }
 
+    reset() {
+        this.bytePos = this.startBytePos;
+        this.bitPos = 0;
+    }
+
     setEscapeCode(escapeCode?: Uint8Array) {
         if (escapeCode && escapeCode.byteLength > 0) {
             this.checkEscapeCode = () => {
@@ -70,7 +75,7 @@ export class BitBuffer {
         }
     }
 
-    slice(range: ByteRange) {
+    slice(range: ByteRange = new ByteRange(this.startBytePos, this.endBytePos)) {
         return this.buffer.slice(range.start, range.end);
     }
 

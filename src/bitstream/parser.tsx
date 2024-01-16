@@ -2,7 +2,7 @@ import { DataNode } from "../types/parser.types";
 import { BitBuffer } from "./buffer";
 import { ByteRange } from "./range";
 
-export const MAX_ITER = 1000;
+export const MAX_ITER = 10000;
 
 export function syntax<BS extends {}, T extends Array<any>, U>(title: string, fn: (bs: Bitstream<BS>, ...args: T) => U) {
     return (bs: Bitstream<any>, ...args: T) => bs.syntax(title, fn)(...args);
@@ -18,6 +18,7 @@ export class Bitstream<T extends {} = ParserCtx> {
     private current: DataNode = {
         title: "ROOT",
         key: "root",
+        varName: "root",
         children: [],
         start: 0,
         size: 0
@@ -49,15 +50,12 @@ export class Bitstream<T extends {} = ParserCtx> {
         return this.buffer.slice(range);
     }
 
-    // private setCtxVar(_title: keyof T | string, value: any) {
-
-    // }
-
     addSyntaxValue(varPath: string, title: string, value: number | string, startBitPos: number, hidden: boolean) {
         const names = varPath.split("[") as string[];
         if (names.length == 1) {
             this.ctx[names[0] as keyof T] = value as any;
             this.current.children?.push({
+                varName: varPath,
                 key: Math.floor(Math.random() * 1909000000).toString(),
                 title,
                 start: startBitPos,
@@ -75,6 +73,7 @@ export class Bitstream<T extends {} = ParserCtx> {
             if (!syntaxDataNode) {
                 syntaxDataNode = {
                     key: Math.floor(Math.random() * 1909000000).toString(),
+                    varName: varName.toString(),
                     title: varName.toString(),
                     start: startBitPos,
                     size: this.getPos() - startBitPos,
@@ -158,16 +157,16 @@ export class Bitstream<T extends {} = ParserCtx> {
         return value;
     }
 
-    le(varPath: string, n: number, { e, hidden = false }: { e?: any, hidden?: boolean } = {}) {
+    le(varPath: string, numBytes: number, { e, hidden = false }: { e?: any, hidden?: boolean } = {}) {
         const startBitPos = this.getPos();
         let value = 0;
-        for (let i=0; i<n; i++) {
+        for (let i=0; i<numBytes; i++) {
             value |= this.buffer.readByte() << (i*8);
         }
 
         this.addSyntaxValue(
             varPath,
-            `${varPath.toString()}  le(${n})` + (e ? `: (${e[value]})` : ''),
+            `${varPath.toString()}  le(${numBytes} bytes)` + (e ? `: (${e[value]})` : ''),
             value,
             startBitPos,
             hidden
@@ -244,6 +243,7 @@ export class Bitstream<T extends {} = ParserCtx> {
     }
     error(msg: string) {
         this.current.children?.push({
+            varName: "error",
             key: Math.floor(Math.random() * 1909000000).toString(),
             title: <>Error: {msg}</>,
             start: this.getPos(),
@@ -253,6 +253,9 @@ export class Bitstream<T extends {} = ParserCtx> {
 
     setTitle(title: string) {
         this.current.title = title;
+    }
+    setVarName(varName: string) {
+        this.current.varName = varName;
     }
 
     dropSyntax() {
@@ -289,6 +292,7 @@ export class Bitstream<T extends {} = ParserCtx> {
             const parent = this.current;
             this.current = {
                 key: title + Math.floor(Math.random() * 1909000000),
+                varName: title,
                 title,
                 children: [],
                 start: this.getPos(),

@@ -14,6 +14,7 @@ type State<N extends string, T> = {
 
 export const EMPTY_TREE: DataNode = {
     key: "root",
+    varName: "root",
     title: "Empty bitstream",
     start: 0,
     size: 0
@@ -92,6 +93,7 @@ export const BitstreamExplorerContext = createContext<
     & State<"showHiddenSyntax", boolean>
     & State<"filter", { text: string }>
     & State<"containerFormat", string>
+    & State<"fileName", string | undefined>
     & {
         trackBuffer: BitBuffer[],
         reset: () => void,
@@ -110,7 +112,9 @@ export const BitstreamExplorerContext = createContext<
     setFilter: () => undefined,
     reset: () => undefined,
     containerFormat: "detect",
-    setContainerFormat: () => {}
+    setContainerFormat: () => {},
+    fileName: undefined,
+    setFileName: () => {}
 });
 
 export function BitstreamExplorer({ 
@@ -132,7 +136,7 @@ export function BitstreamExplorer({
     const [containerFormat, setContainerFormat] = useState<string>((containers && containers[0]) || "Detect");
     const [showHiddenSyntax, setShowHiddenSyntax] = useState<boolean>(false);
     const [trackBuffer, setTrackBuffer] = useState<BitBuffer[]>([]);
-
+    const [fileName, setFileName] = useState<string>();
     
     const filteredSyntax = useMemo(() => {
         if (!filter.text) return syntax;
@@ -187,7 +191,8 @@ export function BitstreamExplorer({
             showHiddenSyntax, setShowHiddenSyntax,
             filter, setFilter,
             containerFormat, setContainerFormat,
-            reset, containers
+            reset, containers,
+            fileName, setFileName
         }}>
             <BitstreamSelection>
                 {

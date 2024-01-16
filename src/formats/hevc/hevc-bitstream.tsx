@@ -1,5 +1,6 @@
 import { BitBuffer } from "../../bitstream/buffer";
 import { Bitstream, MAX_ITER, ParserCtx, syntax } from "../../bitstream/parser";
+import { ByteRange } from "../../bitstream/range";
 import { pic_parameter_set_rbsp } from "./nalu/pic_parameter_set_rbsp";
 import { seq_parameter_set_rbsp } from "./nalu/seq_parameter_set_rbsp";
 import { slice_segment_header } from "./nalu/slice_segment_header";
@@ -114,7 +115,50 @@ export class SliceCtx {
 const HEVC_START_CODE = new Uint8Array([0, 0, 1]);
 const HEVC_ESCAPE_CODE = new Uint8Array([0, 0, 3]);
 
+export function systemStreamToStartCode(buffers: BitBuffer[]) {
+    const ret: BitBuffer[] = [];
+    for (const buffer of buffers) {
+        buffer.reset();
+        const bs = new Bitstream(buffer);
+        let i = 0;
+        while (bs.getPos() < bs.getEndPos()) {
+            if (i++ > MAX_ITER) break;
+
+            const nalu_size_bytes = bs.f("nalu_size", 32, {hidden: true});
+            const nalu_end_pos = bs.getPos() + nalu_size_bytes*8;
+            const startBytePos = Math.floor(bs.getPos()/8);
+            bs.gotoPos(nalu_end_pos);
+            const endBytePos = Math.floor(bs.getPos()/8);
+
+            const arr = new Uint8Array(4 + (endBytePos-startBytePos));
+            arr.set(HEVC_START_CODE, 1);
+            arr.set(bs.slice(new ByteRange(startBytePos, endBytePos)), 4);
+            ret.push(new BitBuffer(arr));
+        }
+    }
+
+    console.log(buffers, ret);
+    return ret;
+}
+
+export function isSystemStreamHEVC(buffer: Uint8Array) {
+    const bs = new Bitstream(new BitBuffer(buffer));
+
+    let i = 0;
+    while (bs.getPos() < bs.getEndPos()) {
+        if (i++ > MAX_ITER) break;
+
+        const nalu_size_bytes = bs.f("nalu_size", 32, {hidden: true});
+        if (nalu_size_bytes === 0) return false;
+        const nalu_end_pos = bs.getPos() + nalu_size_bytes*8;
+        if (nalu_end_pos < bs.getEndPos()) return false;
+        bs.gotoPos(nalu_end_pos);
+    }
+    return bs.getPos() === bs.getEndPos();
+}
+
 export const HEVC = (buffer: BitBuffer) => {
+    buffer.reset();
     buffer.setEscapeCode(new Uint8Array([0, 0, 3]));
     const bs = new Bitstream(buffer);
     bs.updateCtx(new ParserCtx());
@@ -138,6 +182,7 @@ export const SystemStreamHEVC = (buffers: BitBuffer[]) => {
     bs.updateCtx(new ParserCtx());
 
     for(const buff of buffers) {
+        buff.reset();
         bs.updateBuffer(buff);
         
         let i = 0;

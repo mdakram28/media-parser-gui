@@ -22,6 +22,7 @@ export function Box(subBoxes: NestedBoxes) {
         }
         const boxEndPos = startPos + c.size * 8;
         const boxTypeName = Array(4).fill(0).map((_, i) => String.fromCharCode((c.type >> (8 * i)) & 0xFF)).reverse().join("");
+        bs.setVarName(`box_${boxTypeName}`);
         bs.setTitle(`box_${boxTypeName}`);
 
         if (subBoxes[boxTypeName]) {

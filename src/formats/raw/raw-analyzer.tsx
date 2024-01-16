@@ -11,6 +11,7 @@ export const RawAnalyzerComponent = (props: {}) => {
             const bs = new Bitstream(buffers[0]);
             return {
                 key: "ROOT",
+                varName: "root",
                 title: "ROOT",
                 start: 0,
                 size: bs.getEndPos()

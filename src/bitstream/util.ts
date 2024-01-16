@@ -8,7 +8,7 @@ export function forEachChild(node: DataNode, t: string | string[], cb: (box: Dat
     let i = 0;
     const titles = (Array.isArray(t) ? t : [t]);
     for(const child of node.children || []) {
-        if (child.title && titles.indexOf(child.title.toString().toLowerCase()) >= 0) {
+        if (titles.indexOf(child.varName) >= 0) {
             cb(child, i++);
         }
     }
@@ -17,7 +17,7 @@ export function forEachChild(node: DataNode, t: string | string[], cb: (box: Dat
 export function getChildValue(node: DataNode, t: string | string[]) {
     const titles = (Array.isArray(t) ? t : [t]);
     for(const child of node.children || []) {
-        if (child.title && titles.indexOf(child.title.toString().toLowerCase()) >= 0) {
+        if (titles.indexOf(child.varName) >= 0) {
             return child.value;
         }
     }
