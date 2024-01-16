@@ -1,4 +1,5 @@
-import { ByteRange } from "./range";
+import { BitRange, ByteRange } from "./range";
+import { assert } from "./util";
 
 function REV64(x: number) {
     x = ((x >> 1) & 0x55555555) | ((x & 0x55555555) << 1);
@@ -34,24 +35,32 @@ function FloorLog2( x: number ) {
     return s - 1
 }
 
-abstract class BitBuffer {
-    public byteLength;
+export class BitBuffer {
+    private buffer;
+    private startBytePos: number;
+    private endBytePos: number;
+
+    // State
+    private bytePos;
+    private bitPos;
+
     
-    
-    protected bytePos = 0;
-    protected bitPos = 0;
-    protected buffer;
-    
-    constructor(data: Uint8Array, escapeCode?: Uint8Array) {
+    constructor(data: Uint8Array, range: ByteRange = new ByteRange(0, data.byteLength)) {
         this.buffer = data;
-        this.byteLength = data.byteLength;
-        if (escapeCode !== undefined) {
-            this.checkEscapeCode = () => {
-                const start = this.bytePos-(escapeCode.byteLength-1);
-                if (this.bitPos == 0 && start >= 0) {
-                    if (escapeCode.every((val, i) => this.buffer[start+i] == val)) {
-                        this.bytePos++;
-                    }
+        this.startBytePos = range.start;
+        this.endBytePos = range.end;
+
+        // Starting state
+        this.bytePos = this.startBytePos;
+        this.bitPos = 0;
+    }
+
+    setEscapeCode(escapeCode: Uint8Array) {
+        this.checkEscapeCode = () => {
+            const start = this.bytePos-(escapeCode.byteLength-1);
+            if (this.bitPos == 0 && start >= this.startBytePos) {
+                if (escapeCode.every((val, i) => this.buffer[start+i] == val)) {
+                    this.bytePos++;
                 }
             }
         }
@@ -61,10 +70,20 @@ abstract class BitBuffer {
         return this.buffer.slice(range.start, range.end);
     }
 
+    getByteLength() {
+        return this.endBytePos - this.startBytePos;
+    }
+
+    getEndPos() {
+        return this.endBytePos * 8;
+    }
+
     checkEscapeCode() {}
 
     gotoPos(p: number) {
-        this.bytePos = Math.floor(p / 8);
+        const toByte = Math.floor(p / 8);
+        assert(toByte >= this.startBytePos && toByte <= this.endBytePos);
+        this.bytePos = toByte;
         this.bitPos = p % 8;
         this.checkEscapeCode();
     }
@@ -78,10 +97,6 @@ abstract class BitBuffer {
             throw Error("Not byte aligned");
         }
     }
-    
-    abstract readByte(): number;
-    abstract readBit(): number;
-    abstract readBits(bits: number): number;
 
     readLeb128() {
         let value = 0;
@@ -164,11 +179,6 @@ abstract class BitBuffer {
         const extra_bit = this.readBit();
         return (v << 1) - m + extra_bit	 ;
     }
-}
-
-
-// Reads MSB from byte first
-export class MSBBuffer extends BitBuffer {
     
     readByte() {
         this.checkEscapeCode();

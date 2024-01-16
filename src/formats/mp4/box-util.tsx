@@ -1,3 +1,4 @@
+import { DataNode } from "../../types/parser.types";
 import { Bitstream, MAX_ITER, ParserCtx, syntax } from "../../bitstream/parser";
 import { BoxCtx } from "./mp4-bitstream";
 

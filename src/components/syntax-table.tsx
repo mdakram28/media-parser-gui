@@ -86,7 +86,7 @@ function DataTreeNode({ node, level = 0 }: { node: DataNode, level?: number }) {
             <td>{node.start}</td>
             <td>{node.size}</td>
         </tr>
-        {expanded && node.children?.length &&
+        {expanded && !!node.children?.length &&
             node.children
                 .filter(child => showHiddenSyntax || !child.hidden)
                 .filter(child => !child.filtered)
@@ -99,59 +99,11 @@ function DataTreeNode({ node, level = 0 }: { node: DataNode, level?: number }) {
 
 export function SyntaxTable({ }: {}
 ) {
-    const ctx = useContext(BitstreamExplorerContext);
-    useTraceUpdate(ctx);
-    const { syntax: root, showHiddenSyntax, setShowHiddenSyntax, setFilter, reset } = ctx;
+    const {syntax: root} = useContext(BitstreamExplorerContext);
 
     console.log("Syntax table rendered");
 
-    if (!root.children) {
-        return <>No data</>
-    }
-
-    return <div style={{ flex: "1 1 auto", height: "100%", width: "100%", display: "flex", flexDirection: "column", overflow: "auto" }}>
-        <div className="toolbar">
-            <div data-tooltip="Filter by title" className="toolbar-item" style={{ verticalAlign: "middle" }}>
-                <i className="fas fa-search"></i>&nbsp;&nbsp;
-                <form onSubmit={(e: any) => {
-                    e.preventDefault();
-                    const search = new FormData(e.target).get("search")?.toString() || "";
-                    setFilter(f => ({ ...f, text: search }))
-                }}>
-                    <input name="search" />
-                </form>
-            </div>
-            <span className="toolbar-item" style={{ flex: 1 }}></span>
-            <a className="toolbar-item"
-                data-tooltip="Reset"
-                onClick={reset}><i className="fas fa-redo"></i></a>
-            <a data-tooltip="Settings" className="toolbar-item" onClick={(ev: any) => {
-                const menu: HTMLElement = ev.target.getElementsByClassName("toolbar-menu")[0];
-                if (!menu) return;
-                menu.classList.toggle("visible");
-                if (menu.classList.contains("visible")) {
-                    const closeListener = (ev: any) => {
-                        if (!menu.contains(ev.target)) {
-                            menu.classList.remove("visible");
-                            document.removeEventListener("click", closeListener);
-                        }
-                    };
-                    setTimeout(() => document.addEventListener("click", closeListener), 0);
-                }
-            }}>
-                <i className="fas fa-sliders-h"></i>
-                <div className="toolbar-menu">
-                    <div className="toolbar-item">
-
-                        <span style={{ flex: 1 }}></span>
-                        <FormControlLabel control={
-                            <Switch value={showHiddenSyntax} onChange={(ev) => setShowHiddenSyntax(ev.target.checked)} />
-                        } label="Show hidden syntax" />
-                    </div>
-                </div>
-            </a>
-        </div>
-        <div style={{ flex: "1 1 auto", height: 0, overflowY: "auto", width: "100%" }}>
+    return <div style={{ flex: "1 1 auto", height: 0, overflowY: "auto", width: "100%" }}>
             <table
                 className="syntax-table"
                 cellSpacing={0}
@@ -167,5 +119,4 @@ export function SyntaxTable({ }: {}
                     <DataTreeNode node={root}></DataTreeNode>
                 </tbody>
             </table></div>
-    </div>
 }

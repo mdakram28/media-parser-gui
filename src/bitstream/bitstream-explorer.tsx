@@ -3,6 +3,7 @@ import { DataNode } from "../types/parser.types";
 import { BitstreamUploader } from "./uploader";
 import { BitRange } from "./range";
 import { colors } from "@mui/material";
+import { BitBuffer } from "./buffer";
 
 type State<N extends string, T> = {
     [key in N]: T
@@ -29,31 +30,6 @@ export const BitstreamSelectionContext = createContext<
     setRanges: () => { },
     getBitColor: () => undefined,
     getByteColor: () => undefined,
-});
-
-export const BitstreamExplorerContext = createContext<
-    & State<"buffer", Uint8Array>
-    & State<"syntax", DataNode>
-    & State<"showHiddenSyntax", boolean>
-    & State<"filter", { text: string }>
-    & State<"containerFormat", string>
-    & {
-        reset: () => void,
-        unpack?: (buffer: Uint8Array) => Uint8Array,
-        containers?: string[]
-    }
->({
-    buffer: new Uint8Array,
-    setBuffer: () => { },
-    syntax: EMPTY_TREE,
-    setSyntax: () => { },
-    showHiddenSyntax: false,
-    setShowHiddenSyntax: () => undefined,
-    filter: { text: "" },
-    setFilter: () => undefined,
-    reset: () => undefined,
-    containerFormat: "detect",
-    setContainerFormat: () => {}
 });
 
 function forEachPreOrder(node: DataNode, cb: (node: DataNode) => void) {
@@ -110,6 +86,33 @@ function BitstreamSelection({ children }: {
     </BitstreamSelectionContext.Provider>
 }
 
+export const BitstreamExplorerContext = createContext<
+    & State<"fileBuffer", Uint8Array>
+    & State<"syntax", DataNode>
+    & State<"showHiddenSyntax", boolean>
+    & State<"filter", { text: string }>
+    & State<"containerFormat", string>
+    & {
+        trackBuffer: BitBuffer[],
+        reset: () => void,
+        unpack?: (buffer: Uint8Array) => BitBuffer,
+        containers?: string[]
+    }
+>({
+    trackBuffer: [],
+    fileBuffer: new Uint8Array,
+    setFileBuffer: () => { },
+    syntax: EMPTY_TREE,
+    setSyntax: () => { },
+    showHiddenSyntax: false,
+    setShowHiddenSyntax: () => undefined,
+    filter: { text: "" },
+    setFilter: () => undefined,
+    reset: () => undefined,
+    containerFormat: "detect",
+    setContainerFormat: () => {}
+});
+
 export function BitstreamExplorer({ 
     children, 
     parser, 
@@ -118,22 +121,19 @@ export function BitstreamExplorer({
     unpack
 }: {
     children: ReactNode,
-    parser: (buffer: Uint8Array) => DataNode,
+    parser: (buffer: BitBuffer[]) => DataNode,
     uploader?: ReactNode,
     containers?: string[],
-    unpack?: (buffer: Uint8Array, format: string) => Uint8Array
+    unpack?: (buffer: Uint8Array, format: string) => BitBuffer[]
 }) {
     const [syntax, setSyntax] = useState<DataNode>(EMPTY_TREE);
-    const [buffer, setBuffer] = useState<Uint8Array>(() => new Uint8Array());
+    const [fileBuffer, setFileBuffer] = useState<Uint8Array>(() => new Uint8Array());
     const [filter, setFilter] = useState<{text: string}>({text: ""});
     const [containerFormat, setContainerFormat] = useState<string>((containers && containers[0]) || "Detect");
     const [showHiddenSyntax, setShowHiddenSyntax] = useState<boolean>(false);
+    const [trackBuffer, setTrackBuffer] = useState<BitBuffer[]>([]);
 
-    const unPackedBuffer = useMemo(() => {
-        if (unpack && containerFormat) return unpack(buffer, containerFormat);
-        return buffer;
-    }, [buffer, unpack])
-
+    
     const filteredSyntax = useMemo(() => {
         if (!filter.text) return syntax;
         const text = filter.text.toLowerCase();
@@ -155,24 +155,28 @@ export function BitstreamExplorer({
             }
             return undefined;
         }
-
+        
         return dfs(syntax) || EMPTY_TREE;
     }, [syntax, filter]);
     
-
-    const reset = useCallback(() => {
-        setSyntax(parser(unPackedBuffer));
-    }, [setSyntax, parser, unPackedBuffer]);
-
+    
     useEffect(() => {
         reset();
-    }, [unPackedBuffer]);
+    }, [fileBuffer])
+    
+    const reset = useCallback(() => {
+        let newTrackBuffer = [new BitBuffer(fileBuffer)];
+        if (unpack && containerFormat) newTrackBuffer = unpack(fileBuffer, containerFormat);
+        setTrackBuffer(newTrackBuffer);
+        setSyntax(parser(newTrackBuffer));
+    }, [fileBuffer, unpack, parser, setSyntax, setTrackBuffer, containerFormat]);
 
 
     return <>
         <BitstreamExplorerContext.Provider value={{
             syntax: filteredSyntax, setSyntax,
-            buffer: unPackedBuffer, setBuffer,
+            fileBuffer, setFileBuffer,          // Input file buffer
+            trackBuffer,                        // Track Buffer to parse
             showHiddenSyntax, setShowHiddenSyntax,
             filter, setFilter,
             containerFormat, setContainerFormat,
@@ -180,7 +184,7 @@ export function BitstreamExplorer({
         }}>
             <BitstreamSelection>
                 {
-                    buffer.byteLength == 0
+                    trackBuffer.length === 0 || trackBuffer[0].getByteLength() === 0
                         ? uploader
                         : children
                 }

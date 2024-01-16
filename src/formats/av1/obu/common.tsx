@@ -1,12 +1,7 @@
-import { Bitstream } from "bitstream/parser";
+import { Bitstream } from "../../../bitstream/parser";
 
 export function assert(val: any, msg: string = "Assertion failed") {
     if (!val) throw Error(msg);
-}
-
-export function assertNums(...vals: any[]) {
-    for(let i in vals)
-        assert(typeof vals[i] === "number", `vals[${i}] not a number, ${typeof vals[i]} found`);
 }
 
 export function tile_log2(blkSize: number, target: number) {

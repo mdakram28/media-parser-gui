@@ -1,15 +1,14 @@
 import { HexEditor } from "../../components/hex-editor";
 import { Bitstream } from "../../bitstream/parser";
-import { MSBBuffer } from "../../bitstream/buffer";
+import { BitBuffer } from "../../bitstream/buffer";
 import { BitstreamExplorer } from "../../bitstream/bitstream-explorer";
 import { BitstreamUploader } from "../../bitstream/uploader";
-import { SyntaxViewer } from "../../bitstream/syntax-viewer";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 
 export const RawAnalyzerComponent = (props: {}) => {
     return <BitstreamExplorer
-        parser={(buffer: Uint8Array) => {
-            const bs = new Bitstream(new MSBBuffer(buffer));
+        parser={(buffers: BitBuffer[]) => {
+            const bs = new Bitstream(buffers[0]);
             return {
                 key: "ROOT",
                 title: "ROOT",

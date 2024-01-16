@@ -3,6 +3,7 @@ import { frame_obu } from "./obu/obu_frame";
 import { FrameType } from "./obu/obu_frame_header";
 import { Bitstream, ParserCtx, syntax } from "../../bitstream/parser";
 import { Av1Const } from "./obu/constants";
+import { BitBuffer } from "../../bitstream/buffer";
 
 
 // https://aomediacodec.github.io/av1-spec
@@ -172,13 +173,19 @@ export class ObuCtx {
         0, 0]
 };
 
-export const AV1 = (bs: Bitstream<any>) => {
-    bs.updateCtx(new ParserCtx());
-    let i = 0;
-    while (bs.getPos() < bs.getEndPos()) {
-        if (i++ > 1000) break;
-        open_bitstream_unit(bs, 0);
+export const AV1 = (buffers: BitBuffer[]) => {
+    const bs = new Bitstream(new BitBuffer(new Uint8Array()));
+    for(const buff of buffers) {
+        bs.updateBuffer(buff);
+        bs.updateCtx(new ParserCtx());
+
+        let i = 0;
+        while (bs.getPos() < bs.getEndPos()) {
+            if (i++ > 1000) break;
+            open_bitstream_unit(bs, 0);
+        }
     }
+    return bs.getCurrent();
 };
 
 export const open_bitstream_unit = syntax("open_bitstream_unit", (bs: Bitstream<ObuCtx & ParserCtx>, sz: number) => {

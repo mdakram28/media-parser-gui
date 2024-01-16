@@ -1,5 +1,5 @@
 import { DataNode } from "../types/parser.types";
-import { MSBBuffer } from "./buffer";
+import { BitBuffer } from "./buffer";
 import { ByteRange } from "./range";
 
 export const MAX_ITER = 10000;
@@ -14,7 +14,7 @@ export class ParserCtx {
 
 
 export class Bitstream<T extends {} = ParserCtx> {
-    private buffer: MSBBuffer;
+    private buffer: BitBuffer;
     private current: DataNode = {
         title: "ROOT",
         key: "root",
@@ -24,9 +24,13 @@ export class Bitstream<T extends {} = ParserCtx> {
     };
     readonly ctx: T;
 
-    constructor(buffer: MSBBuffer) {
+    constructor(buffer: BitBuffer) {
         this.buffer = buffer;
         this.ctx = {} as T;
+    }
+
+    updateBuffer(buffer: BitBuffer) {
+        this.buffer = buffer;
     }
 
     updateCtx(newCtx: Partial<T>) {
@@ -38,7 +42,7 @@ export class Bitstream<T extends {} = ParserCtx> {
     }
 
     getEndPos() {
-        return this.buffer.byteLength * 8;
+        return this.buffer.getEndPos();
     }
 
     slice(range: ByteRange) {
@@ -294,7 +298,7 @@ export class Bitstream<T extends {} = ParserCtx> {
             try {
                 ret = fn(this as any, ...args);
             } catch(e: any) {
-                console.error(e);
+                // console.error(e);
                 this.current.title = <>{this.current.title}&nbsp;<span className="error">{e.toString()}</span></>;
             } finally {
                 this.current.size = this.getPos() - this.current.start;

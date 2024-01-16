@@ -19,7 +19,7 @@ const VisuallyHiddenInput = styled('input')({
 });
 
 export function BitstreamUploader({ title, samples }: { title: string, samples?: { [name: string]: string } }) {
-    const { setBuffer, containerFormat, setContainerFormat, containers } = useContext(BitstreamExplorerContext);
+    const { setFileBuffer, containerFormat, setContainerFormat, containers } = useContext(BitstreamExplorerContext);
 
 
     const readFileUploadData = useCallback((file: File) => {
@@ -28,7 +28,7 @@ export function BitstreamUploader({ title, samples }: { title: string, samples?:
         reader.onload = (event) => {
             const buff = new Uint8Array(event.target?.result as ArrayBuffer);
             if (buff.length === 0) return;
-            setBuffer(buff);
+            setFileBuffer(buff);
         };
 
         reader.onerror = (err) => {
@@ -79,10 +79,10 @@ export function BitstreamUploader({ title, samples }: { title: string, samples?:
                     e.preventDefault();
                     const search = new FormData(e.target).get("url")?.toString() || "";
                     if (!search) return;
-                    setBuffer(new Uint8Array(await (await fetch(search)).arrayBuffer()));
+                    setFileBuffer(new Uint8Array(await (await fetch(search)).arrayBuffer()));
                 }}>
                     <select name="url">
-                        {Object.entries(samples).map(([k, v]) => <option value={v}>{k}</option>)}
+                        {Object.entries(samples).map(([k, v]) => <option key={v} value={v}>{k}</option>)}
                     </select>
                     <button type="submit" >Load</button>
                 </form></>
@@ -94,7 +94,7 @@ export function BitstreamUploader({ title, samples }: { title: string, samples?:
             e.preventDefault();
             const search = new FormData(e.target).get("url")?.toString() || "";
             if (!search) return;
-            setBuffer(new Uint8Array(await (await fetch(search)).arrayBuffer()));
+            setFileBuffer(new Uint8Array(await (await fetch(search)).arrayBuffer()));
         }}>
             <input name="url" />
             <button type="submit" >Load</button>
@@ -106,7 +106,7 @@ export function BitstreamUploader({ title, samples }: { title: string, samples?:
             Container Format:
             <div className="url-uploader">
                 <select name="url" value={containerFormat} onChange={e => setContainerFormat(e.target.value)}>
-                    {containers.map((c) => <option value={c}>{c}</option>)}
+                    {containers.map((c) => <option key={c} value={c}>{c}</option>)}
                 </select>
             </div>
             </>

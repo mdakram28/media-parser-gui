@@ -1,6 +1,6 @@
 import { Bitstream, syntax } from "../../../bitstream/parser";
+import { assertNums } from "../../../bitstream/util";
 import { Av1Bs, ObuCtx } from "../av1-bitstream";
-import { assertNums } from "./common";
 import { Av1Const } from "./constants";
 import { Default_Angle_Delta_Cdf, Default_Cfl_Alpha_Cdf, Default_Cfl_Sign_Cdf, Default_Comp_Bwd_Ref_Cdf, Default_Comp_Group_Idx_Cdf, Default_Comp_Mode_Cdf, Default_Comp_Ref_Cdf, Default_Comp_Ref_Type_Cdf, Default_Compound_Idx_Cdf, Default_Compound_Mode_Cdf, Default_Compound_Type_Cdf, Default_Dc_Sign_Cdf, Default_Delta_Lf_Cdf, Default_Delta_Q_Cdf, Default_Drl_Mode_Cdf, Default_Eob_Extra_Cdf, Default_Eob_Pt_1024_Cdf, Default_Eob_Pt_128_Cdf, Default_Eob_Pt_16_Cdf, Default_Eob_Pt_256_Cdf, Default_Eob_Pt_32_Cdf, Default_Eob_Pt_512_Cdf, Default_Eob_Pt_64_Cdf, Default_Filter_Intra_Cdf, Default_Filter_Intra_Mode_Cdf, Default_Inter_Intra_Cdf, Default_Inter_Intra_Mode_Cdf, Default_Inter_Tx_Type_Set1_Cdf, Default_Inter_Tx_Type_Set2_Cdf, Default_Inter_Tx_Type_Set3_Cdf, Default_Interp_Filter_Cdf, Default_Intra_Frame_Y_Mode_Cdf, Default_Intra_Tx_Type_Set1_Cdf, Default_Intra_Tx_Type_Set2_Cdf, Default_Intrabc_Cdf, Default_Is_Inter_Cdf, Default_Motion_Mode_Cdf, Default_Mv_Bit_Cdf, Default_Mv_Class0_Bit_Cdf, Default_Mv_Class0_Fr_Cdf, Default_Mv_Class0_Hp_Cdf, Default_Mv_Class_Cdf, Default_Mv_Fr_Cdf, Default_Mv_Hp_Cdf, Default_Mv_Joint_Cdf, Default_Mv_Sign_Cdf, Default_New_Mv_Cdf, Default_Palette_Size_2_Uv_Color_Cdf, Default_Palette_Size_2_Y_Color_Cdf, Default_Palette_Size_3_Uv_Color_Cdf, Default_Palette_Size_3_Y_Color_Cdf, Default_Palette_Size_4_Uv_Color_Cdf, Default_Palette_Size_4_Y_Color_Cdf, Default_Palette_Size_5_Uv_Color_Cdf, Default_Palette_Size_5_Y_Color_Cdf, Default_Palette_Size_6_Uv_Color_Cdf, Default_Palette_Size_6_Y_Color_Cdf, Default_Palette_Size_7_Uv_Color_Cdf, Default_Palette_Size_7_Y_Color_Cdf, Default_Palette_Size_8_Uv_Color_Cdf, Default_Palette_Size_8_Y_Color_Cdf, Default_Palette_Uv_Mode_Cdf, Default_Palette_Uv_Size_Cdf, Default_Palette_Y_Mode_Cdf, Default_Palette_Y_Size_Cdf, Default_Partition_W128_Cdf, Default_Partition_W16_Cdf, Default_Partition_W32_Cdf, Default_Partition_W64_Cdf, Default_Partition_W8_Cdf, Default_Ref_Mv_Cdf, Default_Restoration_Type_Cdf, Default_Segment_Id_Cdf, Default_Segment_Id_Predicted_Cdf, Default_Single_Ref_Cdf, Default_Skip_Cdf, Default_Skip_Mode_Cdf, Default_Tx_16x16_Cdf, Default_Tx_32x32_Cdf, Default_Tx_64x64_Cdf, Default_Tx_8x8_Cdf, Default_Txb_Skip_Cdf, Default_Txfm_Split_Cdf, Default_Uni_Comp_Ref_Cdf, Default_Use_Obmc_Cdf, Default_Use_Sgrproj_Cdf, Default_Use_Wiener_Cdf, Default_Uv_Mode_Cfl_Allowed_Cdf, Default_Uv_Mode_Cfl_Not_Allowed_Cdf, Default_Wedge_Index_Cdf, Default_Wedge_Inter_Intra_Cdf, Default_Y_Mode_Cdf, Default_Zero_Mv_Cdf } from "./default_cdf_tables";
 
@@ -179,7 +179,7 @@ function decode_tile(bs: Av1Bs) {
 export const tile_group_obu = syntax("tile_group_obu", (bs: Bitstream<ObuCtx>, sz: number) => {
     const c = bs.ctx as any;
     // bs.error("Not implemented")
-    assertNums(c.TileCols, c.TileRows);
+    assertNums([c.TileCols, c.TileRows]);
 
     c.NumTiles = c.TileCols * c.TileRows
     const startBitPos = bs.getPos();
@@ -190,7 +190,7 @@ export const tile_group_obu = syntax("tile_group_obu", (bs: Bitstream<ObuCtx>, s
         c.tg_start = 0
         c.tg_end = c.NumTiles - 1
     } else {
-        assertNums(c.TileColsLog2, c.TileRowsLog2);
+        assertNums([c.TileColsLog2, c.TileRowsLog2]);
         c.tileBits = c.TileColsLog2 + c.TileRowsLog2
         bs.f(`tg_start`, c.tileBits);
         bs.f(`tg_end`, c.tileBits);

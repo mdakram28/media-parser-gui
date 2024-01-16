@@ -30,11 +30,11 @@ const NUM_BYTES_IN_INSPECT = 4;
 
 function ByteInspector({ range }: { range: ByteRange }) {
 
-    const { buffer } = useContext(BitstreamExplorerContext);
+    const { fileBuffer } = useContext(BitstreamExplorerContext);
     const { getBitColor } = useContext(BitstreamSelectionContext);
 
     const inspectBytes = range.first(NUM_BYTES_IN_INSPECT);
-    const inspectValue = inspectBytes.map(1, i => buffer[i]).reduce((prev, val) => prev << 8 | val);
+    const inspectValue = inspectBytes.map(1, i => fileBuffer[i]).reduce((prev, val) => prev << 8 | val);
 
     return <Card variant="outlined" sx={{ padding: 1 }}>
         Selected: {range.start}:{range.end - 1} <br />
@@ -43,7 +43,7 @@ function ByteInspector({ range }: { range: ByteRange }) {
         Decimal: {inspectValue}  <br />
         Binary: {
             inspectBytes.map(1, i => <span key={i} style={{ marginRight: CELL_WIDTH / 2 }}>{
-                [...byteToBin[buffer[i]]].map(
+                [...byteToBin[fileBuffer[i]]].map(
                     (bit, j) => <span key={i * 8 + j} style={{ width: CELL_WIDTH / 2, backgroundColor: getBitColor(i * 8 + j) }}>{bit}</span>
                 )
             }</span>)
@@ -52,7 +52,7 @@ function ByteInspector({ range }: { range: ByteRange }) {
 }
 
 export function HexEditor({ }: {}) {
-    const { buffer } = useContext(BitstreamExplorerContext);
+    const { fileBuffer } = useContext(BitstreamExplorerContext);
     const { ranges, setRanges, getByteColor } = useContext(BitstreamSelectionContext);
     const [offset, setOffset] = useState(0);
     const [dragStart, setDragStart] = useState<number>();
@@ -76,8 +76,8 @@ export function HexEditor({ }: {}) {
 
     const renderBytes = useMemo(() => new ByteRange(
         Math.max(offset - EXTRA_RENDER_ROWS * NUM_COLS, 0),
-        Math.min(offset + (NUM_ROWS + EXTRA_RENDER_ROWS) * NUM_COLS, buffer.length)
-    ), [buffer, offset]);
+        Math.min(offset + (NUM_ROWS + EXTRA_RENDER_ROWS) * NUM_COLS, fileBuffer.length)
+    ), [fileBuffer, offset]);
 
     return <div className="hex-editor" style={{ position: "relative", fontFamily: "monospace", height: "100%", minWidth: "min-content", display: "flex", flexDirection: "column" }}>
         
@@ -90,7 +90,7 @@ export function HexEditor({ }: {}) {
                 setOffset(NUM_COLS * Math.floor(scrollTop / CELL_HEIGHT));
             }}
         >
-            <div style={{ height: (buffer.length / NUM_COLS) * CELL_HEIGHT }}>
+            <div style={{ height: (fileBuffer.length / NUM_COLS) * CELL_HEIGHT }}>
                 <div className="infinite-render" style={{ position: "relative", top: CELL_HEIGHT * (renderBytes.start / NUM_COLS) }}>
 
                     <div className="hex-positions">{
@@ -134,7 +134,7 @@ export function HexEditor({ }: {}) {
                                                 key={j}
                                                 data-pos={j}
                                                 style={{ backgroundColor: getByteColor(j) }}>
-                                                {byteToHex[buffer[j]]}
+                                                {byteToHex[fileBuffer[j]]}
                                             </span>)
                                     }
                                 </div>
@@ -146,7 +146,7 @@ export function HexEditor({ }: {}) {
                                 {
                                     new ByteRange(i, i + NUM_COLS).map(1, (j) =>
                                         <span key={j} style={{ backgroundColor: getByteColor(j) }}>
-                                            {byteToAscii[buffer[j]]}
+                                            {byteToAscii[fileBuffer[j]]}
                                         </span>
                                     )
                                 }

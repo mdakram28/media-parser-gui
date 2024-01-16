@@ -1,4 +1,4 @@
-import { Bitstream, ParserCtx } from "bitstream/parser";
+import { Bitstream, ParserCtx } from "../../../bitstream/parser";
 import { Box, Container } from "../box-util";
 import { BoxCtx } from "../mp4-bitstream";
 import { AV1Sample } from "./sample_av1";
@@ -29,29 +29,24 @@ export function VisualSampleEntry(bs: Bitstream<BoxCtx & ParserCtx>, end: number
 }
 
 const SampleEntryBox = Box({
-    "av01": AV1Sample
+    // "av01": AV1Sample
 });
 
-function TableBox(cb: (bs: Bitstream<BoxCtx & ParserCtx>, i: number) => void) {
+function TableBox(cb: (bs: Bitstream<BoxCtx & ParserCtx>, i: number, end: number) => void) {
     return (bs: Bitstream<BoxCtx & ParserCtx>, end: number) => {
         const version = bs.f("version", 8);
         bs.f("flags", 24);
         const entry_count = bs.f("entry_count", 32);
         for (let i = 0; i < entry_count; i++) {
-            cb(bs, i);
+            cb(bs, i, end);
         }
     }
 }
 
 export const Box_stbl = Container({
-    "stsd": (bs: Bitstream<BoxCtx & ParserCtx>, end: number) => {
-        const version = bs.f("version", 8);
-        bs.f("flags", 24);
-        const entry_count = bs.f("entry_count", 32);
-        for (let i = 1; i <= entry_count; i++) {
-            SampleEntryBox(bs, end);
-        }
-    },
+    "stsd": TableBox((bs, i, end) => {
+        SampleEntryBox(bs, end);
+    }),
     "stts": TableBox((bs, i) => {
         bs.f(`sample_count[${i}]`, 32);
         bs.f(`sample_delta[${i}]`, 32);
@@ -71,7 +66,7 @@ export const Box_stbl = Container({
         const sample_count = bs.f(`sample_count`, 32);
         if (sample_size == 0) {
             for (let i = 1; i <= sample_count; i++) {
-                bs.f(`entry_size[${i}]`, 32);
+                bs.f(`entry_size[${i-1}]`, 32);
             }
         }
     },
@@ -82,7 +77,7 @@ export const Box_stbl = Container({
         const field_size = bs.f("field_size", 8);
         const sample_count = bs.f(`sample_count`, 32);
         for (let i = 1; i <= sample_count; i++) {
-            bs.f(`entry_size[${i}]`, field_size);
+            bs.f(`entry_size[${i-1}]`, field_size);
         }
     },
 
