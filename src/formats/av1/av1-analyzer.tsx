@@ -28,8 +28,6 @@ export const Av1AnalyzerComponent = (props: {}) => {
                     .filter(([trackId, track]) => track.samplesType === "av01")
                     .reduce((obj, [trackId, track]) => ({ ...obj, [trackId]: track }), {});
                 
-                console.log(tracks);
-
                 // Set Tracks for future selections
                 setTracks(tracks);
 
