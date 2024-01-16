@@ -15,8 +15,9 @@ export const Mp4AnalyzerComponent = (props: {}) => {
             return (bs.getCurrent().children || [EMPTY_TREE])[0];
         }}
         uploader={<BitstreamUploader title="Drop MP4 file here" samples={{
-            "spbtv_sample_bipbop_av1_960x540_25fps.mp4": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/test-data/spbtv_sample_bipbop_av1_960x540_25fps.mp4",
-            "big_buck_bunny.mp4": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/test-data/big_buck_bunny.mp4",
+            "av1_multi.mp4": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/sample_data/av1_multi.mp4",
+            "av1_audvid.mp4": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/sample_data/av1_audvid.mp4",
+            "hevc_single.mp4": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/sample_data/hevc_single.mp4",
         }}/>}
     >
     <PanelGroup autoSaveId="example" direction="horizontal">

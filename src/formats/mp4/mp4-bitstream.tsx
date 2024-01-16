@@ -76,7 +76,7 @@ export const isMP4Format = (buffer: Uint8Array) => {
     }
 }
 
-export const extractMp4Tracks = (buffer: Uint8Array): Record<string, MediaTrack> => {
+export const extractMp4Tracks = (buffer: Uint8Array, codecs?: string[]): Record<string, MediaTrack> => {
     const bs = new Bitstream(new BitBuffer(buffer));
     const rootBox = Box({
         "moov": RootBoxMap.moov
@@ -97,8 +97,7 @@ export const extractMp4Tracks = (buffer: Uint8Array): Record<string, MediaTrack>
                             sampleRanges: [],
                             chunkRanges: []
                         }
-                        tracks[trackId] = track;
-
+                        
                         forEachChild(node, "box_stsd", (node) => {
                             if (!node.children) return;
                             for (const child of node.children) {
@@ -107,6 +106,12 @@ export const extractMp4Tracks = (buffer: Uint8Array): Record<string, MediaTrack>
                                 }
                             }
                         });
+
+                        // Discard unwanted tracks
+                        if (codecs && codecs.indexOf(track.samplesType) === -1) return;
+                        
+                        tracks[trackId] = track;
+
                         
                         const chunkOffsets: number[] = [];
                         forEachChild(node, ["box_stco", "box_co64"], (node) => {

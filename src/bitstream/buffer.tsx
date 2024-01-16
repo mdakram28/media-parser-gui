@@ -55,14 +55,18 @@ export class BitBuffer {
         this.bitPos = 0;
     }
 
-    setEscapeCode(escapeCode: Uint8Array) {
-        this.checkEscapeCode = () => {
-            const start = this.bytePos-(escapeCode.byteLength-1);
-            if (this.bitPos == 0 && start >= this.startBytePos) {
-                if (escapeCode.every((val, i) => this.buffer[start+i] == val)) {
-                    this.bytePos++;
+    setEscapeCode(escapeCode?: Uint8Array) {
+        if (escapeCode && escapeCode.byteLength > 0) {
+            this.checkEscapeCode = () => {
+                const start = this.bytePos-(escapeCode.byteLength-1);
+                if (this.bitPos == 0 && start >= this.startBytePos) {
+                    if (escapeCode.every((val, i) => this.buffer[start+i] == val)) {
+                        this.bytePos++;
+                    }
                 }
             }
+        } else {
+            this.checkEscapeCode = () => {};
         }
     }
 

@@ -302,8 +302,8 @@ export function seq_parameter_set_rbsp(bs: NaluCtx, end: number) {
         sps_3d_extension(bs) /* specified in Annex I */
     if (c.sps_scc_extension_flag)
         sps_scc_extension(bs)
-    if (c.sps_extension_4bits)
-        while (bs.getPos() < end)
-            bs.f(`sps_extension_data_flag`, 1);
+    // if (c.sps_extension_4bits)
+        // while (bs.getPos() < end)
+        //     bs.f(`sps_extension_data_flag`, 1);
     // rbsp_trailing_bits()
 }

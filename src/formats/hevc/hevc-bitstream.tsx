@@ -1,3 +1,4 @@
+import { BitBuffer } from "../../bitstream/buffer";
 import { Bitstream, MAX_ITER, ParserCtx, syntax } from "../../bitstream/parser";
 import { pic_parameter_set_rbsp } from "./nalu/pic_parameter_set_rbsp";
 import { seq_parameter_set_rbsp } from "./nalu/seq_parameter_set_rbsp";
@@ -111,8 +112,11 @@ export class SliceCtx {
 }
 
 const HEVC_START_CODE = new Uint8Array([0, 0, 1]);
+const HEVC_ESCAPE_CODE = new Uint8Array([0, 0, 3]);
 
-export const HEVC = syntax("HEVC", (bs: Bitstream<ParserCtx>) => {
+export const HEVC = (buffer: BitBuffer) => {
+    buffer.setEscapeCode(new Uint8Array([0, 0, 3]));
+    const bs = new Bitstream(buffer);
     bs.updateCtx(new ParserCtx());
     let i = 0;
 
@@ -126,11 +130,34 @@ export const HEVC = syntax("HEVC", (bs: Bitstream<ParserCtx>) => {
 
         nal_unit(bs, nextStartPos);
     }
-});
+    return bs.getCurrent();
+};
+
+export const SystemStreamHEVC = (buffers: BitBuffer[]) => {
+    const bs = new Bitstream(new BitBuffer(new Uint8Array()));
+    bs.updateCtx(new ParserCtx());
+
+    for(const buff of buffers) {
+        bs.updateBuffer(buff);
+        
+        let i = 0;
+        while (bs.getPos() < bs.getEndPos()) {
+            if (i++ > MAX_ITER) break;
+            // bs.findNextBytes(HEVC_START_CODE);
+            const nalu_size_bytes = bs.f("nalu_size", 32, {hidden: true});
+            const nalu_end_pos = bs.getPos() + nalu_size_bytes*8;
+            buff.setEscapeCode(HEVC_ESCAPE_CODE);   // Set escape code
+            nal_unit(bs, nalu_end_pos);
+            buff.setEscapeCode();                   // Remove escape code
+            bs.gotoPos(nalu_end_pos);
+        }
+    }
+    return bs.getCurrent();
+};
 
 export type NaluCtx = Bitstream<NalCtx & ParserCtx>;
 
-const nal_unit = syntax("NAL_UNIT", (bs: NaluCtx, end: number) => {
+export const nal_unit = syntax("NAL_UNIT", (bs: NaluCtx, end: number) => {
     bs.updateCtx(new NalCtx());
     const c = bs.ctx;
 
@@ -159,5 +186,6 @@ const nal_unit = syntax("NAL_UNIT", (bs: NaluCtx, end: number) => {
             break;
     }
 
+    
     bs.gotoPos(end);
 });

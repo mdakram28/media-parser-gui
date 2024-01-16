@@ -24,10 +24,13 @@ export const Av1AnalyzerComponent = (props: {}) => {
             if (format == "mp4" || (format == "detect" && isMP4Format(buffer))) {
 
                 // Extract and filter tracks
-                const tracks: Record<string, MediaTrack> = Object.entries(extractMp4Tracks(buffer))
-                    .filter(([trackId, track]) => track.samplesType === "av01")
-                    .reduce((obj, [trackId, track]) => ({ ...obj, [trackId]: track }), {});
+                const tracks = extractMp4Tracks(buffer, ["av01"]);
                 
+                if (Object.keys(tracks).length === 0) {
+                    alert(`Could not find "av01" track in mp4 file.`);
+                    return ["mp4", []];
+                }
+
                 // Set Tracks for future selections
                 setTracks(tracks);
 
@@ -35,16 +38,17 @@ export const Av1AnalyzerComponent = (props: {}) => {
                 const trackId = selectedTrack || Object.keys(tracks)[0];
 
                 const buffers = tracks[trackId].chunkRanges.map(chunkRange => new BitBuffer(buffer, chunkRange));
-                return buffers;
-                // return extractMp4Data(buffer);
+                return ["mp4", buffers];
             }
-            return [new BitBuffer(buffer)];
+            return ["obu", [new BitBuffer(buffer)]];
         }}
         uploader={<BitstreamUploader title="Drop AV1 raw bitstream file" samples={{
-            "spbtv_sample_bipbop_av1_960x540_25fps.mp4": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/test-data/spbtv_sample_bipbop_av1_960x540_25fps.mp4",
-            "multi_track.mp4": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/test-data/multi_track.mp4",
-            "big_buck_bunny.obu": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/test-data/big_buck_bunny.obu",
-            "big_buck_bunny.mp4": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/test-data/big_buck_bunny.mp4"
+            "av1_multi.mp4": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/sample_data/av1_multi.mp4",
+            "av1_audvid.mp4": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/sample_data/av1_audvid.mp4",
+            "av1_single.mp4": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/sample_data/av1_single.mp4",
+            "av1_single.obu": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/sample_data/av1_single.obu",
+            "hevc_single.mp4": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/sample_data/hevc_single.mp4",
+            "hevc_single.hevc": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/sample_data/hevc_single.hevc",
         }} />}
     >
         <PanelGroup autoSaveId="example" direction="horizontal">

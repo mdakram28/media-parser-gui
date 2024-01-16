@@ -45,9 +45,9 @@ export function video_parameter_set_rbsp(bs: NaluCtx, end: number) {
         }
     }
     bs.f(`vps_extension_flag`, 1);
-    if (c.vps_extension_flag)
-        while (bs.getPos() < end)
-            bs.f(`vps_extension_data_flag`, 1);
+    // if (c.vps_extension_flag)
+    //     while (bs.getPos() < end)
+    //         bs.f(`vps_extension_data_flag`, 1);
     // rbsp_trailing_bits()
 }
 

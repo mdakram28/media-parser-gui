@@ -269,9 +269,9 @@ export function pic_parameter_set_rbsp(bs: NaluCtx, end: number) {
         pps_3d_extension(bs); /* specified in Annex I */
     if (c.pps_scc_extension_flag)
         pps_scc_extension(bs);
-    if (c.pps_extension_4bits)
-        while (bs.getPos() < end)
-            bs.f(`pps_extension_data_flag`, 1);
+    // if (c.pps_extension_4bits)
+        // while (bs.getPos() < end)
+        //     bs.f(`pps_extension_data_flag`, 1);
     // rbsp_trailing_bits()
 }
 

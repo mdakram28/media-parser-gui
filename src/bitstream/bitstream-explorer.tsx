@@ -121,10 +121,10 @@ export function BitstreamExplorer({
     unpack
 }: {
     children: ReactNode,
-    parser: (buffer: BitBuffer[]) => DataNode,
+    parser: (buffer: BitBuffer[], format: string) => DataNode,
     uploader?: ReactNode,
     containers?: string[],
-    unpack?: (buffer: Uint8Array, format: string) => BitBuffer[]
+    unpack?: (buffer: Uint8Array, format: string) => [string, BitBuffer[]]
 }) {
     const [syntax, setSyntax] = useState<DataNode>(EMPTY_TREE);
     const [fileBuffer, setFileBuffer] = useState<Uint8Array>(() => new Uint8Array());
@@ -161,15 +161,22 @@ export function BitstreamExplorer({
     
     
     useEffect(() => {
+        if (fileBuffer.byteLength === 0) return;
         reset();
     }, [fileBuffer])
     
     const reset = useCallback(() => {
         let newTrackBuffer = [new BitBuffer(fileBuffer)];
-        if (unpack && containerFormat) newTrackBuffer = unpack(fileBuffer, containerFormat);
+        let format = containerFormat;
+        if (unpack && containerFormat) {
+            const [_format, _newTrackBuffer] = unpack(fileBuffer, containerFormat);
+            newTrackBuffer = _newTrackBuffer;
+            format = _format;
+            setContainerFormat(format);         // Detected container after unpacking
+        }
         setTrackBuffer(newTrackBuffer);
-        setSyntax(parser(newTrackBuffer));
-    }, [fileBuffer, unpack, parser, setSyntax, setTrackBuffer, containerFormat]);
+        setSyntax(parser(newTrackBuffer, format));
+    }, [fileBuffer, unpack, parser, setSyntax, setTrackBuffer]);
 
 
     return <>

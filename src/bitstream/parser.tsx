@@ -2,7 +2,7 @@ import { DataNode } from "../types/parser.types";
 import { BitBuffer } from "./buffer";
 import { ByteRange } from "./range";
 
-export const MAX_ITER = 10000;
+export const MAX_ITER = 1000;
 
 export function syntax<BS extends {}, T extends Array<any>, U>(title: string, fn: (bs: Bitstream<BS>, ...args: T) => U) {
     return (bs: Bitstream<any>, ...args: T) => bs.syntax(title, fn)(...args);
