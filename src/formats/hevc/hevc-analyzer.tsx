@@ -3,7 +3,7 @@ import { Bitstream } from "../../bitstream/parser";
 import { BitBuffer } from "../../bitstream/buffer";
 import { BitstreamExplorer, EMPTY_TREE } from "../../bitstream/bitstream-explorer";
 import { BitstreamUploader } from "../../bitstream/uploader";
-import { HEVC, SystemStreamHEVC, isSystemStreamHEVC, systemStreamToStartCode } from "./hevc-bitstream";
+import { HEVC, SystemStreamHEVC, isSystemStreamHEVC, systemStreamToAnnexB } from "./hevc-bitstream";
 import { SyntaxTable } from "../../components/syntax-table";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { extractMp4Tracks, isMP4Format } from "../mp4/mp4-bitstream";
@@ -11,6 +11,8 @@ import { MediaTrack } from "../../types/media.types";
 import { useState } from "react";
 import { SyntaxToolbar } from "../../components/syntax-toolbar";
 import { TrackDownloader } from "../../components/downloader";
+import { Tabs } from "../../components/tabs";
+import { FrameViewer } from "../../components/frame-viewer";
 
 export const HevcAnalyzerComponent = (props: {}) => {
     const [tracks, setTracks] = useState<Record<string, MediaTrack>>({});
@@ -58,14 +60,22 @@ export const HevcAnalyzerComponent = (props: {}) => {
                                 {Object.keys(tracks).map(id => <option key={id} value={id}>{id}</option>)}
                             </select>
                         </div>}
-                        <TrackDownloader downloadExtension=".hevc" transformer={systemStreamToStartCode}/>
+                            <TrackDownloader downloadExtension=".hevc" transformer={systemStreamToAnnexB} />
                         </>
                     } />
                 <SyntaxTable />
             </Panel>
             <PanelResizeHandle className="resize-handle fa-solid fa-ellipsis-vertical" />
             <Panel className="panel">
-                <HexEditor />
+                <Tabs defaultTab="hexEditor"
+                    tabs={[
+                        // { key: "frame", title: "Frame", render: <FrameViewer config={{ 
+                        //     codec: "hvc1.1.6.L123.00", 
+                        //     hevc: { format: "annexb" }, pt: 2
+                        // } as any} /> },
+                        { key: "hexEditor", title: "Hex", render: <HexEditor /> }
+                    ]}
+                />
             </Panel>
         </PanelGroup>
     </BitstreamExplorer>

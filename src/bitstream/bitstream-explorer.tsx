@@ -4,6 +4,7 @@ import { BitstreamUploader } from "./uploader";
 import { BitRange } from "./range";
 import { colors } from "@mui/material";
 import { BitBuffer } from "./buffer";
+import { SyntaxTableSettings } from "../components/syntax-table";
 
 type State<N extends string, T> = {
     [key in N]: T
@@ -22,6 +23,7 @@ export const EMPTY_TREE: DataNode = {
 
 export const BitstreamSelectionContext = createContext<
     State<"ranges", BitRange[]>
+    & State<"selectedNode", DataNode | undefined>
     & {
         getBitColor: (pos: number) => string | undefined,
         getByteColor: (pos: number) => string | undefined
@@ -29,6 +31,8 @@ export const BitstreamSelectionContext = createContext<
 >({
     ranges: [],
     setRanges: () => { },
+    selectedNode: undefined,
+    setSelectedNode: () => {},
     getBitColor: () => undefined,
     getByteColor: () => undefined,
 });
@@ -58,6 +62,7 @@ function BitstreamSelection({ children }: {
     children: ReactNode,
 }) {
     const [ranges, setRanges] = useState<BitRange[]>([]);
+    const [selectedNode, setSelectedNode] = useState<DataNode>();
 
     const getBitColor = useCallback((bitPos: number) => {
         for (let i = 0; i < ranges.length; i++) {
@@ -82,6 +87,7 @@ function BitstreamSelection({ children }: {
     return <BitstreamSelectionContext.Provider value={{
         ranges, setRanges,
         getBitColor, getByteColor,
+        selectedNode, setSelectedNode
     }}>
         {children}
     </BitstreamSelectionContext.Provider>
@@ -90,10 +96,10 @@ function BitstreamSelection({ children }: {
 export const BitstreamExplorerContext = createContext<
     & State<"fileBuffer", Uint8Array>
     & State<"syntax", DataNode>
-    & State<"showHiddenSyntax", boolean>
     & State<"filter", { text: string }>
     & State<"containerFormat", string>
     & State<"fileName", string | undefined>
+    & State<"settings", SyntaxTableSettings>
     & {
         trackBuffer: BitBuffer[],
         reset: () => void,
@@ -106,15 +112,15 @@ export const BitstreamExplorerContext = createContext<
     setFileBuffer: () => { },
     syntax: EMPTY_TREE,
     setSyntax: () => { },
-    showHiddenSyntax: false,
-    setShowHiddenSyntax: () => undefined,
     filter: { text: "" },
     setFilter: () => undefined,
     reset: () => undefined,
     containerFormat: "detect",
     setContainerFormat: () => {},
     fileName: undefined,
-    setFileName: () => {}
+    setFileName: () => {},
+    settings: {showHiddenSyntax: false, showSizeBar: true},
+    setSettings: () => {}
 });
 
 export function BitstreamExplorer({ 
@@ -137,7 +143,11 @@ export function BitstreamExplorer({
     const [showHiddenSyntax, setShowHiddenSyntax] = useState<boolean>(false);
     const [trackBuffer, setTrackBuffer] = useState<BitBuffer[]>([]);
     const [fileName, setFileName] = useState<string>();
-    
+    const [settings, setSettings] = useState<SyntaxTableSettings>({
+        showHiddenSyntax: false,
+        showSizeBar: true
+    });
+
     const filteredSyntax = useMemo(() => {
         if (!filter.text) return syntax;
         const text = filter.text.toLowerCase();
@@ -188,11 +198,11 @@ export function BitstreamExplorer({
             syntax: filteredSyntax, setSyntax,
             fileBuffer, setFileBuffer,          // Input file buffer
             trackBuffer,                        // Track Buffer to parse
-            showHiddenSyntax, setShowHiddenSyntax,
             filter, setFilter,
             containerFormat, setContainerFormat,
             reset, containers,
-            fileName, setFileName
+            fileName, setFileName,
+            settings, setSettings
         }}>
             <BitstreamSelection>
                 {

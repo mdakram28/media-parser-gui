@@ -52,6 +52,18 @@ a {
     color: var(--primary-color);
 }
 
+.flexv-item {
+    flex: 1 1 auto; 
+    height: 0px; 
+    overflow-y: auto; 
+    width: 100%;
+}
+
+.flexv {
+    display: flex;
+    flex-direction: column;
+}
+
 .toolbar {
     background-color: var(--bg-strong-color);
     border: $border;
@@ -69,13 +81,14 @@ a {
         padding: 0px math.div($toolbar-height, 2);
         display: flex;
         align-items: center;
-        justify-content: center;
+        justify-content: space-between;
         border-right: $border;
         box-sizing: border-box;
         white-space: nowrap;
         text-decoration: none;
         z-index: 100;
         gap: 5px;
+        
 
         // margin-top: -$border-width -2;
         // margin-bottom: -$border-width -2;

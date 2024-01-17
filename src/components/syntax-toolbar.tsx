@@ -1,22 +1,34 @@
-import { ReactElement, useContext } from "react";
+import { ReactElement, useContext, useState } from "react";
 import { BitstreamExplorerContext } from "../bitstream/bitstream-explorer";
 import { FormControlLabel, Switch } from "@mui/material";
 import { MediaTrack } from "../types/media.types";
 import { downloadBlob } from "../browser-util";
+import { SyntaxTableSettings } from "./syntax-table";
 
 
 
-export function SyntaxToolbar({ leftItems, rightItems}: {
+export function SyntaxToolbar({ leftItems, rightItems }: {
     rightItems?: ReactElement,
-    leftItems?: ReactElement,
+    leftItems?: ReactElement
 }) {
     const {
         syntax: root,
-        showHiddenSyntax,
-        setShowHiddenSyntax,
         setFilter,
         reset,
+        settings, setSettings
     } = useContext(BitstreamExplorerContext);
+
+    function SettingSwitch<T extends keyof SyntaxTableSettings>(
+        title: string,
+        key: T
+    ) {
+
+        return <div className="toolbar-item">
+            <FormControlLabel control={
+                <Switch value={settings[key]} onChange={(ev) => setSettings(s => ({ ...s, [key]: ev.target.checked }))} />
+            } label={title} />
+        </div>
+    }
 
     return <>
         <div className="toolbar">
@@ -58,15 +70,12 @@ export function SyntaxToolbar({ leftItems, rightItems}: {
                 }}>
                 <i className="fas fa-sliders-h"></i>
                 <div className="toolbar-menu">
-                    <div className="toolbar-item">
 
-                        <span style={{ flex: 1 }}></span>
-                        <FormControlLabel control={
-                            <Switch value={showHiddenSyntax} onChange={(ev) => setShowHiddenSyntax(ev.target.checked)} />
-                        } label="Show hidden syntax" />
-                    </div>
+                    
+                    {SettingSwitch("Show hidden syntax", "showHiddenSyntax")}
+                    {SettingSwitch("Show size bars", "showSizeBar")}
                 </div>
-            </a>
-        </div>
+            </a >
+        </div >
     </>
 }

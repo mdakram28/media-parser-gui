@@ -16,3 +16,7 @@ export function useTraceUpdate(props: any) {
         prev.current = props;
     });
 }
+
+export function classes(obj: Record<string, boolean>){
+    return Object.keys(obj).filter(k => obj[k]).join(" ");
+}

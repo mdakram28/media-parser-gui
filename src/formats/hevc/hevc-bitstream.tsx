@@ -115,7 +115,7 @@ export class SliceCtx {
 const HEVC_START_CODE = new Uint8Array([0, 0, 1]);
 const HEVC_ESCAPE_CODE = new Uint8Array([0, 0, 3]);
 
-export function systemStreamToStartCode(buffers: BitBuffer[]) {
+export function systemStreamToAnnexB(buffers: BitBuffer[]) {
     const ret: BitBuffer[] = [];
     for (const buffer of buffers) {
         buffer.reset();

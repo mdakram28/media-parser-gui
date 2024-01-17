@@ -134,6 +134,21 @@
         max-width: 500px;
         white-space: break-word;
     }
+
+    td:first-child {
+        position: relative;
+    }
+    .size-rect {
+        background-color: var(--primary-color);
+        box-sizing: border-box;
+        border: 2px solid black;
+        border-left: 0px;
+        border-right: 0px;
+        height: 100%;
+        position: absolute;
+        right: 0;
+        top: 0;
+    }
 }
 
 .error {

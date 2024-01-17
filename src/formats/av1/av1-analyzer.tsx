@@ -11,6 +11,8 @@ import { MediaTrack } from "../../types/media.types";
 import { useState } from "react";
 import { extracIvfTracks, isIVFFormat } from "../ivf/ivf-bitstream";
 import { TrackDownloader } from "../../components/downloader";
+import { FrameViewer } from "../../components/frame-viewer";
+import { Tabs } from "../../components/tabs";
 
 export const Av1AnalyzerComponent = (props: {}) => {
     const [tracks, setTracks] = useState<Record<string, MediaTrack>>({});
@@ -75,7 +77,12 @@ export const Av1AnalyzerComponent = (props: {}) => {
             </Panel>
             <PanelResizeHandle className="resize-handle fa-solid fa-ellipsis-vertical" />
             <Panel className="panel">
-                <HexEditor />
+                <Tabs defaultTab="frame"
+                    tabs={[
+                        {key: "frame", title: "Frame", render: <FrameViewer config={{codec: "av01.0.15M.10"}}/>},
+                        {key: "hexEditor", title: "Hex", render: <HexEditor />}
+                    ]}
+                />
             </Panel>
         </PanelGroup>
     </BitstreamExplorer>
