@@ -22,3 +22,8 @@ export function downloadBlob(parts: Uint8Array[], fileName: string, mimeType: st
         return window.URL.revokeObjectURL(url);
     }, 1000);
 }
+
+
+export function mod(n: number, m: number) {
+    return ((n % m) + m) % m;
+}

@@ -116,7 +116,7 @@ export function SyntaxTable({}: {}
 
     const maxNodeSize = useMemo(() => {
         let maxSize = 8;
-        forEachChild(root, "open_bitstream_unit", (obu) => {
+        root.children?.forEach(obu => {
             maxSize = Math.max(maxSize, obu.size);
         });
         return maxSize;

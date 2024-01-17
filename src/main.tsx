@@ -7,6 +7,13 @@ import theme from './theme';
 import { BrowserRouter, HashRouter } from 'react-router-dom';
 import { MemoryRouter } from 'react-router-dom'
 
+// @ts-ignore
+Number.prototype.mod = function (n) {
+  "use strict";
+  // @ts-ignore
+  return ((this % n) + n) % n;
+};
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <>
     <HashRouter>
