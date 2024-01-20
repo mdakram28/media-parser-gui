@@ -206,7 +206,7 @@ export function BitstreamExplorer({
         }}>
             <BitstreamSelection>
                 {
-                    trackBuffer.length === 0 || trackBuffer[0].getByteLength() === 0
+                    trackBuffer.length === 0 || trackBuffer[0].byteLength() === 0
                         ? uploader
                         : children
                 }

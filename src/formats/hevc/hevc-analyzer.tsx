@@ -13,6 +13,7 @@ import { SyntaxToolbar } from "../../components/syntax-toolbar";
 import { TrackDownloader } from "../../components/downloader";
 import { Tabs } from "../../components/tabs";
 import { FrameViewer } from "../../components/frame-viewer";
+import { FrameViewerFfmpeg } from "../../components/frame-viewer-libde265";
 
 export const HevcAnalyzerComponent = (props: {}) => {
     const [tracks, setTracks] = useState<Record<string, MediaTrack>>({});
@@ -39,7 +40,7 @@ export const HevcAnalyzerComponent = (props: {}) => {
                 const trackId = selectedTrack || Object.keys(tracks)[0];
                 const buffers = tracks[trackId].chunkRanges.map(chunkRange => new BitBuffer(buffer, chunkRange));
                 return ["hevc_ss", buffers];
-            } else if (format === "hevc_ss" || (format === "detect" && isSystemStreamHEVC(buffer))) {
+            } else if (format === "hevc_ss" || (format === "detect" && isSystemStreamHEVC([new BitBuffer(buffer)]))) {
                 return ["hevc_ss", [new BitBuffer(buffer)]];
             }
 
@@ -73,6 +74,7 @@ export const HevcAnalyzerComponent = (props: {}) => {
                         //     codec: "hvc1.1.6.L123.00", 
                         //     hevc: { format: "annexb" }, pt: 2
                         // } as any} /> },
+                        {key: "frame", title: "Frame", render: <FrameViewerFfmpeg />},
                         { key: "hexEditor", title: "Hex", render: <HexEditor /> }
                     ]}
                 />

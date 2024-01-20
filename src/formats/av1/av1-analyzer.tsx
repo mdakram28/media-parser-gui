@@ -13,6 +13,7 @@ import { extracIvfTracks, isIVFFormat } from "../ivf/ivf-bitstream";
 import { TrackDownloader } from "../../components/downloader";
 import { FrameViewer } from "../../components/frame-viewer";
 import { Tabs } from "../../components/tabs";
+import { FrameViewerFfmpeg } from "../../components/frame-viewer-libde265";
 
 export const Av1AnalyzerComponent = (props: {}) => {
     const [tracks, setTracks] = useState<Record<string, MediaTrack>>({});
@@ -55,8 +56,6 @@ export const Av1AnalyzerComponent = (props: {}) => {
             "av1_audvid.mp4": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/sample_data/av1_audvid.mp4",
             "av1_single.mp4": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/sample_data/av1_single.mp4",
             "av1_single.obu": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/sample_data/av1_single.obu",
-            "hevc_single.mp4": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/sample_data/hevc_single.mp4",
-            "hevc_single.hevc": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/sample_data/hevc_single.hevc",
         }} />}
     >
         <PanelGroup autoSaveId="example" direction="horizontal">

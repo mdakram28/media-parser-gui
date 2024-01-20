@@ -79,7 +79,11 @@ export class BitBuffer {
         return this.buffer.slice(range.start, range.end);
     }
 
-    getByteLength() {
+    subBuffer(range: ByteRange) {
+        return new BitBuffer(this.buffer, range);
+    }
+
+    byteLength() {
         return this.endBytePos - this.startBytePos;
     }
 

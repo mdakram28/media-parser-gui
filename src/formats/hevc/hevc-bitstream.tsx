@@ -1,6 +1,6 @@
 import { BitBuffer } from "../../bitstream/buffer";
 import { Bitstream, MAX_ITER, ParserCtx, syntax } from "../../bitstream/parser";
-import { ByteRange } from "../../bitstream/range";
+import { BitRange, ByteRange } from "../../bitstream/range";
 import { pic_parameter_set_rbsp } from "./nalu/pic_parameter_set_rbsp";
 import { seq_parameter_set_rbsp } from "./nalu/seq_parameter_set_rbsp";
 import { slice_segment_header } from "./nalu/slice_segment_header";
@@ -141,21 +141,57 @@ export function systemStreamToAnnexB(buffers: BitBuffer[]) {
     return ret;
 }
 
-export function isSystemStreamHEVC(buffer: Uint8Array) {
-    const bs = new Bitstream(new BitBuffer(buffer));
+export function isSystemStreamHEVC(buffers: BitBuffer[]) {
+    const bs = new Bitstream(new BitBuffer(new Uint8Array(0)));
 
-    let i = 0;
-    while (bs.getPos() < bs.getEndPos()) {
-        if (i++ > MAX_ITER) break;
+    for (const buffer of buffers) {
+        buffer.setEscapeCode();
+        buffer.reset();
+        bs.updateBuffer(buffer);
 
-        const nalu_size_bytes = bs.f("nalu_size", 32, {hidden: true});
-        if (nalu_size_bytes === 0) return false;
-        const nalu_end_pos = bs.getPos() + nalu_size_bytes*8;
-        if (nalu_end_pos < bs.getEndPos()) return false;
-        bs.gotoPos(nalu_end_pos);
+        let i = 0;
+        while (bs.getPos() < bs.getEndPos()) {
+            if (i++ > MAX_ITER) break;
+            
+            const nalu_size_bytes = bs.f("nalu_size", 32, {hidden: true});
+            if (nalu_size_bytes === 0) return false;
+            const nalu_end_pos = bs.getPos() + nalu_size_bytes*8;
+            if (nalu_end_pos > bs.getEndPos()) return false;
+            bs.gotoPos(nalu_end_pos);
+        }
+
+        if (bs.getPos() !== bs.getEndPos()) return false;
     }
-    return bs.getPos() === bs.getEndPos();
+    return true;
 }
+
+export const HEVCSplitNalu = (buffers: BitBuffer[]) => {
+    const bs = new Bitstream(new BitBuffer(new Uint8Array(0)));
+    bs.updateCtx(new ParserCtx());
+    const nalus: BitBuffer[] = [];
+    
+    let i = 0;
+    for (const buffer of buffers) {
+        buffer.reset();
+        buffer.setEscapeCode(new Uint8Array([0, 0, 3]));
+        bs.updateBuffer(buffer);
+        
+        bs.byteAlign();
+        let nextStartPos = bs.findNextBytes(HEVC_START_CODE);
+        while (nextStartPos < bs.getEndPos()) {
+            if (i++ > MAX_ITER) break;
+            
+            bs.gotoPos(nextStartPos + HEVC_START_CODE.length * 8);
+            const startPos = nextStartPos;
+            nextStartPos = bs.findNextBytes(HEVC_START_CODE);
+            
+            nalus.push(buffer.subBuffer(new BitRange(startPos, nextStartPos).toByteRange()));
+
+            bs.gotoPos(nextStartPos);
+        }
+    }
+    return nalus;
+};
 
 export const HEVC = (buffer: BitBuffer) => {
     buffer.reset();
