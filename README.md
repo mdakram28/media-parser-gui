@@ -5,7 +5,8 @@ A browser based AV1, HEVC, MP4, IVF bitstream parser.
 Features:
 1. *Auto detect* and parse AV1/HEVC data from *MP4 and IVF* containers.
 2. Unpack and download raw bitstream from MP4/IVF file.
-2. In browser parsing. Data is not sent to any server.
+3. In browser parsing. Data is not sent to any server.
+4. Supports decoding of AV1 and HEVC frames.
 
 Live App: https://mdakram.com/media-parser-gui/
 
