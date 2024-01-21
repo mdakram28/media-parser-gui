@@ -1,4 +1,4 @@
-# Multimedia Explorer
+# Media Parser GUI
 
 A browser based AV1, HEVC, MP4, IVF bitstream parser.
 
