@@ -60,6 +60,7 @@ export class Bitstream<T extends {} = ParserCtx> {
                 title,
                 start: startBitPos,
                 size: this.getPos() - startBitPos,
+                skip: 0,
                 value,
                 hidden
             });
@@ -77,12 +78,17 @@ export class Bitstream<T extends {} = ParserCtx> {
                     title: varName.toString(),
                     start: startBitPos,
                     size: this.getPos() - startBitPos,
+                    skip: 0,
                     value: [],
                     hidden
                 };
                 this.current.children?.push(syntaxDataNode);
+            } else {
+                if (!syntaxDataNode.skip) {
+                    syntaxDataNode.skip = startBitPos - (syntaxDataNode.start + syntaxDataNode.size);
+                }
+                syntaxDataNode.size += this.getPos() - startBitPos;
             }
-
 
             let arr = this.ctx[varName] as any[];
             let syntaxArr = syntaxDataNode.value as any[];
@@ -108,10 +114,6 @@ export class Bitstream<T extends {} = ParserCtx> {
             }
             syntaxArr[index] = value;
         }
-
-
-
-
     }
 
     f(varPath: string, bits: number, { e, hidden = false }: { e?: any, hidden?: boolean } = {}) {

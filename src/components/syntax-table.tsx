@@ -41,9 +41,26 @@ function DataTreeNode({ node, level = 0, maxNodeSize }: {
 
     const select = useCallback(() => {
         if (node.size == 0) return;
-        const newRange = new BitRange(node.start, node.start + node.size);
-        // if (ranges.length == 1 && ranges[0].equals(newRange)) return;
-        setRanges([newRange]);
+
+        let syntaxArr = node.value as any[];
+
+        if (!Array.isArray(syntaxArr)) {
+            // Single value
+            const newRange = new BitRange(node.start, node.start + node.size);
+            setRanges([newRange]);
+        } else {
+            // Multiple values - only first will be available in byte inspector
+            let subStart = node.start;
+            let subSize = node.size / syntaxArr?.length;
+            let ranges: BitRange[] = [];
+
+            for (let i = 0; i < syntaxArr?.length; i++) {
+                const newRange = new BitRange(subStart, subStart + subSize);
+                ranges.push(newRange);
+                subStart += subSize + node.skip;
+            }
+            setRanges(ranges);
+        }
     }, [node, setRanges]);
 
     const toggleExpand = () => setExpanded(exp => !exp);
