@@ -48,7 +48,7 @@ export const tile_info = syntax("tile_info", (bs: Av1Bs) => {
         }
         c.tileHeightSb = (c.sbRows + (1 << c.TileRowsLog2) - 1) >> c.TileRowsLog2
         i = 0
-        for (let startSb = 0; c.startSb < c.sbRows; startSb += c.tileHeightSb) {
+        for (let startSb = 0; startSb < c.sbRows; startSb += c.tileHeightSb) {
             c.MiRowStarts[i] = c.startSb << c.sbShift
             i += 1
         }

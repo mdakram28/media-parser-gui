@@ -189,7 +189,6 @@ export const AV1 = (buffers: BitBuffer[]) => {
 };
 
 export const open_bitstream_unit = syntax("open_bitstream_unit", (bs: Bitstream<ObuCtx & ParserCtx>, sz: number) => {
-    bs.updateCtx(new ObuCtx());
     const c = bs.ctx;
 
     const obu_header = () => {
@@ -230,7 +229,7 @@ export const open_bitstream_unit = syntax("open_bitstream_unit", (bs: Bitstream<
 
     if (c.obu_type == OBU_TYPE.OBU_SEQUENCE_HEADER) {
         bs.setTitle("OBU_SEQUENCE_HEADER");
-        // bs.error("sequence_header_obu(): Not implemented");
+        bs.updateCtx(new ObuCtx());
         sequence_header_obu(bs);
     }
     else if (c.obu_type == OBU_TYPE.OBU_TEMPORAL_DELIMITER) {
@@ -255,7 +254,6 @@ export const open_bitstream_unit = syntax("open_bitstream_unit", (bs: Bitstream<
     }
     else if (c.obu_type == OBU_TYPE.OBU_FRAME) {
         bs.setTitle("OBU_FRAME");
-        // bs.error("frame_obu(): Not implemented");
         frame_obu(bs, c.obu_size);
     }
     else if (c.obu_type == OBU_TYPE.OBU_TILE_LIST) {

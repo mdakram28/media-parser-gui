@@ -213,20 +213,22 @@ export const tile_group_obu = syntax("tile_group_obu", (bs: Bitstream<ObuCtx>, s
             c.tileSize = c.tile_size_minus_1 + 1
             sz -= c.tileSize + c.TileSizeBytes
         }
+        bs.f("tile_data", c.tileSize * 8);
         c.MiRowStart = c.MiRowStarts[c.tileRow]
         c.MiRowEnd = c.MiRowStarts[c.tileRow + 1]
         c.MiColStart = c.MiColStarts[c.tileCol]
         c.MiColEnd = c.MiColStarts[c.tileCol + 1]
         c.CurrentQIndex = c.base_q_idx
-        init_symbol(bs, c.tileSize);
-        decode_tile(bs)
+        //init_symbol(bs, c.tileSize);
+        //decode_tile(bs)
         // exit_symbol()
     }
-    // if (c.tg_end == NumTiles - 1) {
+
+    if (c.tg_end == c.NumTiles - 1) {
     //     if (!disable_frame_end_update_cdf) {
     //         frame_end_update_cdf()
     //     }
     //     decode_frame_wrapup()
-    //     SeenFrameHeader = 0
-    // }
+         c.SeenFrameHeader = 0
+    }
 });

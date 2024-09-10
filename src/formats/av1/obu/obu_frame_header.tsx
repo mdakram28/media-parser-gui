@@ -89,8 +89,8 @@ const frame_size = syntax("frame_size", (bs: Bitstream<ObuCtx>) => {
             c.SuperresDenom = SUPERRES_NUM
         }
         c.UpscaledWidth = c.FrameWidth
-        c.FrameWidth = (c.UpscaledWidth * SUPERRES_NUM +
-            (c.SuperresDenom / 2)) / c.SuperresDenom
+        c.FrameWidth = Math.trunc((c.UpscaledWidth * SUPERRES_NUM +
+            Math.trunc(c.SuperresDenom / 2)) / c.SuperresDenom)
     });
 
     if (c.frame_size_override_flag) {
