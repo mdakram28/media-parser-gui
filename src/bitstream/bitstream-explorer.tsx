@@ -67,7 +67,7 @@ function BitstreamSelection({ children }: {
     const getBitColor = useCallback((bitPos: number) => {
         for (let i = 0; i < ranges.length; i++) {
             if (ranges[i].inRange(bitPos)) {
-                return COLORS[i];
+                return COLORS[i > 0 ? 1 : 0];
             }
         }
         return undefined;
@@ -77,7 +77,7 @@ function BitstreamSelection({ children }: {
         const bitRange = new BitRange(bytePos * 8, (bytePos + 1) * 8);
         for (let i = 0; i < ranges.length; i++) {
             if (ranges[i].intersect(bitRange).count() > 0) {
-                return COLORS[i];
+                return COLORS[i > 0 ? 1 : 0];
             }
         }
         return undefined;

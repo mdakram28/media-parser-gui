@@ -10,7 +10,8 @@ export type DataNode = {
     varName: string,
     value?: DataNodeValue,
     start: number,
-    size: number
+    size: number,
+    skip: number,
     hidden?: boolean
     filtered?: boolean
 }
