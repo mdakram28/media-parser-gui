@@ -1,5 +1,7 @@
 import { sequence_header_obu } from "./obu/obu_sequence_header";
 import { frame_obu } from "./obu/obu_frame";
+import { frame_header_obu } from "./obu/obu_frame_header";
+import { tile_group_obu } from "./obu/obu_tile_group";
 import { FrameType } from "./obu/obu_frame_header";
 import { Bitstream, ParserCtx, syntax } from "../../bitstream/parser";
 import { Av1Const } from "./obu/constants";
@@ -238,15 +240,15 @@ export const open_bitstream_unit = syntax("open_bitstream_unit", (bs: Bitstream<
     }
     else if (c.obu_type == OBU_TYPE.OBU_FRAME_HEADER) {
         bs.setTitle("OBU_FRAME_HEADER");
-        bs.error("frame_header_obu(): Not implemented");
+        frame_header_obu(bs);
     }
     else if (c.obu_type == OBU_TYPE.OBU_REDUNDANT_FRAME_HEADER) {
         bs.setTitle("OBU_REDUNDANT_FRAME_HEADER");
-        bs.error("frame_header_obu(): Not implemented");
+        frame_header_obu(bs);
     }
     else if (c.obu_type == OBU_TYPE.OBU_TILE_GROUP) {
         bs.setTitle("OBU_TILE_GROUP");
-        bs.error("tile_group_obu(obu_size): Not implemented");
+        tile_group_obu(bs, c.obu_size);
     }
     else if (c.obu_type == OBU_TYPE.OBU_METADATA) {
         bs.setTitle("OBU_METADATA");
