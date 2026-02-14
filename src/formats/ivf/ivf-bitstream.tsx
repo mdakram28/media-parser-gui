@@ -3,7 +3,6 @@ import { Bitstream, MAX_ITER, ParserCtx, syntax } from "../../bitstream/parser";
 import { BitBuffer } from "../../bitstream/buffer";
 import { assert, assertNums, forEachChild, getChildValue } from "../../bitstream/util";
 import { MediaTrack } from "../../types/media.types";
-import { EMPTY_TREE } from "../../bitstream/bitstream-explorer";
 
 // https://wiki.multimedia.cx/index.php/Duck_IVF
 
@@ -14,7 +13,7 @@ export const isIVFFormat = (buffer: Uint8Array) => {
     return (signature.toLocaleUpperCase() === "DKIF");
 }
 
-export const extracIvfTracks = (buffer: Uint8Array, codecs?: string[]): Record<string, MediaTrack> => {
+export const extractIvfTracks = (buffer: Uint8Array, codecs?: string[]): Record<string, MediaTrack> => {
     const root = DuckIVF(new BitBuffer(buffer));
     const trackCodec = getChildValue(root, "codec");
     assert(trackCodec !== undefined, "Codec not found in ivf");

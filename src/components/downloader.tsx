@@ -2,18 +2,18 @@ import { useContext } from "react";
 import { BitstreamExplorerContext } from "../bitstream/bitstream-explorer";
 import { downloadBlob } from "../browser-util";
 import { BitBuffer } from "../bitstream/buffer";
-
-
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faDownload } from "@fortawesome/free-solid-svg-icons";
+import { Tooltip, IconButton } from "@radix-ui/themes";
 
 export function TrackDownloader({ downloadExtension = ".bin", transformer }: {
     downloadExtension?: string,
-    transformer ?: (buffers: BitBuffer[]) => BitBuffer[]
+    transformer?: (buffers: BitBuffer[]) => BitBuffer[]
 }) {
-    const { trackBuffer, fileName, setFileName } = useContext(BitstreamExplorerContext);
+    const { trackBuffer, fileName } = useContext(BitstreamExplorerContext);
 
-    return <>
-        <a className="toolbar-item"
-            data-tooltip={`Download track as raw "${downloadExtension}" file`}
+    return <Tooltip content={`Download track as raw "${downloadExtension}" file`}>
+        <IconButton variant="ghost" size="1"
             onClick={() => {
                 let dlName = fileName || "unknown.xyz";
                 if (dlName.indexOf('.') >= 0) {
@@ -25,6 +25,8 @@ export function TrackDownloader({ downloadExtension = ".bin", transformer }: {
                     buffers = transformer(buffers);
                 }
                 downloadBlob(buffers.map(buff => buff.slice()), dlName, 'application/octet-stream');
-            }}><i className="fas fa-download"></i></a>
-    </>
+            }}>
+            <FontAwesomeIcon icon={faDownload} style={{ fontSize: 12 }} />
+        </IconButton>
+    </Tooltip>
 }

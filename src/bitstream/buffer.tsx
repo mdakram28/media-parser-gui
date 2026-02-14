@@ -1,31 +1,6 @@
 import { BitRange, ByteRange } from "./range";
 import { assert } from "./util";
 
-function REV64(x: number) {
-    x = ((x >> 1) & 0x55555555) | ((x & 0x55555555) << 1);
-    x = ((x >> 2) & 0x33333333) | ((x & 0x33333333) << 2);
-    x = ((x >> 4) & 0x0F0F0F0F) | ((x & 0x0F0F0F0F) << 4);
-    x = ((x >> 8) & 0x00FF00FF) | ((x & 0x00FF00FF) << 8);
-    x = (x >>> 16) | (x << 16);
-    
-    return x >>> 0;
-}
-
-
-function REV8(b: number) {
-    b = (b & 0xF0) >> 4 | (b & 0x0F) << 4;
-    b = (b & 0xCC) >> 2 | (b & 0x33) << 2;
-    b = (b & 0xAA) >> 1 | (b & 0x55) << 1;
-    return b;
-}
-
-// Less than 8 bits
-const REV: number[] = [];
-
-for (let i=0; i<=0xFF; i++) {
-    REV[i] = parseInt([...i.toString(2)].reverse().join(""), 2);
-}
-
 function FloorLog2( x: number ) {
     let s = 0
     while ( x != 0 ) {

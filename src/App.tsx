@@ -1,80 +1,79 @@
-import "./app.scss";
-import "./common.scss";
-import * as React from 'react';
-import { Av1AnalyzerComponent } from './formats/av1/av1-analyzer';
-import { Mp4AnalyzerComponent } from './formats/mp4/mp4-analyzer';
-import { Switch } from "@mui/material";
+import "./index.css";
+import { useState } from "react";
+import { Av1AnalyzerComponent } from "./formats/av1/av1-analyzer";
+import { Mp4AnalyzerComponent } from "./formats/mp4/mp4-analyzer";
 import { RawAnalyzerComponent } from "./formats/raw/raw-analyzer";
 import { HevcAnalyzerComponent } from "./formats/hevc/hevc-analyzer";
-import { Link, NavLink, Route, Routes } from "react-router-dom";
-import GitHubButton from 'react-github-btn';
 import { IvfAnalyzerComponent } from "./formats/ivf/ivf-analyzer";
+import { Theme, Tabs, Switch, Text, Flex, Box } from "@radix-ui/themes";
+import { Toaster } from "sonner";
+import GitHubButton from "react-github-btn";
+
+const ANALYZERS = [
+  { key: "av1", title: "AV1", component: <Av1AnalyzerComponent /> },
+  { key: "hevc", title: "HEVC", component: <HevcAnalyzerComponent /> },
+  { key: "mp4", title: "MP4", component: <Mp4AnalyzerComponent /> },
+  { key: "ivf", title: "IVF", component: <IvfAnalyzerComponent /> },
+  { key: "raw", title: "Raw", component: <RawAnalyzerComponent /> },
+];
 
 export default function Dashboard() {
-  const [page, setPage] = React.useState("av1");
-  const menuItems = [{
-    page: "av1",
-    title: "AV1 parser"
-  },  {
-    page: "hevc",
-    title: "HEVC parser"
-  }, {
-    page: "mp4",
-    title: "MP4 parser"
-  },{
-    page: "ivf",
-    title: "IVF parser"
-  }, {
-    page: "raw",
-    title: "Raw viewer"
-  }]
-
-  const setTheme = (theme: string) => {
-    const c = document.body.classList;
-    c.remove("dark");
-    c.remove("light");
-    c.add(theme);
-  }
-
-  React.useEffect(() => {
-    document.body.classList.add("dark");
-  }, []);
-  console.log("Main rendered");
+  const [appearance, setAppearance] = useState<"dark" | "light">("dark");
 
   return (
-    <main>
-      <div className="toolbar">
-        <div className="toolbar-item"><b>Multimedia Explorer</b></div>
-        {menuItems.map((menu) =>
-          <NavLink to={"/" + menu.page} key={menu.page}
-            className={({ isActive }) => "toolbar-item " + (isActive && "active")}>
-            {menu.title}
-          </NavLink>
-        )}
-        <span style={{ flex: 1 }}></span>
-        <div className="toolbar-item gh">
-          <GitHubButton
-            href="https://github.com/mdakram28/media-parser-gui"
-            data-color-scheme="no-preference: dark; light: dark; dark: dark;"
-            data-size="large"
-            aria-label="Star mdakram28/media-parser-gui on GitHub"
-          >Star</GitHubButton>
-        </div>
-        <div className="toolbar-item">
-          Light
-          <Switch defaultChecked={true} inputProps={{ 'aria-label': "Dark" }} onClick={(ev: any) => setTheme(ev.target.checked ? "dark" : "light")} />
-          Dark
-        </div>
-      </div>
-      <div className="content">
-        <Routes>
-          <Route path="*" element={<Av1AnalyzerComponent />} />
-          <Route path="/mp4" element={<Mp4AnalyzerComponent />} />
-          <Route path="/hevc" element={<HevcAnalyzerComponent />} />
-          <Route path="/raw" element={<RawAnalyzerComponent />} />
-          <Route path="/ivf" element={<IvfAnalyzerComponent />} />
-        </Routes>
-      </div>
-    </main>
+    <Theme appearance={appearance} accentColor="iris" grayColor="slate" radius="medium" style={{
+      display: "flex",
+      flexDirection: "column",
+      height: "100vh",
+    }}>
+      <Tabs.Root defaultValue="av1" style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
+        <Flex align="center" style={{
+          height: 44,
+          borderBottom: "1px solid var(--glass-border)",
+          background: "var(--glass-bg)",
+          backdropFilter: "var(--glass-blur)",
+          WebkitBackdropFilter: "var(--glass-blur)",
+          flexShrink: 0,
+          paddingInline: 4,
+        }}>
+          <Text size="2" weight="bold" style={{ paddingInline: 12 }}>
+            Multimedia Explorer
+          </Text>
+          <Tabs.List>
+            {ANALYZERS.map((a) => (
+              <Tabs.Trigger key={a.key} value={a.key}>
+                {a.title}
+              </Tabs.Trigger>
+            ))}
+          </Tabs.List>
+          <Box flexGrow="1" />
+          <Flex align="center" gap="2" style={{ paddingInline: 12 }}>
+            <GitHubButton
+              href="https://github.com/mdakram28/media-parser-gui"
+              data-color-scheme="no-preference: dark; light: dark; dark: dark;"
+              data-size="large"
+              aria-label="Star mdakram28/media-parser-gui on GitHub"
+            >
+              Star
+            </GitHubButton>
+          </Flex>
+          <Flex align="center" gap="2" style={{ paddingInline: 12 }}>
+            <Text as="label" size="1" color="gray">Light</Text>
+            <Switch
+              size="1"
+              defaultChecked
+              onCheckedChange={(checked) => setAppearance(checked ? "dark" : "light")}
+            />
+            <Text as="label" size="1" color="gray">Dark</Text>
+          </Flex>
+        </Flex>
+        {ANALYZERS.map((a) => (
+          <Tabs.Content key={a.key} value={a.key} style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0, overflow: "hidden" }}>
+            {a.component}
+          </Tabs.Content>
+        ))}
+      </Tabs.Root>
+      <Toaster theme={appearance} richColors />
+    </Theme>
   );
 }

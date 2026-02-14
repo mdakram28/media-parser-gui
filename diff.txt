@@ -1,0 +1,3478 @@
+diff --git a/index.html b/index.html
+index f103ae9..ca16598 100644
+--- a/index.html
++++ b/index.html
+@@ -4,15 +4,13 @@
+     <meta charset="utf-8" />
+     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+     <meta name="viewport" content="initial-scale=1, width=device-width" />
+-    <!-- Fonts to support Material Design -->
+     <link rel="preconnect" href="https://fonts.googleapis.com" />
+     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+     <link
+       rel="stylesheet"
+-      href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&display=swap"
++      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap"
+     />
+-    <script src="https://kit.fontawesome.com/877d2cecdc.js" crossorigin="anonymous"></script>
+-    <title>AV1 Bitstream Parser</title>
++    <title>Multimedia Explorer</title>
+   </head>
+   <body>
+     <div id="root"></div>
+diff --git a/package.json b/package.json
+index a649d89..57c117f 100644
+--- a/package.json
++++ b/package.json
+@@ -1,5 +1,5 @@
+ {
+-  "name": "material-ui-vite-ts",
++  "name": "media-parser-gui",
+   "private": true,
+   "version": "5.0.0",
+   "type": "module",
+@@ -10,27 +10,25 @@
+     "preview": "vite preview"
+   },
+   "dependencies": {
+-    "@emotion/react": "latest",
+-    "@emotion/styled": "latest",
+     "@ffmpeg/ffmpeg": "^0.12.10",
+     "@ffmpeg/util": "^0.12.1",
+     "@fortawesome/fontawesome-svg-core": "^6.5.1",
+     "@fortawesome/free-solid-svg-icons": "^6.5.1",
+     "@fortawesome/react-fontawesome": "^0.2.0",
+-    "@mui/icons-material": "latest",
+-    "@mui/material": "latest",
+-    "@mui/x-tree-view": "^6.17.0",
++    "@radix-ui/themes": "^3.3.0",
++    "@tailwindcss/vite": "^4.1.18",
++    "@tanstack/react-virtual": "^3.13.18",
+     "react": "latest",
+     "react-dom": "latest",
+     "react-resizable-panels": "^1.0.9",
+-    "react-router-dom": "^6.21.1"
++    "sonner": "^2.0.7",
++    "tailwindcss": "^4.1.18"
+   },
+   "devDependencies": {
+     "@types/react": "latest",
+     "@types/react-dom": "latest",
+     "@vitejs/plugin-react": "latest",
+     "react-github-btn": "^1.4.0",
+-    "sass": "^1.69.7",
+     "typescript": "latest",
+     "vite": "latest"
+   }
+diff --git a/src/App.tsx b/src/App.tsx
+index 6c46cb2..fa98fc5 100644
+--- a/src/App.tsx
++++ b/src/App.tsx
+@@ -1,80 +1,79 @@
+-import "./app.scss";
+-import "./common.scss";
+-import * as React from 'react';
+-import { Av1AnalyzerComponent } from './formats/av1/av1-analyzer';
+-import { Mp4AnalyzerComponent } from './formats/mp4/mp4-analyzer';
+-import { Switch } from "@mui/material";
++import "./index.css";
++import { useState } from "react";
++import { Av1AnalyzerComponent } from "./formats/av1/av1-analyzer";
++import { Mp4AnalyzerComponent } from "./formats/mp4/mp4-analyzer";
+ import { RawAnalyzerComponent } from "./formats/raw/raw-analyzer";
+ import { HevcAnalyzerComponent } from "./formats/hevc/hevc-analyzer";
+-import { Link, NavLink, Route, Routes } from "react-router-dom";
+-import GitHubButton from 'react-github-btn';
+ import { IvfAnalyzerComponent } from "./formats/ivf/ivf-analyzer";
++import { Theme, Tabs, Switch, Text, Flex, Box } from "@radix-ui/themes";
++import { Toaster } from "sonner";
++import GitHubButton from "react-github-btn";
+ 
+-export default function Dashboard() {
+-  const [page, setPage] = React.useState("av1");
+-  const menuItems = [{
+-    page: "av1",
+-    title: "AV1 parser"
+-  },  {
+-    page: "hevc",
+-    title: "HEVC parser"
+-  }, {
+-    page: "mp4",
+-    title: "MP4 parser"
+-  },{
+-    page: "ivf",
+-    title: "IVF parser"
+-  }, {
+-    page: "raw",
+-    title: "Raw viewer"
+-  }]
+-
+-  const setTheme = (theme: string) => {
+-    const c = document.body.classList;
+-    c.remove("dark");
+-    c.remove("light");
+-    c.add(theme);
+-  }
++const ANALYZERS = [
++  { key: "av1", title: "AV1", component: <Av1AnalyzerComponent /> },
++  { key: "hevc", title: "HEVC", component: <HevcAnalyzerComponent /> },
++  { key: "mp4", title: "MP4", component: <Mp4AnalyzerComponent /> },
++  { key: "ivf", title: "IVF", component: <IvfAnalyzerComponent /> },
++  { key: "raw", title: "Raw", component: <RawAnalyzerComponent /> },
++];
+ 
+-  React.useEffect(() => {
+-    document.body.classList.add("dark");
+-  }, []);
+-  console.log("Main rendered");
++export default function Dashboard() {
++  const [appearance, setAppearance] = useState<"dark" | "light">("dark");
+ 
+   return (
+-    <main>
+-      <div className="toolbar">
+-        <div className="toolbar-item"><b>Multimedia Explorer</b></div>
+-        {menuItems.map((menu) =>
+-          <NavLink to={"/" + menu.page} key={menu.page}
+-            className={({ isActive }) => "toolbar-item " + (isActive && "active")}>
+-            {menu.title}
+-          </NavLink>
+-        )}
+-        <span style={{ flex: 1 }}></span>
+-        <div className="toolbar-item gh">
+-          <GitHubButton
+-            href="https://github.com/mdakram28/media-parser-gui"
+-            data-color-scheme="no-preference: dark; light: dark; dark: dark;"
+-            data-size="large"
+-            aria-label="Star mdakram28/media-parser-gui on GitHub"
+-          >Star</GitHubButton>
+-        </div>
+-        <div className="toolbar-item">
+-          Light
+-          <Switch defaultChecked={true} inputProps={{ 'aria-label': "Dark" }} onClick={(ev: any) => setTheme(ev.target.checked ? "dark" : "light")} />
+-          Dark
+-        </div>
+-      </div>
+-      <div className="content">
+-        <Routes>
+-          <Route path="*" element={<Av1AnalyzerComponent />} />
+-          <Route path="/mp4" element={<Mp4AnalyzerComponent />} />
+-          <Route path="/hevc" element={<HevcAnalyzerComponent />} />
+-          <Route path="/raw" element={<RawAnalyzerComponent />} />
+-          <Route path="/ivf" element={<IvfAnalyzerComponent />} />
+-        </Routes>
+-      </div>
+-    </main>
++    <Theme appearance={appearance} accentColor="iris" grayColor="slate" radius="medium" style={{
++      display: "flex",
++      flexDirection: "column",
++      height: "100vh",
++    }}>
++      <Tabs.Root defaultValue="av1" style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
++        <Flex align="center" style={{
++          height: 44,
++          borderBottom: "1px solid var(--glass-border)",
++          background: "var(--glass-bg)",
++          backdropFilter: "var(--glass-blur)",
++          WebkitBackdropFilter: "var(--glass-blur)",
++          flexShrink: 0,
++          paddingInline: 4,
++        }}>
++          <Text size="2" weight="bold" style={{ paddingInline: 12 }}>
++            Multimedia Explorer
++          </Text>
++          <Tabs.List>
++            {ANALYZERS.map((a) => (
++              <Tabs.Trigger key={a.key} value={a.key}>
++                {a.title}
++              </Tabs.Trigger>
++            ))}
++          </Tabs.List>
++          <Box flexGrow="1" />
++          <Flex align="center" gap="2" style={{ paddingInline: 12 }}>
++            <GitHubButton
++              href="https://github.com/mdakram28/media-parser-gui"
++              data-color-scheme="no-preference: dark; light: dark; dark: dark;"
++              data-size="large"
++              aria-label="Star mdakram28/media-parser-gui on GitHub"
++            >
++              Star
++            </GitHubButton>
++          </Flex>
++          <Flex align="center" gap="2" style={{ paddingInline: 12 }}>
++            <Text as="label" size="1" color="gray">Light</Text>
++            <Switch
++              size="1"
++              defaultChecked
++              onCheckedChange={(checked) => setAppearance(checked ? "dark" : "light")}
++            />
++            <Text as="label" size="1" color="gray">Dark</Text>
++          </Flex>
++        </Flex>
++        {ANALYZERS.map((a) => (
++          <Tabs.Content key={a.key} value={a.key} style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0, overflow: "hidden" }}>
++            {a.component}
++          </Tabs.Content>
++        ))}
++      </Tabs.Root>
++      <Toaster theme={appearance} richColors />
++    </Theme>
+   );
+-}
+\ No newline at end of file
++}
+diff --git a/src/app.scss b/src/app.scss
+deleted file mode 100644
+index ebcf80b..0000000
+--- a/src/app.scss
++++ /dev/null
+@@ -1,215 +0,0 @@
+-@use "sass:math";
+-
+-body {
+-    --color-danger: red
+-}
+-
+-.light {
+-    --primary-color: #5e5bae;
+-    --secondary-color: #536390;
+-    --font-color: #242424;
+-    --font-secondary-color: #474747;
+-    --bg-color: #f5f5f5;
+-    --bg-strong-color: #fff;
+-    --heading-color: #292922;
+-    --border-color: #2d2d3c;
+-    --border-strong-color: #1e1e28;
+-}
+-
+-.dark {
+-    --primary-color: #9A97F3;
+-    --secondary-color: #818cab;
+-    --font-color: #e1e1ff;
+-    --font-secondary-color: #9797ae;
+-    --bg-color: #0f0f13;
+-    --bg-strong-color: #000000;
+-    --heading-color: #818cab;
+-    --border-color: #2d2d3c;
+-    --border-strong-color: #494960;
+-    color-scheme: dark;
+-}
+-
+-$border-width: 1px;
+-$border: $border-width solid var(--border-color);
+-
+-$toolbar-height: 40px;
+-
+-html,
+-body {
+-    background-color: var(--bg-color);
+-    color: var(--font-color);
+-    padding: 0px;
+-    margin: 0px;
+-    font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+-    overflow: hidden;
+-}
+-
+-h1 {
+-    color: var(--secondary-color);
+-}
+-
+-a {
+-    color: var(--primary-color);
+-}
+-
+-.flexv-item {
+-    flex: 1 1 auto; 
+-    height: 0px; 
+-    overflow-y: auto; 
+-    width: 100%;
+-}
+-
+-.flexv {
+-    display: flex;
+-    flex-direction: column;
+-}
+-
+-.toolbar {
+-    background-color: var(--bg-strong-color);
+-    border: $border;
+-    // margin-bottom: -5px;
+-    box-sizing: border-box;
+-    // height: $toolbar-height;
+-    display: flex;
+-    flex-direction: row;
+-    align-items: center;
+-
+-    .toolbar-item {
+-        background-color: var(--bg-strong-color);
+-        position: relative;
+-        height: $toolbar-height;
+-        padding: 0px math.div($toolbar-height, 2);
+-        display: flex;
+-        align-items: center;
+-        justify-content: space-between;
+-        border-right: $border;
+-        box-sizing: border-box;
+-        white-space: nowrap;
+-        text-decoration: none;
+-        z-index: 100;
+-        gap: 5px;
+-        
+-
+-        // margin-top: -$border-width -2;
+-        // margin-bottom: -$border-width -2;
+-
+-        &.active {
+-            background-color: var(--bg-color);
+-            border-top: 3px solid var(--primary-color);
+-            border-bottom: $border-width solid var(--bg-color);
+-        }
+-    }
+-
+-    .toolbar-menu {
+-        border-left: $border;
+-        border-right: $border;
+-        border-top: $border;
+-
+-        background-color: var(--bg-strong-color);
+-        position: absolute;
+-        top: 100%;
+-        // left: -2%;
+-        right: -3%;
+-
+-        &:not(.visible) {
+-            display: none;
+-        }
+-
+-        .toolbar-item {
+-            border-bottom: $border;
+-            border-right: none;
+-        }
+-    }
+-
+-    &>a.toolbar-item:hover {
+-        background-color: var(--bg-color);
+-        cursor: pointer;
+-    }
+-}
+-
+-.FilesDragAndDrop {
+-    &:hover {
+-        background-color: var(--bg-strong-color);
+-    }
+-
+-    .FilesDragAndDrop__area {
+-        width: 300px;
+-        height: 200px;
+-        padding: 50px;
+-        display: flex;
+-        align-items: center;
+-        justify-content: center;
+-        flex-flow: column nowrap;
+-        font-size: 24px;
+-        color: #555555;
+-        border: 2px #c3c3c3 dashed;
+-        border-radius: 12px;
+-        position: relative;
+-        cursor: pointer;
+-
+-
+-        .area__icon {
+-            font-size: 64px;
+-            margin-top: 20px;
+-        }
+-    }
+-}
+-
+-.content {
+-    height: calc(100vh - $toolbar-height);
+-    display: flex;
+-    align-items: center;
+-    justify-content: center;
+-    width: 100%;
+-}
+-
+-.resize-handle {
+-    width: 2px;
+-    border: 2px solid var(--bg-color);
+-    border-top-width: 0;
+-    border-bottom-width: 0;
+-
+-    background-color: var(--border-color);
+-    display: flex;
+-    align-items: center;
+-    justify-content: center;
+-    &:before {
+-        color: var(--font-secondary-color);
+-    }
+-    transition: background-color 0.1s;
+-    transition: border-color 0.1s;
+-    &:hover {
+-        background-color: var(--border-strong-color);
+-        border-color: transparent;
+-    }
+-}
+-
+-.panel {
+-    // border-left: $border;
+-    box-sizing: border-box;
+-    padding: 10px;
+-    flex: 1;
+-    display: flex;
+-    flex-direction: column;
+-    // margin: -1px;
+-}
+-
+-.gh>span {
+-    margin-bottom: -3px;
+-}
+-
+-.url-uploader {
+-    width: 100%;
+-    display: flex;
+-    gap: 20px;
+-
+-}
+-
+-input, select {
+-    // border-width: 2px;
+-    box-sizing: border-box;
+-    min-width: 50px;
+-    flex: 1;
+-    height: 25px;
+-    // padding: 0 10px;
+-}
+\ No newline at end of file
+diff --git a/src/bitstream/bitstream-explorer.tsx b/src/bitstream/bitstream-explorer.tsx
+index aa1be21..c36e29c 100644
+--- a/src/bitstream/bitstream-explorer.tsx
++++ b/src/bitstream/bitstream-explorer.tsx
+@@ -2,72 +2,52 @@ import { ReactNode, createContext, useCallback, useEffect, useMemo, useState } f
+ import { DataNode } from "../types/parser.types";
+ import { BitstreamUploader } from "./uploader";
+ import { BitRange } from "./range";
+-import { colors } from "@mui/material";
+ import { BitBuffer } from "./buffer";
+ import { SyntaxTableSettings } from "../components/syntax-table";
+ 
+ type State<N extends string, T> = {
+     [key in N]: T
+ } & {
+-        [key in `set${Capitalize<N>}`]: React.Dispatch<React.SetStateAction<T>>
+-    }
+-
++    [key in `set${Capitalize<N>}`]: React.Dispatch<React.SetStateAction<T>>
++}
+ 
+ export const EMPTY_TREE: DataNode = {
+     key: "root",
+     varName: "root",
+     title: "Empty bitstream",
+     start: 0,
+-    size: 0
++    size: 0,
+ };
+ 
+ export const BitstreamSelectionContext = createContext<
+     State<"ranges", BitRange[]>
+     & State<"selectedNode", DataNode | undefined>
+     & {
+-        getBitColor: (pos: number) => string | undefined,
+-        getByteColor: (pos: number) => string | undefined
++        getBitColor: (pos: number) => string | undefined;
++        getByteColor: (pos: number) => string | undefined;
+     }
+ >({
+     ranges: [],
+-    setRanges: () => { },
++    setRanges: () => {},
+     selectedNode: undefined,
+     setSelectedNode: () => {},
+     getBitColor: () => undefined,
+     getByteColor: () => undefined,
+ });
+ 
+-function forEachPreOrder(node: DataNode, cb: (node: DataNode) => void) {
+-    cb(node);
+-    for (const child of (node.children || [])) {
+-        forEachPreOrder(child, cb);
+-    }
+-}
++const SELECTION_COLORS = [
++    "var(--selection-primary)",
++    "var(--selection-secondary)",
++];
+ 
+-// const COLORS = [colors.purple[700], colors.purple[400], colors.purple[300], colors.purple[200], colors.purple[100], colors.purple[50]];
+-const COLORS = ["var(--primary-color)", "var(--secondary-color)"];
+-
+-let watchCount: { [k: string]: number } = {};
+-function watch<T extends Function>(name: string, cb: T) {
+-    watchCount[name] = 0;
+-    return ((...args: any) => {
+-        watchCount[name]++;
+-        console.log(`Watch: ${name} callled ${watchCount[name]} times.`, args);
+-        console.trace();
+-        return cb(...args);
+-    }) as any as T;
+-}
+-
+-function BitstreamSelection({ children }: {
+-    children: ReactNode,
+-}) {
++function BitstreamSelection({ children }: { children: ReactNode }) {
+     const [ranges, setRanges] = useState<BitRange[]>([]);
+     const [selectedNode, setSelectedNode] = useState<DataNode>();
+ 
+     const getBitColor = useCallback((bitPos: number) => {
+         for (let i = 0; i < ranges.length; i++) {
+             if (ranges[i].inRange(bitPos)) {
+-                return COLORS[i > 0 ? 1 : 0];
++                return SELECTION_COLORS[i > 0 ? 1 : 0];
+             }
+         }
+         return undefined;
+@@ -77,20 +57,21 @@ function BitstreamSelection({ children }: {
+         const bitRange = new BitRange(bytePos * 8, (bytePos + 1) * 8);
+         for (let i = 0; i < ranges.length; i++) {
+             if (ranges[i].intersect(bitRange).count() > 0) {
+-                return COLORS[i > 0 ? 1 : 0];
++                return SELECTION_COLORS[i > 0 ? 1 : 0];
+             }
+         }
+         return undefined;
+     }, [ranges]);
+ 
+-
+-    return <BitstreamSelectionContext.Provider value={{
+-        ranges, setRanges,
+-        getBitColor, getByteColor,
+-        selectedNode, setSelectedNode
+-    }}>
+-        {children}
+-    </BitstreamSelectionContext.Provider>
++    return (
++        <BitstreamSelectionContext.Provider value={{
++            ranges, setRanges,
++            getBitColor, getByteColor,
++            selectedNode, setSelectedNode,
++        }}>
++            {children}
++        </BitstreamSelectionContext.Provider>
++    );
+ }
+ 
+ export const BitstreamExplorerContext = createContext<
+@@ -101,17 +82,17 @@ export const BitstreamExplorerContext = createContext<
+     & State<"fileName", string | undefined>
+     & State<"settings", SyntaxTableSettings>
+     & {
+-        trackBuffer: BitBuffer[],
+-        reset: () => void,
+-        unpack?: (buffer: Uint8Array) => BitBuffer,
+-        containers?: string[]
++        trackBuffer: BitBuffer[];
++        reset: () => void;
++        unpack?: (buffer: Uint8Array) => BitBuffer;
++        containers?: string[];
+     }
+ >({
+     trackBuffer: [],
+-    fileBuffer: new Uint8Array,
+-    setFileBuffer: () => { },
++    fileBuffer: new Uint8Array(),
++    setFileBuffer: () => {},
+     syntax: EMPTY_TREE,
+-    setSyntax: () => { },
++    setSyntax: () => {},
+     filter: { text: "" },
+     setFilter: () => undefined,
+     reset: () => undefined,
+@@ -119,98 +100,88 @@ export const BitstreamExplorerContext = createContext<
+     setContainerFormat: () => {},
+     fileName: undefined,
+     setFileName: () => {},
+-    settings: {showHiddenSyntax: false, showSizeBar: true},
+-    setSettings: () => {}
++    settings: { showHiddenSyntax: false, showSizeBar: true },
++    setSettings: () => {},
+ });
+ 
+-export function BitstreamExplorer({ 
+-    children, 
+-    parser, 
++export function BitstreamExplorer({
++    children,
++    parser,
+     uploader = <BitstreamUploader title="Drop media file here" />,
+     containers,
+-    unpack
++    unpack,
+ }: {
+-    children: ReactNode,
+-    parser: (buffer: BitBuffer[], format: string) => DataNode,
+-    uploader?: ReactNode,
+-    containers?: string[],
+-    unpack?: (buffer: Uint8Array, format: string) => [string, BitBuffer[]]
++    children: ReactNode;
++    parser: (buffer: BitBuffer[], format: string) => DataNode;
++    uploader?: ReactNode;
++    containers?: string[];
++    unpack?: (buffer: Uint8Array, format: string) => [string, BitBuffer[]];
+ }) {
+     const [syntax, setSyntax] = useState<DataNode>(EMPTY_TREE);
+     const [fileBuffer, setFileBuffer] = useState<Uint8Array>(() => new Uint8Array());
+-    const [filter, setFilter] = useState<{text: string}>({text: ""});
++    const [filter, setFilter] = useState<{ text: string }>({ text: "" });
+     const [containerFormat, setContainerFormat] = useState<string>((containers && containers[0]) || "Detect");
+-    const [showHiddenSyntax, setShowHiddenSyntax] = useState<boolean>(false);
+     const [trackBuffer, setTrackBuffer] = useState<BitBuffer[]>([]);
+     const [fileName, setFileName] = useState<string>();
+     const [settings, setSettings] = useState<SyntaxTableSettings>({
+         showHiddenSyntax: false,
+-        showSizeBar: true
++        showSizeBar: true,
+     });
+ 
+     const filteredSyntax = useMemo(() => {
+         if (!filter.text) return syntax;
+         const text = filter.text.toLowerCase();
+-        function dfs(node: DataNode): DataNode | undefined {
+-            const take = node.title!.toString().toLowerCase().indexOf(text) >= 0;
+-            if (take) return node;
+-            const children: DataNode[] = []
+-            for (const child of (node.children || [])) {
+-                const takeChild = dfs(child);
+-                if (takeChild !== undefined) {
+-                    children.push(takeChild);
+-                }
+-            }
+-            if (children.length > 0) {
+-                return {
+-                    ...node,
+-                    children
+-                }
++
++        function filterTree(node: DataNode): DataNode | undefined {
++            if (node.title!.toString().toLowerCase().includes(text)) return node;
++            const children: DataNode[] = [];
++            for (const child of node.children || []) {
++                const match = filterTree(child);
++                if (match) children.push(match);
+             }
+-            return undefined;
++            return children.length > 0 ? { ...node, children } : undefined;
+         }
+-        
+-        return dfs(syntax) || EMPTY_TREE;
++
++        return filterTree(syntax) || EMPTY_TREE;
+     }, [syntax, filter]);
+-    
+-    
++
+     useEffect(() => {
+         if (fileBuffer.byteLength === 0) return;
+         reset();
+-    }, [fileBuffer])
+-    
++    }, [fileBuffer]);
++
+     const reset = useCallback(() => {
+         let newTrackBuffer = [new BitBuffer(fileBuffer)];
+         let format = containerFormat;
+         if (unpack && containerFormat) {
+-            const [_format, _newTrackBuffer] = unpack(fileBuffer, containerFormat);
+-            newTrackBuffer = _newTrackBuffer;
+-            format = _format;
+-            setContainerFormat(format);         // Detected container after unpacking
++            const [detectedFormat, unpacked] = unpack(fileBuffer, containerFormat);
++            newTrackBuffer = unpacked;
++            format = detectedFormat;
++            setContainerFormat(format);
+         }
+         setTrackBuffer(newTrackBuffer);
+         setSyntax(parser(newTrackBuffer, format));
+     }, [fileBuffer, unpack, parser, setSyntax, setTrackBuffer]);
+ 
++    const showUploader = trackBuffer.length === 0 || trackBuffer[0].byteLength() === 0;
+ 
+-    return <>
++    return (
+         <BitstreamExplorerContext.Provider value={{
+             syntax: filteredSyntax, setSyntax,
+-            fileBuffer, setFileBuffer,          // Input file buffer
+-            trackBuffer,                        // Track Buffer to parse
++            fileBuffer, setFileBuffer,
++            trackBuffer,
+             filter, setFilter,
+             containerFormat, setContainerFormat,
+             reset, containers,
+             fileName, setFileName,
+-            settings, setSettings
++            settings, setSettings,
+         }}>
+             <BitstreamSelection>
+-                {
+-                    trackBuffer.length === 0 || trackBuffer[0].byteLength() === 0
+-                        ? uploader
+-                        : children
++                {showUploader
++                    ? <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>{uploader}</div>
++                    : children
+                 }
+             </BitstreamSelection>
+-        </BitstreamExplorerContext.Provider >
+-    </>
++        </BitstreamExplorerContext.Provider>
++    );
+ }
+diff --git a/src/bitstream/buffer.tsx b/src/bitstream/buffer.tsx
+index 8189b7b..cb56838 100644
+--- a/src/bitstream/buffer.tsx
++++ b/src/bitstream/buffer.tsx
+@@ -1,31 +1,6 @@
+ import { BitRange, ByteRange } from "./range";
+ import { assert } from "./util";
+ 
+-function REV64(x: number) {
+-    x = ((x >> 1) & 0x55555555) | ((x & 0x55555555) << 1);
+-    x = ((x >> 2) & 0x33333333) | ((x & 0x33333333) << 2);
+-    x = ((x >> 4) & 0x0F0F0F0F) | ((x & 0x0F0F0F0F) << 4);
+-    x = ((x >> 8) & 0x00FF00FF) | ((x & 0x00FF00FF) << 8);
+-    x = (x >>> 16) | (x << 16);
+-    
+-    return x >>> 0;
+-}
+-
+-
+-function REV8(b: number) {
+-    b = (b & 0xF0) >> 4 | (b & 0x0F) << 4;
+-    b = (b & 0xCC) >> 2 | (b & 0x33) << 2;
+-    b = (b & 0xAA) >> 1 | (b & 0x55) << 1;
+-    return b;
+-}
+-
+-// Less than 8 bits
+-const REV: number[] = [];
+-
+-for (let i=0; i<=0xFF; i++) {
+-    REV[i] = parseInt([...i.toString(2)].reverse().join(""), 2);
+-}
+-
+ function FloorLog2( x: number ) {
+     let s = 0
+     while ( x != 0 ) {
+diff --git a/src/bitstream/uploader.tsx b/src/bitstream/uploader.tsx
+index bec1a14..a59e2f7 100644
+--- a/src/bitstream/uploader.tsx
++++ b/src/bitstream/uploader.tsx
+@@ -1,28 +1,23 @@
+-import styled from "@emotion/styled";
+-import { Button } from "@mui/material";
+-import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+-import { DragEventHandler, useCallback, useContext } from "react";
++import { useCallback, useContext, useState } from "react";
+ import { BitstreamExplorerContext } from "./bitstream-explorer";
++import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
++import { faCloudUploadAlt } from "@fortawesome/free-solid-svg-icons";
++import { Button, TextField, Text, Select, Spinner, Flex } from "@radix-ui/themes";
++import { toast } from "sonner";
+ 
+-
+-
+-const VisuallyHiddenInput = styled('input')({
+-    clip: 'rect(0 0 0 0)',
+-    clipPath: 'inset(50%)',
+-    height: 1,
+-    overflow: 'hidden',
+-    position: 'absolute',
+-    bottom: 0,
+-    left: 0,
+-    whiteSpace: 'nowrap',
+-    width: 1,
+-});
++const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100 MB
+ 
+ export function BitstreamUploader({ title, samples }: { title: string, samples?: { [name: string]: string } }) {
+     const { setFileBuffer, setFileName, containerFormat, setContainerFormat, containers } = useContext(BitstreamExplorerContext);
+-
++    const [dragOver, setDragOver] = useState(false);
++    const [loading, setLoading] = useState(false);
+ 
+     const readFileUploadData = useCallback((file: File) => {
++        if (file.size > MAX_FILE_SIZE) {
++            toast.warning(`File too large (${(file.size / 1024 / 1024).toFixed(1)} MB). Maximum size is 100 MB.`);
++            return;
++        }
++
+         const reader = new FileReader();
+ 
+         reader.onload = (event) => {
+@@ -32,23 +27,56 @@ export function BitstreamUploader({ title, samples }: { title: string, samples?:
+             setFileBuffer(buff);
+         };
+ 
+-        reader.onerror = (err) => {
+-            console.error(err);
++        reader.onerror = () => {
++            toast.error("Failed to read file");
+         };
+ 
+         reader.readAsArrayBuffer(file);
+     }, []);
+ 
+-    return <div>
+-        <div className='FilesDragAndDrop'
++    const loadFromUrl = useCallback(async (url: string) => {
++        if (!url) return;
++        setLoading(true);
++        try {
++            const response = await fetch(url);
++            const buffer = new Uint8Array(await response.arrayBuffer());
++            if (buffer.byteLength > MAX_FILE_SIZE) {
++                toast.warning(`File too large (${(buffer.byteLength / 1024 / 1024).toFixed(1)} MB). Maximum size is 100 MB.`);
++                return;
++            }
++            setFileName(url.split('#')[0].split('?')[0].split('/').pop());
++            setFileBuffer(buffer);
++        } catch (err) {
++            toast.error(`Failed to load file: ${err}`);
++        } finally {
++            setLoading(false);
++        }
++    }, [setFileBuffer, setFileName]);
++
++    return <div style={{
++        width: "100%",
++        maxWidth: 480,
++        background: "var(--glass-bg)",
++        backdropFilter: "var(--glass-blur)",
++        WebkitBackdropFilter: "var(--glass-blur)",
++        border: "1px solid var(--glass-border)",
++        borderRadius: "var(--radius-3)",
++        padding: 24,
++        display: "flex",
++        flexDirection: "column",
++        gap: 20,
++    }}>
++        <div style={{ width: "100%" }}
+             onDragOver={(e) => {
+                 e.preventDefault();
+                 e.stopPropagation();
++                setDragOver(true);
+             }}
++            onDragLeave={() => setDragOver(false)}
+             onDrop={(e) => {
+-                console.log(e);
+                 e.preventDefault();
+                 e.stopPropagation();
++                setDragOver(false);
+ 
+                 const { files } = e.dataTransfer;
+ 
+@@ -56,63 +84,81 @@ export function BitstreamUploader({ title, samples }: { title: string, samples?:
+                     readFileUploadData(files[0]);
+                 }
+             }}>
+-            <label className='FilesDragAndDrop__area'>
+-                {title}
+-                <VisuallyHiddenInput
++            <label style={{
++                display: "flex",
++                width: "100%",
++                minHeight: 150,
++                padding: 32,
++                alignItems: "center",
++                justifyContent: "center",
++                flexDirection: "column",
++                gap: 8,
++                color: dragOver ? "var(--accent-11)" : "var(--gray-a11)",
++                border: `2px ${dragOver ? "solid" : "dashed"} ${dragOver ? "var(--accent-9)" : "var(--glass-border)"}`,
++                borderRadius: "var(--radius-2)",
++                cursor: "pointer",
++                transition: "all 0.2s",
++                background: dragOver ? "var(--accent-a2)" : "var(--glass-highlight)",
++            }}>
++                <FontAwesomeIcon icon={faCloudUploadAlt} style={{ fontSize: 40 }} />
++                <span style={{ fontSize: 16, fontWeight: 500 }}>{title}</span>
++                <span style={{ fontSize: 12, opacity: 0.6 }}>or click to browse</span>
++                <input
+                     type="file"
++                    style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0,0,0,0)" }}
+                     onChange={e => e.target.files && readFileUploadData(e.target.files[0])}
+                 />
+-                <span
+-                    role='img'
+-                    aria-label='emoji'
+-                    className='area__icon'
+-                >
+-                    &#128526;
+-                </span>
+             </label>
+         </div>
+ 
+-        {
+-            samples && <>
+-                <br />
+-                From Sample File:
+-                <form className="url-uploader" onSubmit={async (e: any) => {
+-                    e.preventDefault();
+-                    const search = new FormData(e.target).get("url")?.toString() || "";
+-                    if (!search) return;
+-                    setFileName(search.split('#')[0].split('?')[0].split('/').pop());
+-                    setFileBuffer(new Uint8Array(await (await fetch(search)).arrayBuffer()));
++        {samples && <Flex direction="column" gap="1">
++            <Text size="1" color="gray" style={{ textTransform: "uppercase", letterSpacing: "0.05em" }}>Sample File</Text>
++            <form style={{ display: "flex", gap: 8 }} onSubmit={(e: React.FormEvent<HTMLFormElement>) => {
++                e.preventDefault();
++                const search = new FormData(e.currentTarget).get("url")?.toString() || "";
++                loadFromUrl(search);
++            }}>
++                <select name="url" style={{
++                    flex: 1,
++                    height: 32,
++                    borderRadius: "var(--radius-2)",
++                    border: "1px solid var(--glass-border)",
++                    background: "transparent",
++                    paddingInline: 12,
++                    fontSize: 14,
++                    minWidth: 0,
++                    color: "inherit",
+                 }}>
+-                    <select name="url">
+-                        {Object.entries(samples).map(([k, v]) => <option key={v} value={v}>{k}</option>)}
+-                    </select>
+-                    <button type="submit" >Load</button>
+-                </form></>
+-        }
++                    {Object.entries(samples).map(([k, v]) => <option key={v} value={v}>{k}</option>)}
++                </select>
++                <Button type="submit" variant="outline" size="1" disabled={loading}>
++                    {loading ? <><Spinner size="1" />Loading</> : "Load"}
++                </Button>
++            </form>
++        </Flex>}
+ 
+-        <br />
+-        From URL:
+-        <form className="url-uploader" onSubmit={async (e: any) => {
+-            e.preventDefault();
+-            const search = new FormData(e.target).get("url")?.toString() || "";
+-            if (!search) return;
+-            setFileName(search.split('#')[0].split('?')[0].split('/').pop());
+-            setFileBuffer(new Uint8Array(await (await fetch(search)).arrayBuffer()));
+-        }}>
+-            <input name="url" />
+-            <button type="submit" >Load</button>
+-        </form>
++        <Flex direction="column" gap="1">
++            <Text size="1" color="gray" style={{ textTransform: "uppercase", letterSpacing: "0.05em" }}>From URL</Text>
++            <form style={{ display: "flex", gap: 8 }} onSubmit={(e: React.FormEvent<HTMLFormElement>) => {
++                e.preventDefault();
++                const search = new FormData(e.currentTarget).get("url")?.toString() || "";
++                loadFromUrl(search);
++            }}>
++                <TextField.Root name="url" placeholder="https://example.com/file.mp4" size="1" style={{ flex: 1 }} />
++                <Button type="submit" variant="outline" size="1" disabled={loading}>
++                    {loading ? <><Spinner size="1" />Loading</> : "Load"}
++                </Button>
++            </form>
++        </Flex>
+ 
+-        {containers &&
+-            <>
+-                <br />
+-                Container Format:
+-                <div className="url-uploader">
+-                    <select name="url" value={containerFormat} onChange={e => setContainerFormat(e.target.value)}>
+-                        {containers.map((c) => <option key={c} value={c}>{c}</option>)}
+-                    </select>
+-                </div>
+-            </>
+-        }
++        {containers && <Flex direction="column" gap="1">
++            <Text size="1" color="gray" style={{ textTransform: "uppercase", letterSpacing: "0.05em" }}>Container Format</Text>
++            <Select.Root size="1" value={containerFormat} onValueChange={setContainerFormat}>
++                <Select.Trigger />
++                <Select.Content>
++                    {containers.map((c) => <Select.Item key={c} value={c}>{c}</Select.Item>)}
++                </Select.Content>
++            </Select.Root>
++        </Flex>}
+     </div>
+-}
+\ No newline at end of file
++}
+diff --git a/src/browser-util.tsx b/src/browser-util.tsx
+index 59d3b36..3050b31 100644
+--- a/src/browser-util.tsx
++++ b/src/browser-util.tsx
+@@ -5,13 +5,12 @@ function downloadURL(data: string, fileName: string) {
+     a.href = data;
+     a.download = fileName;
+     document.body.appendChild(a);
+-    // @ts-ignore
+-    a.style = 'display: none';
++    a.style.display = 'none';
+     a.click();
+     a.remove();
+ }
+ 
+-export function downloadBlob(parts: Uint8Array[], fileName: string, mimeType: string) {
++export function downloadBlob(parts: BlobPart[], fileName: string, mimeType: string) {
+     var blob, url: string;
+     blob = new Blob(parts, {
+         type: mimeType
+diff --git a/src/common.scss b/src/common.scss
+deleted file mode 100644
+index a5ffd70..0000000
+--- a/src/common.scss
++++ /dev/null
+@@ -1,31 +0,0 @@
+-[data-tooltip] {
+-    position: relative;
+-    border-bottom: 1px dashed #000;
+-    cursor: help;
+-}
+-
+-[data-tooltip]::after {
+-    font-size: 13px !important;
+-    // color: #00000063;
+-    background-color: var(--bg-strong-color);
+-    position: absolute;
+-    opacity: 0;
+-    pointer-events: none;
+-    content: attr(data-tooltip);
+-    left: 0;
+-    top: calc(100% + 10px);
+-    border-radius: 3px;
+-    border: 1px solid var(--border-color);
+-    // box-shadow: 0 0 5px 2px rgba(100, 100, 100, 0.6);
+-    z-index: 10;
+-    padding: 8px;
+-    width: 200px;
+-    transform: translateY(-20px);
+-    transition: all 150ms cubic-bezier(.25, .8, .25, 1);
+-}
+-
+-[data-tooltip]:hover::after {
+-    opacity: 1;
+-    transform: translateY(0);
+-    transition-duration: 300ms;
+-}
+\ No newline at end of file
+diff --git a/src/components/downloader.tsx b/src/components/downloader.tsx
+index 3bd0c4f..5aacd0c 100644
+--- a/src/components/downloader.tsx
++++ b/src/components/downloader.tsx
+@@ -2,18 +2,18 @@ import { useContext } from "react";
+ import { BitstreamExplorerContext } from "../bitstream/bitstream-explorer";
+ import { downloadBlob } from "../browser-util";
+ import { BitBuffer } from "../bitstream/buffer";
+-
+-
++import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
++import { faDownload } from "@fortawesome/free-solid-svg-icons";
++import { Tooltip, IconButton } from "@radix-ui/themes";
+ 
+ export function TrackDownloader({ downloadExtension = ".bin", transformer }: {
+     downloadExtension?: string,
+-    transformer ?: (buffers: BitBuffer[]) => BitBuffer[]
++    transformer?: (buffers: BitBuffer[]) => BitBuffer[]
+ }) {
+-    const { trackBuffer, fileName, setFileName } = useContext(BitstreamExplorerContext);
++    const { trackBuffer, fileName } = useContext(BitstreamExplorerContext);
+ 
+-    return <>
+-        <a className="toolbar-item"
+-            data-tooltip={`Download track as raw "${downloadExtension}" file`}
++    return <Tooltip content={`Download track as raw "${downloadExtension}" file`}>
++        <IconButton variant="ghost" size="1"
+             onClick={() => {
+                 let dlName = fileName || "unknown.xyz";
+                 if (dlName.indexOf('.') >= 0) {
+@@ -25,6 +25,8 @@ export function TrackDownloader({ downloadExtension = ".bin", transformer }: {
+                     buffers = transformer(buffers);
+                 }
+                 downloadBlob(buffers.map(buff => buff.slice()), dlName, 'application/octet-stream');
+-            }}><i className="fas fa-download"></i></a>
+-    </>
+-}
+\ No newline at end of file
++            }}>
++            <FontAwesomeIcon icon={faDownload} style={{ fontSize: 12 }} />
++        </IconButton>
++    </Tooltip>
++}
+diff --git a/src/components/frame-viewer-libde265.tsx b/src/components/frame-viewer-libde265.tsx
+index b41222e..101607e 100644
+--- a/src/components/frame-viewer-libde265.tsx
++++ b/src/components/frame-viewer-libde265.tsx
+@@ -1,54 +1,23 @@
+-import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
++import { useCallback, useContext, useEffect, useRef, useState } from "react";
+ import { BitstreamExplorerContext } from "../bitstream/bitstream-explorer";
+ import { mod } from "../browser-util";
+-import { BitBuffer } from "../bitstream/buffer";
+ import { HEVCSplitNalu, isSystemStreamHEVC, systemStreamToAnnexB } from "../formats/hevc/hevc-bitstream";
+-
+-const joinBuffer = (buffers: BitBuffer[]) => {
+-    const ret = new Uint8Array(buffers.reduce((p, b) => p + b.byteLength(), 0));
+-    let offset = 0;
+-    for (const buffer of buffers) {
+-        ret.set(buffer.slice(), offset);
+-        offset += buffer.byteLength();
+-    }
+-    return ret;
+-}
++import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
++import { faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons";
++import { Tooltip, IconButton, Progress, Flex, Text, Spinner } from "@radix-ui/themes";
+ 
+ const NALU_PUSH_DELAY = 0;
+ 
+-export function FrameViewerFfmpeg({ }: {}) {
++export function FrameViewerFfmpeg() {
+     const { trackBuffer } = useContext(BitstreamExplorerContext);
+     const canvasRef = useRef<HTMLCanvasElement>(null);
+     const containerRef = useRef<HTMLDivElement>(null);
+-    const [frames, setFrames] = useState<ImageData[]>([]);
+-    const [currentFrame, setCurrentFrame] = useState<number>(0);
+     const logRef = useRef<HTMLPreElement>(null);
+-
+-    const redraw = useCallback(() => {
+-        if (currentFrame >= frames.length) return;
+-
+-        const canvas = canvasRef.current!;
+-        const container = containerRef.current!;
+-        const frame = frames[currentFrame];
+-
+-        var vRatio = frame.width / frame.height;
+-
+-        // const w = container.clientWidth - 2;
+-        // const h = container.clientWidth / vRatio - 2;
+-        const w = frame.width;
+-        const h = frame.height;
+-        canvas.width = w;
+-        canvas.height = h;
+-        // @ts-ignore
+-        canvas.style.width = w;
+-        // @ts-ignore
+-        canvas.style.height = h;
+-
+-        const context = canvas.getContext('2d')!;
+-        context.putImageData(frame, 0, 0);
+-
+-
+-    }, [frames, currentFrame, containerRef]);
++    const cancelledRef = useRef(false);
++    const [frames, setFrames] = useState<ImageData[]>([]);
++    const [currentFrame, setCurrentFrame] = useState(0);
++    const [decoding, setDecoding] = useState(false);
++    const [error, setError] = useState<string>();
+ 
+     const log = (...msgs: any[]) => {
+         if (!logRef.current) {
+@@ -56,40 +25,42 @@ export function FrameViewerFfmpeg({ }: {}) {
+             return;
+         }
+         const pre = logRef.current;
+-        pre.innerHTML += msgs.map(m => m.toString()).join(" ") + "\n";
+-        // setTimeout(() => {   
++        pre.textContent += msgs.map((m) => m.toString()).join(" ") + "\n";
+         pre.scrollTop = pre.scrollHeight;
+-        // }, 100);
+-    }
++    };
+ 
+-    // @ts-ignore
+-    window.logger = {
+-        log: log,
+-        error: log
+-    }
++    (window as any).logger = { log, error: log };
+ 
+-    const extractFrames = async () => {
+-        // @ts-ignore
++    const redraw = useCallback(() => {
++        if (currentFrame >= frames.length) return;
++        const canvas = canvasRef.current!;
++        const frame = frames[currentFrame];
++
++        canvas.width = frame.width;
++        canvas.height = frame.height;
++        canvas.style.width = frame.width + "px";
++        canvas.style.height = frame.height + "px";
++        canvas.getContext("2d")!.putImageData(frame, 0, 0);
++    }, [frames, currentFrame]);
+ 
+-        const {Libde265}: any = await import("../third_party/libde265");
+-        console.log(Libde265);
+-        const libde265 = new Libde265({ log: log, error: log }).libde265;
++    const extractFrames = async () => {
++        const { Libde265 }: any = await import("../third_party/libde265");
++        const libde265 = new Libde265({ log, error: log }).libde265;
+         const decoder = new libde265.Decoder(true);
+-        console.log(decoder);
+ 
+         decoder.set_image_callback((image: any) => {
+             const canvas = canvasRef.current!;
+-            const context = canvas.getContext('2d')!;
+-
+-            var w = image.get_width();
+-            var h = image.get_height();
+-            const image_data = context.createImageData(w, h);
+-            for (var i = 0; i < w * h; i++) {
+-                image_data.data[i * 4 + 3] = 255;
++            const ctx = canvas.getContext("2d")!;
++            const w = image.get_width();
++            const h = image.get_height();
++            const imageData = ctx.createImageData(w, h);
++            for (let i = 0; i < w * h; i++) {
++                imageData.data[i * 4 + 3] = 255;
+             }
+-
+-            image.display(image_data, function (display_image_data: any) {
+-                setFrames(frames => [...frames, display_image_data]);
++            image.display(imageData, (displayData: any) => {
++                if (!cancelledRef.current) {
++                    setFrames((prev) => [...prev, displayData]);
++                }
+             });
+             image.free();
+         });
+@@ -104,28 +75,33 @@ export function FrameViewerFfmpeg({ }: {}) {
+         log(`Nalu found: ${nalus.length}`);
+ 
+         const pushNalu = () => {
+-            if (nalus.length == 0) {
++            if (cancelledRef.current) return;
++
++            if (nalus.length === 0) {
+                 decoder.flush();
++                if (!cancelledRef.current) {
++                    setDecoding(false);
++                    log("Decoding finished");
++                }
+                 return;
+             }
+             const nalu = nalus.shift()?.slice();
+-
+-            // console.log("Pushing nalu");
+             decoder.push_data(nalu);
+ 
+-            decoder.decode(function (err: any) {
+-                // console.log("Decode callback", err);
++            decoder.decode((err: any) => {
++                if (cancelledRef.current) return;
++
+                 switch (err) {
+                     case libde265.DE265_ERROR_WAITING_FOR_INPUT_DATA:
+                         setTimeout(pushNalu, NALU_PUSH_DELAY);
+                         return;
+-
+                     default:
+                         if (!libde265.de265_isOK(err)) {
+-                            log("Error: " + libde265.de265_get_error_text(err));
++                            const errMsg = libde265.de265_get_error_text(err);
++                            log("Error: " + errMsg);
++                            if (!cancelledRef.current) setError(errMsg);
+                             return;
+                         }
+-
+                 }
+ 
+                 if (nalus.length > 0) {
+@@ -133,75 +109,86 @@ export function FrameViewerFfmpeg({ }: {}) {
+                     return;
+                 }
+ 
+-                log("Decoding finished");
++                if (!cancelledRef.current) {
++                    setDecoding(false);
++                    log("Decoding finished");
++                }
+                 decoder.free();
+             });
+-        }
++        };
++
+         log("Starting decoding");
+         setTimeout(pushNalu, NALU_PUSH_DELAY);
+-
+         setFrames([]);
+         return decoder;
+     };
+ 
+     useEffect(() => {
++        cancelledRef.current = false;
++        setDecoding(true);
++        setError(undefined);
++        setCurrentFrame(0);
++
+         const decoder = extractFrames();
+         return () => {
+-            // decoder.stop();
+-            decoder.then(dec => dec.free());
+-        }
++            cancelledRef.current = true;
++            decoder.then((dec) => dec.free());
++        };
+     }, [trackBuffer]);
+ 
+-    useEffect(() => {
+-        redraw();
+-    }, [frames, currentFrame]);
++    useEffect(() => { redraw(); }, [frames, currentFrame]);
+ 
+     useEffect(() => {
+         if (!containerRef.current) return;
+-        const resizeObserver = new ResizeObserver(() => {
+-            redraw();
+-        });
+-        resizeObserver.observe(containerRef.current);
+-        return () => resizeObserver.disconnect();
++        const observer = new ResizeObserver(() => redraw());
++        observer.observe(containerRef.current);
++        return () => observer.disconnect();
+     }, [containerRef.current]);
+ 
+-    return <div className="flexv-item flexv" ref={containerRef} style={{ overflow: "hidden" }}>
+-        <script src="/libde265.js" />
+-        <div className="toolbar">
+-            <a data-tooltip="Previous frame" className="toolbar-item"
+-                onClick={() => setCurrentFrame(mod(currentFrame - 1, frames.length))}>
+-                <i className="fas fa-chevron-left"></i>
+-            </a>
+-            <div className="toolbar-item">
+-                {currentFrame} / {frames.length}
++    const prevFrame = () => setCurrentFrame(mod(currentFrame - 1, frames.length));
++    const nextFrame = () => setCurrentFrame(mod(currentFrame + 1, frames.length));
++
++    return (
++        <div ref={containerRef} style={{ flex: 1, minHeight: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
++            <Flex align="center" style={{ height: 36, background: "var(--glass-bg)", backdropFilter: "var(--glass-blur)", WebkitBackdropFilter: "var(--glass-blur)", borderBottom: "1px solid var(--glass-border)", flexShrink: 0 }}>
++                <Tooltip content="Previous frame">
++                    <IconButton variant="ghost" size="1" onClick={prevFrame} disabled={frames.length === 0}>
++                        <FontAwesomeIcon icon={faChevronLeft} style={{ fontSize: 12 }} />
++                    </IconButton>
++                </Tooltip>
++                <Text size="2" color="gray" style={{ paddingInline: 12 }}>
++                    {currentFrame} / {frames.length}
++                </Text>
++                <Tooltip content="Next frame">
++                    <IconButton variant="ghost" size="1" onClick={nextFrame} disabled={frames.length === 0}>
++                        <FontAwesomeIcon icon={faChevronRight} style={{ fontSize: 12 }} />
++                    </IconButton>
++                </Tooltip>
++                {decoding && (
++                    <Flex align="center" gap="2" style={{ paddingInline: 8 }}>
++                        <Spinner size="1" />
++                        <Text size="1" color="gray">Decoding...</Text>
++                    </Flex>
++                )}
++            </Flex>
++            {error && (
++                <Flex align="center" style={{ padding: "8px 12px", background: "var(--red-a2)", borderBottom: "1px solid var(--red-a5)" }}>
++                    <Text size="1" color="red">{error}</Text>
++                </Flex>
++            )}
++            <canvas
++                ref={canvasRef}
++                tabIndex={0}
++                style={{ border: "1px solid var(--glass-border)" }}
++                onKeyDown={(e) => {
++                    if (e.key === "ArrowRight") nextFrame();
++                    else if (e.key === "ArrowLeft") prevFrame();
++                }}
++            />
++            <div style={{ marginTop: 12, paddingInline: 4 }}>
++                <Progress value={frames.length > 0 ? (100 * currentFrame / frames.length) : 0} />
+             </div>
+-            <a data-tooltip="Next frame" className="toolbar-item"
+-                onClick={() => setCurrentFrame(mod(currentFrame + 1, frames.length))}>
+-                <i className="fas fa-chevron-right"></i>
+-            </a>
+-        </div>
+-        <canvas ref={canvasRef} tabIndex={0}
+-            style={{ border: "1px solid var(--border-color)" }}
+-            onKeyDown={e => {
+-                if (e.key === "ArrowRight") {
+-                    setCurrentFrame(mod(currentFrame + 1, frames.length))
+-                } else if (e.key === "ArrowLeft") {
+-                    setCurrentFrame(mod(currentFrame - 1, frames.length))
+-                }
+-            }} />
+-
+-        <br />
+-        <br />
+-        <div style={{ height: 7, width: "100%", borderRadius: 10, backgroundColor: "var(--secondary-color)" }}>
+-            <div style={{
+-                height: "100%",
+-                width: (100 * currentFrame / frames.length) + "%",
+-                borderTopLeftRadius: 10,
+-                borderBottomLeftRadius: 10,
+-                borderRight: "4px solid white",
+-                backgroundColor: "var(--primary-color)"
+-            }} />
++            <pre ref={logRef} style={{ flex: 1, overflow: "auto", fontSize: 12, color: "var(--gray-a11)", marginTop: 8 }} />
+         </div>
+-        <pre ref={logRef} style={{ flex: 1, overflow: "auto" }} />
+-    </div>
++    );
+ }
+diff --git a/src/components/frame-viewer.tsx b/src/components/frame-viewer.tsx
+index fcecf19..5efd16c 100644
+--- a/src/components/frame-viewer.tsx
++++ b/src/components/frame-viewer.tsx
+@@ -1,119 +1,130 @@
+-import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
++import { useCallback, useContext, useEffect, useRef, useState } from "react";
+ import { BitstreamExplorerContext } from "../bitstream/bitstream-explorer";
+ import { mod } from "../browser-util";
+-
+-
++import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
++import { faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons";
++import { Tooltip, IconButton, Progress, Flex, Text, Spinner } from "@radix-ui/themes";
+ 
+ export function FrameViewer({ config }: { config: VideoDecoderConfig }) {
+     const { trackBuffer } = useContext(BitstreamExplorerContext);
+     const canvasRef = useRef<HTMLCanvasElement>(null);
+     const containerRef = useRef<HTMLDivElement>(null);
+     const [frames, setFrames] = useState<VideoFrame[]>([]);
+-    const [currentFrame, setCurrentFrame] = useState<number>(0);
++    const [currentFrame, setCurrentFrame] = useState(0);
++    const [decoding, setDecoding] = useState(false);
++    const [error, setError] = useState<string>();
+ 
+     const redraw = useCallback(() => {
+         if (currentFrame >= frames.length) return;
+-
+         const canvas = canvasRef.current!;
+         const container = containerRef.current!;
+         const frame = frames[currentFrame];
+-
+-        var vRatio = frame.displayWidth / frame.displayHeight;
+-
++        const ratio = frame.displayWidth / frame.displayHeight;
+         const w = container.clientWidth - 2;
+-        const h = container.clientWidth / vRatio - 2;
++        const h = w / ratio - 2;
++
+         canvas.width = w;
+         canvas.height = h;
+-        // @ts-ignore
+-        canvas.style.width = w;
+-        // @ts-ignore
+-        canvas.style.height = h;
+-
+-        const context = canvas.getContext('2d')!;
+-        context.drawImage(frame, 0, 0, w, h);
+-
+-
++        canvas.style.width = w + "px";
++        canvas.style.height = h + "px";
++        canvas.getContext("2d")!.drawImage(frame, 0, 0, w, h);
+     }, [frames, currentFrame, containerRef]);
+ 
+     useEffect(() => {
++        let cancelled = false;
++        setDecoding(true);
++        setError(undefined);
++        setFrames([]);
++        setCurrentFrame(0);
++
+         (async () => {
+             const decoded: VideoFrame[] = [];
+-            const decoder = new VideoDecoder({
+-                output: (frame: VideoFrame) => {
+-                    // frame.close();
+-                    decoded.push(frame);
+-                },
+-                error: console.error,
+-            });
+-            decoder.configure(config);
+-
+-            console.log("Decoding frames ... ");
+-
+-            for (const buffer of trackBuffer) {
+-                const chunk = new EncodedVideoChunk({
+-                    timestamp: 0,
+-                    type: "key",
+-                    duration: 1,
+-                    data: buffer.slice(),
++            try {
++                const decoder = new VideoDecoder({
++                    output: (frame) => decoded.push(frame),
++                    error: (err) => {
++                        if (!cancelled) setError(`Decode error: ${err.message}`);
++                    },
+                 });
+-                decoder.decode(chunk);
++                decoder.configure(config);
++
++                for (const buffer of trackBuffer) {
++                    decoder.decode(new EncodedVideoChunk({
++                        timestamp: 0,
++                        type: "key",
++                        duration: 1,
++                        data: buffer.slice(),
++                    }));
++                }
++                await decoder.flush();
++            } catch (err: any) {
++                if (!cancelled) setError(`Decode failed: ${err.message || err}`);
++            }
++            if (!cancelled) {
++                setFrames(decoded);
++                setDecoding(false);
++            } else {
++                decoded.forEach((f) => f.close());
+             }
+-
+-            await decoder.flush();
+-
+-            setFrames(decoded);
+         })();
+-    }, [trackBuffer, canvasRef]);
+ 
+-    useEffect(() => {
+-        redraw();
+-    }, [frames, currentFrame]);
++        return () => {
++            cancelled = true;
++        };
++    }, [trackBuffer, config]);
++
++    useEffect(() => { redraw(); }, [frames, currentFrame]);
+ 
+     useEffect(() => {
+         if (!containerRef.current) return;
+-        const resizeObserver = new ResizeObserver(() => {
+-            redraw();
+-        });
+-        resizeObserver.observe(containerRef.current);
+-        return () => resizeObserver.disconnect();
++        const observer = new ResizeObserver(() => redraw());
++        observer.observe(containerRef.current);
++        return () => observer.disconnect();
+     }, [containerRef.current]);
+ 
+-    return <div className="flexv-item" ref={containerRef} style={{ overflow: "hidden" }}>
+-        <div className="toolbar">
+-            <a data-tooltip="Previous frame" className="toolbar-item"
+-                onClick={() => setCurrentFrame(mod(currentFrame - 1, frames.length))}>
+-                <i className="fas fa-chevron-left"></i>
+-            </a>
+-            <div className="toolbar-item">
+-                {currentFrame} / {frames.length}
++    const prevFrame = () => setCurrentFrame(mod(currentFrame - 1, frames.length));
++    const nextFrame = () => setCurrentFrame(mod(currentFrame + 1, frames.length));
++
++    return (
++        <div ref={containerRef} style={{ flex: 1, minHeight: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
++            <Flex align="center" style={{ height: 36, background: "var(--glass-bg)", backdropFilter: "var(--glass-blur)", WebkitBackdropFilter: "var(--glass-blur)", borderBottom: "1px solid var(--glass-border)", flexShrink: 0 }}>
++                <Tooltip content="Previous frame">
++                    <IconButton variant="ghost" size="1" onClick={prevFrame} disabled={frames.length === 0}>
++                        <FontAwesomeIcon icon={faChevronLeft} style={{ fontSize: 12 }} />
++                    </IconButton>
++                </Tooltip>
++                <Text size="2" color="gray" style={{ paddingInline: 12 }}>
++                    {currentFrame} / {frames.length}
++                </Text>
++                <Tooltip content="Next frame">
++                    <IconButton variant="ghost" size="1" onClick={nextFrame} disabled={frames.length === 0}>
++                        <FontAwesomeIcon icon={faChevronRight} style={{ fontSize: 12 }} />
++                    </IconButton>
++                </Tooltip>
++            </Flex>
++            {decoding && (
++                <Flex align="center" justify="center" gap="2" style={{ padding: 24 }}>
++                    <Spinner size="2" />
++                    <Text size="2" color="gray">Decoding...</Text>
++                </Flex>
++            )}
++            {error && (
++                <Flex align="center" justify="center" style={{ padding: 24 }}>
++                    <Text size="2" color="red">{error}</Text>
++                </Flex>
++            )}
++            <canvas
++                ref={canvasRef}
++                tabIndex={0}
++                style={{ border: "1px solid var(--glass-border)" }}
++                onKeyDown={(e) => {
++                    if (e.key === "ArrowRight") nextFrame();
++                    else if (e.key === "ArrowLeft") prevFrame();
++                }}
++            />
++            <div style={{ marginTop: 12, paddingInline: 4 }}>
++                <Progress value={frames.length > 0 ? (100 * currentFrame / frames.length) : 0} />
+             </div>
+-            <a data-tooltip="Next frame" className="toolbar-item"
+-                onClick={() => setCurrentFrame(mod(currentFrame + 1, frames.length))}>
+-                <i className="fas fa-chevron-right"></i>
+-            </a>
+-        </div>
+-        <canvas ref={canvasRef} tabIndex={0}
+-            style={{ border: "1px solid var(--border-color)" }}
+-            onKeyDown={e => {
+-                if (e.key === "ArrowRight") {
+-                    setCurrentFrame(mod(currentFrame + 1, frames.length))
+-                } else if (e.key === "ArrowLeft") {
+-                    setCurrentFrame(mod(currentFrame - 1, frames.length))
+-                }
+-            }} />
+-
+-        <br />
+-        <br />
+-        <div style={{ height: 7, width: "100%", borderRadius: 10, backgroundColor: "var(--secondary-color)" }}>
+-            <div style={{
+-                // display: "inline-block",
+-                height: "100%",
+-                width: (100 * currentFrame / frames.length) + "%",
+-                borderTopLeftRadius: 10,
+-                borderBottomLeftRadius: 10,
+-                borderRight: "4px solid white",
+-                backgroundColor: "var(--primary-color)"
+-            }} />
+         </div>
+-    </div>
++    );
+ }
+diff --git a/src/components/hex-editor.scss b/src/components/hex-editor.scss
+deleted file mode 100644
+index 640390a..0000000
+--- a/src/components/hex-editor.scss
++++ /dev/null
+@@ -1,156 +0,0 @@
+-.hex-editor {
+-    position: relative;
+-    width: 100%;
+-
+-    .infinite-render {
+-        display: flex;
+-        flex-direction: row;
+-        justify-content: space-between;
+-        padding-right: 20px;
+-        .hex-bytes {
+-            user-select: none;
+-            cursor: text;
+-
+-            & > div {
+-                line-height: 25px;
+-
+-            }
+-            & > div > span {
+-                display: inline-block;
+-                width: 25px;
+-                text-align: center;
+-
+-                &:hover {
+-                    background-color: rgb(216, 216, 216);
+-                }
+-            }
+-        }
+-
+-        .hex-positions {
+-            div {
+-                line-height: 25px;
+-            }
+-        }
+-    }
+-}
+-
+-
+-.node-right {
+-    float: right;
+-    margin-right: 50px;
+-
+-    // display: flex;
+-    // width: 100px;
+-    // justify-content: space-between;
+-    &>span {
+-        display: inline-block;
+-        width: 70px;
+-    }
+-}
+-
+-.data-box {
+-    display: block;
+-    border: 2px solid grey;
+-    padding: 20px;
+-    cursor: pointer;
+-    pointer-events: fill;
+-    // box-sizing: content-box;
+-    margin-top: -1px;
+-    margin-left: -1px;
+-
+-    &:hover:not(:has(.data-box:hover)) {
+-        border-color: black;
+-    }
+-
+-    .data-box-header {
+-        display: flex;
+-        user-select: none;
+-
+-        &:hover {
+-            background-color: grey;
+-        }
+-    }
+-}
+-
+-
+-.syntax-table {
+-    width: 100%;
+-    table-layout: auto !important;
+-    tr {
+-        &:hover {
+-            background-color: var(--bg-strong-color);
+-        }
+-        &:focus {
+-            outline: auto;
+-        }
+-    }
+-    th {
+-        text-align: left;
+-        padding: 3px 20px;
+-    }
+-    td:not(:last-child) {
+-        border-right: 1px solid var(--border-color);
+-    }
+-    td {
+-        text-align: left;
+-        vertical-align: middle;
+-        padding: 3px 20px;
+-        width: 1%;
+-        white-space: nowrap;
+-        min-width: 100px;
+-    }
+-    td:first-child {
+-        width: auto !important;
+-    }
+-
+-    .tab-space {
+-        display: inline-block;
+-    }
+-    .expand-btn {
+-        cursor: pointer;
+-        display: inline-block;
+-        margin-right: 10px;
+-        line-height: 1;
+-        // background: none;
+-        // border: none;
+-        transition: transform 0.1s;
+-        vertical-align: middle;
+-        &:hover {
+-            color: var(--heading-color);
+-        }
+-        
+-        &.expanded {
+-            transform: rotate(90deg);
+-        }
+-    }
+-    .expand-space{
+-        width: 23px;
+-        display: inline-block;
+-    }
+-
+-    .value {
+-        font-family: monospace;
+-        overflow: auto;
+-        max-width: 500px;
+-        white-space: break-word;
+-    }
+-
+-    td:first-child {
+-        position: relative;
+-    }
+-    .size-rect {
+-        background-color: var(--primary-color);
+-        box-sizing: border-box;
+-        border: 2px solid black;
+-        border-left: 0px;
+-        border-right: 0px;
+-        height: 100%;
+-        position: absolute;
+-        right: 0;
+-        top: 0;
+-    }
+-}
+-
+-.error {
+-    color: var(--color-danger)
+-}
+\ No newline at end of file
+diff --git a/src/components/hex-editor.tsx b/src/components/hex-editor.tsx
+index 3955f5a..ce0b228 100644
+--- a/src/components/hex-editor.tsx
++++ b/src/components/hex-editor.tsx
+@@ -1,26 +1,17 @@
+-import { DataNode } from "../types/parser.types";
+-import "./hex-editor.scss";
+-import { Fragment, MouseEvent, MouseEventHandler, UIEvent, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+-import { Card, colors } from '@mui/material';
++import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+ import { BitRange, ByteRange } from "../bitstream/range";
+ import { BitstreamExplorerContext, BitstreamSelectionContext } from "../bitstream/bitstream-explorer";
+ 
+-
+ const byteToHex: string[] = [];
+ const byteToBin: string[] = [];
+ const byteToAscii: string[] = [];
+ 
+-
+-
+ for (let n = 0; n <= 0xff; ++n) {
+-    const hexOctet = n.toString(16).padStart(2, "0");
+-    byteToHex.push(hexOctet);
+-    const bin = n.toString(2).padStart(8, "0");
+-    byteToBin.push(bin);
+-    byteToAscii.push(n >= 32 && n <= 127 ? String.fromCharCode(n) : '.');
++    byteToHex.push(n.toString(16).padStart(2, "0"));
++    byteToBin.push(n.toString(2).padStart(8, "0"));
++    byteToAscii.push(n >= 32 && n <= 127 ? String.fromCharCode(n) : ".");
+ }
+ 
+-
+ const NUM_COLS = 16;
+ const NUM_ROWS = 25;
+ const CELL_HEIGHT = 25;
+@@ -29,135 +20,214 @@ const EXTRA_RENDER_ROWS = 10;
+ const NUM_BYTES_IN_INSPECT = 4;
+ 
+ function ByteInspector({ range }: { range: ByteRange }) {
+-
+     const { fileBuffer } = useContext(BitstreamExplorerContext);
+     const { getBitColor } = useContext(BitstreamSelectionContext);
+ 
+     const inspectBytes = range.first(NUM_BYTES_IN_INSPECT);
+-    const inspectValue = inspectBytes.map(1, i => fileBuffer[i]).reduce((prev, val) => prev << 8 | val);
+-
+-    return <Card variant="outlined" sx={{ padding: 1 }}>
+-        Selected: {range.start}:{range.end - 1} <br />
+-        Showing (First {inspectBytes.count()} bytes) <br />
+-        Hex: {inspectValue.toString(16).padStart(inspectBytes.count() * 2, '0')}  <br />
+-        Decimal: {inspectValue}  <br />
+-        Binary: {
+-            inspectBytes.map(1, i => <span key={i} style={{ marginRight: CELL_WIDTH / 2 }}>{
+-                [...byteToBin[fileBuffer[i]]].map(
+-                    (bit, j) => <span key={i * 8 + j} style={{ width: CELL_WIDTH / 2, backgroundColor: getBitColor(i * 8 + j) }}>{bit}</span>
+-                )
+-            }</span>)
+-        }
+-    </Card>
++    const inspectValue = inspectBytes.map(1, (i) => fileBuffer[i]).reduce((prev, val) => prev << 8 | val);
++
++    return (
++        <div style={{
++            background: "var(--glass-bg)",
++            backdropFilter: "var(--glass-blur)",
++            WebkitBackdropFilter: "var(--glass-blur)",
++            border: "1px solid var(--glass-border)",
++            borderRadius: "var(--radius-2)",
++            padding: 12,
++        }}>
++            <div style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: "2px 12px", alignItems: "center", fontSize: 13 }}>
++                <span style={{ color: "var(--gray-a11)" }}>Selected</span>
++                <span>{range.start} : {range.end - 1} ({inspectBytes.count()} bytes)</span>
++                <span style={{ color: "var(--gray-a11)" }}>Hex</span>
++                <span style={{ fontFamily: "var(--code-font-family)" }}>{inspectValue.toString(16).padStart(inspectBytes.count() * 2, "0")}</span>
++                <span style={{ color: "var(--gray-a11)" }}>Decimal</span>
++                <span style={{ fontFamily: "var(--code-font-family)" }}>{inspectValue}</span>
++                <span style={{ color: "var(--gray-a11)" }}>Binary</span>
++                <span style={{ fontFamily: "var(--code-font-family)" }}>
++                    {inspectBytes.map(1, (i) => (
++                        <span key={i} style={{ marginRight: CELL_WIDTH / 2 }}>
++                            {[...byteToBin[fileBuffer[i]]].map((bit, j) => (
++                                <span key={i * 8 + j} style={{ width: CELL_WIDTH / 2, backgroundColor: getBitColor(i * 8 + j) }}>
++                                    {bit}
++                                </span>
++                            ))}
++                        </span>
++                    ))}
++                </span>
++            </div>
++        </div>
++    );
+ }
+ 
+-export function HexEditor({ }: {}) {
++export function HexEditor() {
+     const { fileBuffer } = useContext(BitstreamExplorerContext);
+     const { ranges, setRanges, getByteColor } = useContext(BitstreamSelectionContext);
+     const [offset, setOffset] = useState(0);
+     const [dragStart, setDragStart] = useState<number>();
++    const [cursor, setCursor] = useState(-1);
++    const [anchor, setAnchor] = useState(-1);
+     const scrollViewRef = useRef<HTMLDivElement>(null);
+ 
+-    console.log("Hex editor rendered");
+-
+     useEffect(() => {
+         if (!ranges[0] || dragStart || !scrollViewRef.current) return;
+         const { scrollTop, clientHeight } = scrollViewRef.current;
+-
+         const top = Math.floor(ranges[0].start / (NUM_COLS * 8)) * CELL_HEIGHT;
+-        // Scroll only if not in view
+-        if (top < scrollTop || top > (scrollTop + clientHeight)) {
+-            scrollViewRef.current?.scrollTo({
+-                top,
+-                behavior: "smooth"
+-            });
++        if (top < scrollTop || top > scrollTop + clientHeight) {
++            scrollViewRef.current.scrollTo({ top, behavior: "smooth" });
+         }
+     }, [ranges, dragStart]);
+ 
++    const scrollToCursor = useCallback((pos: number) => {
++        if (!scrollViewRef.current) return;
++        const { scrollTop, clientHeight } = scrollViewRef.current;
++        const top = Math.floor(pos / NUM_COLS) * CELL_HEIGHT;
++        if (top < scrollTop) {
++            scrollViewRef.current.scrollTo({ top, behavior: "smooth" });
++        } else if (top + CELL_HEIGHT > scrollTop + clientHeight) {
++            scrollViewRef.current.scrollTo({ top: top - clientHeight + CELL_HEIGHT, behavior: "smooth" });
++        }
++    }, []);
++
+     const renderBytes = useMemo(() => new ByteRange(
+         Math.max(offset - EXTRA_RENDER_ROWS * NUM_COLS, 0),
+-        Math.min(offset + (NUM_ROWS + EXTRA_RENDER_ROWS) * NUM_COLS, fileBuffer.length)
++        Math.min(offset + (NUM_ROWS + EXTRA_RENDER_ROWS) * NUM_COLS, fileBuffer.length),
+     ), [fileBuffer, offset]);
+ 
+-    return <div className="hex-editor" style={{ position: "relative", fontFamily: "monospace", height: "100%", minWidth: "min-content", display: "flex", flexDirection: "column" }}>
+-        
+-        {/* <div style={{ position: "absolute", zIndex: 8, right: 0, height: "100%", width: 50, backgroundColor: "grey" }}>
+-            <div style={{border: "black", height}}></div>
+-        </div> */}
+-        <div className="infinite" ref={scrollViewRef} style={{ flex: "1 1 auto", height: 0, overflowY: "auto", paddingRight: 50 }}
+-            onScroll={(e: any) => {
+-                const { scrollTop } = e.target;
+-                setOffset(NUM_COLS * Math.floor(scrollTop / CELL_HEIGHT));
+-            }}
+-        >
+-            <div style={{ height: (fileBuffer.length / NUM_COLS) * CELL_HEIGHT }}>
+-                <div className="infinite-render" style={{ position: "relative", top: CELL_HEIGHT * (renderBytes.start / NUM_COLS) }}>
+-
+-                    <div className="hex-positions">{
+-                        renderBytes.map(NUM_COLS,
+-                            i => <div key={i}>{
+-                                byteToHex[(i & 0xFF0000) >> 16] + 
+-                                byteToHex[(i & 0xFF00) >> 8] + 
+-                                byteToHex[i & 0xFF]
+-                            }</div>
+-                        )
+-                    }</div>
+-                    <div className="hex-bytes"
+-                        onMouseDown={({ target }: any) => {
+-                            if (!target.hasAttribute("data-pos")) return;
+-                            const pos = parseInt(target.getAttribute("data-pos"));
+-                            setDragStart(pos);
+-                            const newRange = new BitRange(pos * 8, (pos + 1) * 8);
+-                            if (ranges.length == 1 && newRange.equals(ranges[0])) return;
+-                            setRanges([newRange]);
+-                        }}
+-                        onMouseUp={({ target }: any) => {
+-                            if (!target.hasAttribute("data-pos")) return;
+-                            const pos = parseInt(target.getAttribute("data-pos"));
+-                            setDragStart(undefined);
+-                        }}
+-                        onMouseMove={({ target }: any) => {
+-                            if (!target.hasAttribute("data-pos") || dragStart === undefined) return;
+-                            const pos = parseInt(target.getAttribute("data-pos"));
+-                            const start = Math.min(dragStart, pos) * 8;
+-                            const end = (Math.max(dragStart, pos) + 1) * 8;
+-                            const newRange = new BitRange(start, end);
+-                            if (ranges.length == 1 && newRange.equals(ranges[0])) return;
+-                            setRanges([newRange]);
+-                        }}
+-                    >{
+-                            renderBytes.map(NUM_COLS,
+-                                (i) => <div key={i}>
+-                                    {
+-                                        new ByteRange(i, i + NUM_COLS).map(1, (j) =>
+-                                            <span
+-                                                key={j}
+-                                                data-pos={j}
+-                                                style={{ backgroundColor: getByteColor(j) }}>
+-                                                {byteToHex[fileBuffer[j]]}
+-                                            </span>)
+-                                    }
++    const handleMouseDown = ({ target }: any) => {
++        if (!target.hasAttribute("data-pos")) return;
++        const pos = parseInt(target.getAttribute("data-pos"));
++        setDragStart(pos);
++        setCursor(pos);
++        setAnchor(pos);
++        const newRange = new BitRange(pos * 8, (pos + 1) * 8);
++        if (ranges.length === 1 && newRange.equals(ranges[0])) return;
++        setRanges([newRange]);
++    };
++
++    const handleMouseUp = ({ target }: any) => {
++        if (!target.hasAttribute("data-pos")) return;
++        setDragStart(undefined);
++    };
++
++    const handleMouseMove = ({ target }: any) => {
++        if (!target.hasAttribute("data-pos") || dragStart === undefined) return;
++        const pos = parseInt(target.getAttribute("data-pos"));
++        setCursor(pos);
++        const start = Math.min(dragStart, pos) * 8;
++        const end = (Math.max(dragStart, pos) + 1) * 8;
++        const newRange = new BitRange(start, end);
++        if (ranges.length === 1 && newRange.equals(ranges[0])) return;
++        setRanges([newRange]);
++    };
++
++    const handleKeyDown = (e: React.KeyboardEvent) => {
++        const maxPos = fileBuffer.length - 1;
++        if (maxPos < 0) return;
++
++        let newCursor = cursor;
++        switch (e.key) {
++            case "ArrowLeft":
++                newCursor = Math.max(0, cursor - 1);
++                break;
++            case "ArrowRight":
++                newCursor = Math.min(maxPos, cursor + 1);
++                break;
++            case "ArrowUp":
++                newCursor = Math.max(0, cursor - NUM_COLS);
++                break;
++            case "ArrowDown":
++                newCursor = Math.min(maxPos, cursor + NUM_COLS);
++                break;
++            case "Home":
++                newCursor = cursor - (cursor % NUM_COLS);
++                break;
++            case "End":
++                newCursor = Math.min(maxPos, cursor - (cursor % NUM_COLS) + NUM_COLS - 1);
++                break;
++            default:
++                return;
++        }
++        e.preventDefault();
++
++        setCursor(newCursor);
++        scrollToCursor(newCursor);
++
++        if (e.shiftKey) {
++            const start = Math.min(anchor, newCursor) * 8;
++            const end = (Math.max(anchor, newCursor) + 1) * 8;
++            setRanges([new BitRange(start, end)]);
++        } else {
++            setAnchor(newCursor);
++            setRanges([new BitRange(newCursor * 8, (newCursor + 1) * 8)]);
++        }
++    };
++
++    return (
++        <div style={{ position: "relative", fontFamily: "var(--code-font-family)", height: "100%", minWidth: "min-content", display: "flex", flexDirection: "column", width: "100%" }}>
++            <div
++                style={{ flex: 1, minHeight: 0, overflowY: "auto", paddingRight: 48 }}
++                ref={scrollViewRef}
++                onScroll={(e: any) => setOffset(NUM_COLS * Math.floor(e.target.scrollTop / CELL_HEIGHT))}
++                tabIndex={0}
++                onKeyDown={handleKeyDown}
++            >
++                <div style={{ height: (fileBuffer.length / NUM_COLS) * CELL_HEIGHT }}>
++                    <div style={{ position: "relative", display: "flex", gap: 16, paddingRight: 20, top: CELL_HEIGHT * (renderBytes.start / NUM_COLS) }}>
++                        {/* Byte offsets */}
++                        <div style={{ color: "var(--gray-a11)", fontSize: 13 }}>
++                            {renderBytes.map(NUM_COLS, (i) => (
++                                <div key={i} style={{ lineHeight: CELL_HEIGHT + "px" }}>
++                                    {byteToHex[(i & 0xFF0000) >> 16] + byteToHex[(i & 0xFF00) >> 8] + byteToHex[i & 0xFF]}
++                                </div>
++                            ))}
++                        </div>
++                        {/* Hex bytes */}
++                        <div
++                            style={{ userSelect: "none", cursor: "text" }}
++                            onMouseDown={handleMouseDown}
++                            onMouseUp={handleMouseUp}
++                            onMouseMove={handleMouseMove}
++                        >
++                            {renderBytes.map(NUM_COLS, (i) => (
++                                <div key={i} style={{ lineHeight: CELL_HEIGHT + "px" }}>
++                                    {new ByteRange(i, i + NUM_COLS).map(1, (j) => (
++                                        <span
++                                            key={j}
++                                            data-pos={j}
++                                            style={{
++                                                display: "inline-block",
++                                                width: 25,
++                                                textAlign: "center",
++                                                borderRadius: 2,
++                                                backgroundColor: getByteColor(j),
++                                                outline: j === cursor ? "2px solid var(--accent-9)" : undefined,
++                                                outlineOffset: -1,
++                                            }}
++                                        >
++                                            {byteToHex[fileBuffer[j]]}
++                                        </span>
++                                    ))}
+                                 </div>
+-                            )
+-                        }</div>
+-                    <div className="hex-ascii">{
+-                        renderBytes.map(NUM_COLS, ((i) =>
+-                            <div key={i} style={{ height: CELL_HEIGHT }}>
+-                                {
+-                                    new ByteRange(i, i + NUM_COLS).map(1, (j) =>
+-                                        <span key={j} style={{ backgroundColor: getByteColor(j) }}>
++                            ))}
++                        </div>
++                        {/* ASCII */}
++                        <div style={{ color: "var(--gray-a11)" }}>
++                            {renderBytes.map(NUM_COLS, (i) => (
++                                <div key={i} style={{ height: CELL_HEIGHT, lineHeight: CELL_HEIGHT + "px" }}>
++                                    {new ByteRange(i, i + NUM_COLS).map(1, (j) => (
++                                        <span key={j} style={{ display: "inline-block", width: 10, textAlign: "center", backgroundColor: getByteColor(j) }}>
+                                             {byteToAscii[fileBuffer[j]]}
+                                         </span>
+-                                    )
+-                                }
+-                            </div>
+-                        ))}
++                                    ))}
++                                </div>
++                            ))}
++                        </div>
+                     </div>
+                 </div>
+             </div>
++            <div style={{ width: "100%", marginTop: 10 }}>
++                {ranges[0] && <ByteInspector range={ranges[0].toByteRange()} />}
++            </div>
+         </div>
+-        <div style={{  width: "100%", marginTop: 10 }}>
+-            {ranges[0] && <ByteInspector range={ranges[0].toByteRange()} />}
+-        </div>
+-    </div>
+-}
+\ No newline at end of file
++    );
++}
+diff --git a/src/components/syntax-box.tsx b/src/components/syntax-box.tsx
+deleted file mode 100644
+index 80d6e0b..0000000
+--- a/src/components/syntax-box.tsx
++++ /dev/null
+@@ -1,71 +0,0 @@
+-import "./hex-editor.scss";
+-import { DataNode } from "../types/parser.types";
+-import { useEffect, useState } from "react";
+-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+-
+-function DataBoxNodeComponent({ node, onSelect, selected, boxColor }: {
+-    node: DataNode,
+-    selected: string[],
+-    onSelect: (nodeId: string[]) => void,
+-    boxColor: { [key: string]: string }
+-}) {
+-    const isSelected = selected[0] == node.key;
+-    const [collapsed, setCollapsed] = useState(true);
+-
+-    return <>
+-        <div className={`data-box ${isSelected && "selected"}`} onClick={(ev) => {
+-            onSelect([node.key]);
+-            ev.stopPropagation();
+-        }} style={{
+-            backgroundColor: boxColor[node.key]
+-        }}>
+-            <span className="data-box-header" onClick={() => setCollapsed(!collapsed)}>
+-                {collapsed
+-                    ? <ChevronRightIcon />
+-                    : <ExpandMoreIcon />
+-                }<b>{node.title}</b><br />
+-            </span>
+-            {/* <span className="node-right">
+-                <span>{Math.floor(node.start / 8)}</span>
+-                <span>{Math.ceil((node.start + node.size) / 8 - 1)}</span>
+-            </span> */}
+-            {
+-                collapsed ||
+-                (node.children || [])
+-                    .map(childNode => childNode.children
+-                        ? <DataBoxNodeComponent key={childNode.key} node={childNode} selected={selected} onSelect={onSelect} boxColor={boxColor} />
+-                        : <>{childNode.title}<br /></>)
+-            }
+-        </div>
+-    </>
+-}
+-
+-export function DataBoxComponent({ onSelect, selected, root, boxColor }: {
+-    root: DataNode,
+-    selected: string[],
+-    onSelect: (ids: string[]) => void,
+-    boxColor: { [k: string]: string }
+-}) {
+-    const [expanded, setExpanded] = useState<string[]>([]);
+-
+-    useEffect(() => {
+-        const allKeys: string[] = [];
+-        function dfs(at: DataNode, d: number, maxd: number) {
+-            if (d > maxd) return;
+-            allKeys.push(at.key);
+-            for (const child of (at.children || [])) {
+-                dfs(child, d + 1, maxd);
+-            }
+-        }
+-        dfs(root, 0, 7);
+-        setExpanded(allKeys);
+-    }, [root])
+-
+-    if (!root.children) {
+-        return <>No data</>
+-    }
+-    return <div style={{ flex: 1, overflowY: "auto", width: "100%" }}>
+-        <DataBoxNodeComponent node={root.children[0]} selected={selected} onSelect={onSelect} boxColor={boxColor} />
+-    </div>
+-}
+\ No newline at end of file
+diff --git a/src/components/syntax-table.tsx b/src/components/syntax-table.tsx
+index d0987df..3389cbf 100644
+--- a/src/components/syntax-table.tsx
++++ b/src/components/syntax-table.tsx
+@@ -1,158 +1,249 @@
+ import { DataNode, DataNodeValue } from "../types/parser.types";
+-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
++import { useCallback, useContext, useMemo, useRef, useState } from "react";
+ import { BitstreamExplorerContext, BitstreamSelectionContext } from "../bitstream/bitstream-explorer";
+ import { BitRange } from "../bitstream/range";
+-import { FormControlLabel, Switch } from "@mui/material";
+-import { useTraceUpdate } from "../react-util";
+-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+-import { forEachChild } from "../bitstream/util";
++import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
++import { faAngleRight } from "@fortawesome/free-solid-svg-icons";
++import { useVirtualizer } from "@tanstack/react-virtual";
+ 
+ export type SyntaxTableSettings = {
+-    showHiddenSyntax: boolean,
+-    showSizeBar: boolean
+-}
++    showHiddenSyntax: boolean;
++    showSizeBar: boolean;
++};
++
++type FlatRow = {
++    node: DataNode;
++    level: number;
++};
++
++const ROW_HEIGHT = 28;
++
++const cellStyle: React.CSSProperties = {
++    textAlign: "left",
++    verticalAlign: "middle",
++    paddingInline: 16,
++    paddingBlock: 4,
++    whiteSpace: "nowrap",
++    fontSize: 13,
++};
++
++const headerStyle: React.CSSProperties = {
++    textAlign: "left",
++    paddingInline: 16,
++    paddingBlock: 6,
++    fontSize: 11,
++    fontWeight: 600,
++    textTransform: "uppercase",
++    letterSpacing: "0.05em",
++    color: "var(--gray-a11)",
++    borderBottom: "1px solid var(--glass-border)",
++    position: "sticky",
++    top: 0,
++    background: "var(--glass-bg-solid)",
++    backdropFilter: "var(--glass-blur)",
++    WebkitBackdropFilter: "var(--glass-blur)",
++    zIndex: 10,
++};
+ 
+ function ValueFormat({ value }: { value: DataNodeValue }) {
+-    if (typeof value !== "object") {
+-        return <>{value}</>
+-    } else if (Array.isArray(value)) {
+-        return <div style={{ display: "inline-block" }}>
+-            {'{'}
+-            {value.map((val, i) => <>
+-                <ValueFormat value={val} />
+-                {i != value.length - 1 && ", "}
+-                {((i + 1) % 8 == 0 || typeof val === "object") && i != value.length - 1 && <>
+-                    <br />
+-                    &nbsp;
+-                </>}
+-            </>)}
+-            {'}'}
++    if (typeof value !== "object") return <>{value}</>;
++    if (!Array.isArray(value)) return null;
++
++    return (
++        <div style={{ display: "inline-block" }}>
++            {"{"}
++            {value.map((val, i) => (
++                <span key={i}>
++                    <ValueFormat value={val} />
++                    {i !== value.length - 1 && ", "}
++                    {((i + 1) % 8 === 0 || typeof val === "object") && i !== value.length - 1 && (
++                        <><br />&nbsp;</>
++                    )}
++                </span>
++            ))}
++            {"}"}
+         </div>
+-    }
++    );
+ }
+ 
+-function DataTreeNode({ node, level = 0, maxNodeSize }: {
+-    maxNodeSize: number, node: DataNode, level?: number
+-}) {
+-    const [expanded, setExpanded] = useState(() => level == 0 ? true : false);
++export function SyntaxTable() {
++    const { syntax: root, settings } = useContext(BitstreamExplorerContext);
+     const { setRanges } = useContext(BitstreamSelectionContext);
+-    const {settings, setSettings} = useContext(BitstreamExplorerContext);
++    const scrollRef = useRef<HTMLDivElement>(null);
+ 
++    const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
+ 
+-    const select = useCallback(() => {
+-        if (node.size == 0) return;
++    // Auto-expand root children when root changes
++    const rootKey = root.key;
++    const [lastRootKey, setLastRootKey] = useState(rootKey);
++    if (rootKey !== lastRootKey) {
++        setLastRootKey(rootKey);
++        setExpanded(new Set([root.key]));
++    }
+ 
+-        let syntaxArr = node.value as any[];
++    const maxNodeSize = useMemo(() => {
++        let maxSize = 8;
++        root.children?.forEach((node) => {
++            maxSize = Math.max(maxSize, node.size);
++        });
++        return maxSize;
++    }, [root]);
++
++    const flatRows = useMemo(() => {
++        const rows: FlatRow[] = [];
++        const walk = (node: DataNode, level: number) => {
++            rows.push({ node, level });
++            if (expanded.has(node.key)) {
++                node.children
++                    ?.filter((child) => settings.showHiddenSyntax || !child.hidden)
++                    .filter((child) => !child.filtered)
++                    .forEach((child) => walk(child, level + 1));
++            }
++        };
++        walk(root, 0);
++        return rows;
++    }, [root, expanded, settings.showHiddenSyntax]);
++
++    const virtualizer = useVirtualizer({
++        count: flatRows.length,
++        getScrollElement: () => scrollRef.current,
++        estimateSize: () => ROW_HEIGHT,
++        overscan: 20,
++    });
++
++    const toggleExpand = useCallback((key: string) => {
++        setExpanded((prev) => {
++            const next = new Set(prev);
++            if (next.has(key)) next.delete(key);
++            else next.add(key);
++            return next;
++        });
++    }, []);
++
++    const select = useCallback((node: DataNode) => {
++        if (node.size === 0) return;
++        const syntaxArr = node.value as any[];
+ 
+         if (!Array.isArray(syntaxArr)) {
+-            // Single value
+-            const newRange = new BitRange(node.start, node.start + node.size);
+-            setRanges([newRange]);
++            setRanges([new BitRange(node.start, node.start + node.size)]);
+         } else {
+-            // Multiple values - only first will be available in byte inspector
+             let subStart = node.start;
+-            let subSize = node.size / syntaxArr?.length;
+-            let ranges: BitRange[] = [];
+-
+-            for (let i = 0; i < syntaxArr?.length; i++) {
+-                const newRange = new BitRange(subStart, subStart + subSize);
+-                ranges.push(newRange);
+-                subStart += subSize + node.skip;
++            const subSize = node.size / syntaxArr.length;
++            const ranges: BitRange[] = [];
++            for (let i = 0; i < syntaxArr.length; i++) {
++                ranges.push(new BitRange(subStart, subStart + subSize));
++                subStart += subSize + (node.skip || 0);
+             }
+             setRanges(ranges);
+         }
+-    }, [node, setRanges]);
+-
+-    const toggleExpand = () => setExpanded(exp => !exp);
+-    const setFocus = (ev: any) => ev.target.focus();
+-
+-
+-    return <>
+-        <tr
+-            onFocus={select}
+-            onClick={setFocus}
+-            onDoubleClick={toggleExpand}
+-            tabIndex={0}
+-            onKeyDown={(ev: any) => {
+-                if (ev.key == "Enter" || ev.key == " ") {
+-                    setExpanded(exp => !exp);
+-                } else if (ev.key == "ArrowRight") {
+-                    setExpanded(true);
+-                } else if (ev.key == "ArrowLeft") {
+-                    setExpanded(false);
+-                } else if (ev.key == "ArrowDown") {
+-                    ev.target.nextSibling.focus();
+-                    ev.preventDefault();
+-                } else if (ev.key == "ArrowUp") {
+-                    ev.target.previousSibling.focus();
+-                    ev.preventDefault();
+-                }
+-            }}
+-        >
+-            <td>
+-                <div style={{ display: "flex" }}>
+-                    <span className="tab-space" style={{ width: 25 * level }}></span>
+-                    {node.children?.length
+-                        ? <div
+-                            onClick={toggleExpand}
+-                            className={(expanded ? "expanded " : "") + "expand-btn"}
+-                        >  <i className="fas fa-angle-right" />
+-                        </div>
+-                        : <div className="expand-space" />
+-                    }
+-                    {node.title} {
+-                        node.value !== undefined && <>
+-                            &nbsp;&nbsp; = &nbsp; <span className="value"><ValueFormat value={node.value} /></span>
+-                        </>
+-                    }
+-                </div>
+-                {
+-                    settings.showSizeBar &&
+-                    <span className="size-rect" style={{ width: 100 * (node.size / maxNodeSize) }}></span>
+-                }
+-            </td>
+-            <td>{node.start}</td>
+-            <td>{node.size}</td>
+-        </tr>
+-        {expanded && !!node.children?.length &&
+-            node.children
+-                .filter(child => settings.showHiddenSyntax || !child.hidden)
+-                .filter(child => !child.filtered)
+-                .map(childNode =>
+-                    <DataTreeNode maxNodeSize={maxNodeSize} key={childNode.key} node={childNode} level={level + 1} />
+-                )
+-        }
+-    </>
+-}
+-
+-export function SyntaxTable({}: {}
+-) {
+-    const { syntax: root } = useContext(BitstreamExplorerContext);
+-
+-    console.log("Syntax table rendered");
++    }, [setRanges]);
+ 
+-    const maxNodeSize = useMemo(() => {
+-        let maxSize = 8;
+-        root.children?.forEach(obu => {
+-            maxSize = Math.max(maxSize, obu.size);
+-        });
+-        return maxSize;
+-    }, [root]);
++    return (
++        <div ref={scrollRef} style={{ flex: 1, minHeight: 0, overflowY: "auto", width: "100%" }}>
++            <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "auto" }}>
++                <thead>
++                    <tr>
++                        <th style={headerStyle}>Syntax</th>
++                        <th style={headerStyle}>Start (bit)</th>
++                        <th style={headerStyle}>Size (bits)</th>
++                    </tr>
++                </thead>
++            </table>
++            <div style={{ height: virtualizer.getTotalSize(), position: "relative" }}>
++                {virtualizer.getVirtualItems().map((virtualItem) => {
++                    const { node, level } = flatRows[virtualItem.index];
++                    const hasChildren = !!(node.children?.length);
+ 
+-    return <div style={{ flex: "1 1 auto", height: 0, overflowY: "auto", width: "100%" }}>
+-        <table
+-            className="syntax-table"
+-            cellSpacing={0}
+-        >
+-            <thead>
+-                <tr>
+-                    <th></th>
+-                    <th>Start</th>
+-                    <th>Size</th>
+-                </tr>
+-            </thead>
+-            <tbody>
+-                <DataTreeNode node={root} maxNodeSize={maxNodeSize}></DataTreeNode>
+-            </tbody>
+-        </table></div>
+-}
+\ No newline at end of file
++                    return (
++                        <div
++                            key={virtualItem.key}
++                            tabIndex={0}
++                            style={{
++                                position: "absolute",
++                                top: 0,
++                                left: 0,
++                                width: "100%",
++                                height: ROW_HEIGHT,
++                                transform: `translateY(${virtualItem.start}px)`,
++                                display: "flex",
++                                alignItems: "center",
++                                cursor: "pointer",
++                                transition: "background-color 0.1s",
++                            }}
++                            onFocus={() => select(node)}
++                            onClick={(e: any) => e.currentTarget.focus()}
++                            onDoubleClick={() => hasChildren && toggleExpand(node.key)}
++                            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--gray-a3)")}
++                            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "")}
++                            onFocusCapture={(e) => (e.currentTarget.style.backgroundColor = "var(--gray-a3)")}
++                            onBlurCapture={(e) => (e.currentTarget.style.backgroundColor = "")}
++                            onKeyDown={(ev) => {
++                                if (ev.key === "Enter" || ev.key === " ") {
++                                    toggleExpand(node.key);
++                                } else if (ev.key === "ArrowRight") {
++                                    if (!expanded.has(node.key) && hasChildren) toggleExpand(node.key);
++                                } else if (ev.key === "ArrowLeft") {
++                                    if (expanded.has(node.key)) toggleExpand(node.key);
++                                } else if (ev.key === "ArrowDown") {
++                                    (ev.currentTarget.nextElementSibling as HTMLElement)?.focus();
++                                    ev.preventDefault();
++                                } else if (ev.key === "ArrowUp") {
++                                    (ev.currentTarget.previousElementSibling as HTMLElement)?.focus();
++                                    ev.preventDefault();
++                                }
++                            }}
++                        >
++                            <div style={{ ...cellStyle, flex: 1, position: "relative", overflow: "hidden", borderRight: "1px solid var(--glass-border)" }}>
++                                <div style={{ display: "flex" }}>
++                                    <span style={{ display: "inline-block", width: 25 * level }} />
++                                    {hasChildren ? (
++                                        <div
++                                            onClick={(e) => { e.stopPropagation(); toggleExpand(node.key); }}
++                                            style={{
++                                                cursor: "pointer",
++                                                display: "inline-block",
++                                                marginRight: 10,
++                                                lineHeight: 1,
++                                                verticalAlign: "middle",
++                                                color: "var(--gray-a11)",
++                                                transition: "transform 0.15s",
++                                                transform: expanded.has(node.key) ? "rotate(90deg)" : "rotate(0deg)",
++                                            }}
++                                        >
++                                            <FontAwesomeIcon icon={faAngleRight} />
++                                        </div>
++                                    ) : (
++                                        <div style={{ display: "inline-block", width: 23 }} />
++                                    )}
++                                    {node.title}
++                                    {node.value !== undefined && (
++                                        <>
++                                            &nbsp;&nbsp; = &nbsp;
++                                            <span style={{ fontFamily: "var(--code-font-family)", overflow: "auto", maxWidth: 500, overflowWrap: "break-word", color: "var(--accent-11)" }}>
++                                                <ValueFormat value={node.value} />
++                                            </span>
++                                        </>
++                                    )}
++                                </div>
++                                {settings.showSizeBar && (
++                                    <span
++                                        style={{
++                                            position: "absolute",
++                                            right: 0,
++                                            top: 0,
++                                            height: "100%",
++                                            background: "var(--accent-a3)",
++                                            width: 100 * (node.size / maxNodeSize),
++                                        }}
++                                    />
++                                )}
++                            </div>
++                            <div style={{ ...cellStyle, width: 100, minWidth: 100, borderRight: "1px solid var(--glass-border)" }}>{node.start}</div>
++                            <div style={{ ...cellStyle, width: 100, minWidth: 100 }}>{node.size}</div>
++                        </div>
++                    );
++                })}
++            </div>
++        </div>
++    );
++}
+diff --git a/src/components/syntax-toolbar.tsx b/src/components/syntax-toolbar.tsx
+index 139edc5..35bf4c1 100644
+--- a/src/components/syntax-toolbar.tsx
++++ b/src/components/syntax-toolbar.tsx
+@@ -1,81 +1,84 @@
+-import { ReactElement, useContext, useState } from "react";
++import { ReactElement, useContext, useEffect, useState } from "react";
+ import { BitstreamExplorerContext } from "../bitstream/bitstream-explorer";
+-import { FormControlLabel, Switch } from "@mui/material";
+-import { MediaTrack } from "../types/media.types";
+-import { downloadBlob } from "../browser-util";
++import { IconButton, Switch, Text, Tooltip, TextField, DropdownMenu, Flex } from "@radix-ui/themes";
+ import { SyntaxTableSettings } from "./syntax-table";
+-
+-
++import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
++import { faSearch, faRedo, faSlidersH } from "@fortawesome/free-solid-svg-icons";
+ 
+ export function SyntaxToolbar({ leftItems, rightItems }: {
+     rightItems?: ReactElement,
+     leftItems?: ReactElement
+ }) {
+     const {
+-        syntax: root,
+         setFilter,
+         reset,
+         settings, setSettings
+     } = useContext(BitstreamExplorerContext);
++    const [searchText, setSearchText] = useState("");
++
++    useEffect(() => {
++        const timer = setTimeout(() => {
++            setFilter((f) => ({ ...f, text: searchText }));
++        }, 300);
++        return () => clearTimeout(timer);
++    }, [searchText, setFilter]);
+ 
+     function SettingSwitch<T extends keyof SyntaxTableSettings>(
+         title: string,
+         key: T
+     ) {
+-
+-        return <div className="toolbar-item">
+-            <FormControlLabel control={
+-                <Switch value={settings[key]} onChange={(ev) => setSettings(s => ({ ...s, [key]: ev.target.checked }))} />
+-            } label={title} />
+-        </div>
++        return <DropdownMenu.Item onSelect={(e) => e.preventDefault()}>
++            <Flex align="center" gap="2">
++                <Switch
++                    size="1"
++                    checked={settings[key] as boolean}
++                    onCheckedChange={(checked) => setSettings(s => ({ ...s, [key]: checked }))}
++                />
++                <Text as="label" size="2" className="cursor-pointer">{title}</Text>
++            </Flex>
++        </DropdownMenu.Item>
+     }
+ 
+-    return <>
+-        <div className="toolbar">
+-            <div data-tooltip="Filter by title" className="toolbar-item" style={{ verticalAlign: "middle" }}>
+-                <i className="fas fa-search"></i>&nbsp;&nbsp;
+-                <form onSubmit={(e: any) => {
+-                    e.preventDefault();
+-                    const search = new FormData(e.target).get("search")?.toString() || "";
+-                    setFilter(f => ({ ...f, text: search }))
+-                }}>
+-                    <input name="search" />
+-                </form>
+-            </div>
+-            {leftItems}
++    return <Flex align="center" gap="1" style={{
++        height: 36,
++        background: "var(--glass-bg)",
++        backdropFilter: "var(--glass-blur)",
++        WebkitBackdropFilter: "var(--glass-blur)",
++        borderBottom: "1px solid var(--glass-border)",
++        flexShrink: 0,
++        paddingInline: 8,
++    }}>
++        <Flex align="center" gap="2">
++            <FontAwesomeIcon icon={faSearch} style={{ color: "var(--gray-a11)", fontSize: 12 }} />
++            <TextField.Root
++                size="1"
++                placeholder="Filter..."
++                style={{ width: 128 }}
++                value={searchText}
++                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchText(e.target.value)}
++            />
++        </Flex>
++        {leftItems}
+ 
+-            <span className="toolbar-item" style={{ flex: 1 }}></span>
+-            {rightItems}
++        <span style={{ flex: 1 }} />
++        {rightItems}
+ 
+-            {/* Right */}
+-            <a className="toolbar-item"
+-                data-tooltip="Reset"
+-                onClick={reset}><i className="fas fa-redo"></i></a>
+-            <a data-tooltip="Settings" className="toolbar-item"
+-                onClick={(ev: any) => {
+-                    console.log(ev.target);
+-                    const button: HTMLElement = ev.target.closest(".toolbar-item");
+-                    const menu = button.getElementsByClassName("toolbar-menu")[0];
+-                    if (!menu) return;
+-                    menu.classList.toggle("visible");
+-                    if (menu.classList.contains("visible")) {
+-                        const closeListener = (ev: any) => {
+-                            if (!menu.contains(ev.target)) {
+-                                menu.classList.remove("visible");
+-                                document.removeEventListener("click", closeListener);
+-                            }
+-                        };
+-                        setTimeout(() => document.addEventListener("click", closeListener), 0);
+-                    }
+-                }}>
+-                <i className="fas fa-sliders-h"></i>
+-                <div className="toolbar-menu">
++        <Tooltip content="Reset">
++            <IconButton variant="ghost" size="1" onClick={reset}>
++                <FontAwesomeIcon icon={faRedo} style={{ fontSize: 12 }} />
++            </IconButton>
++        </Tooltip>
+ 
+-                    
+-                    {SettingSwitch("Show hidden syntax", "showHiddenSyntax")}
+-                    {SettingSwitch("Show size bars", "showSizeBar")}
+-                </div>
+-            </a >
+-        </div >
+-    </>
+-}
+\ No newline at end of file
++        <DropdownMenu.Root>
++            <DropdownMenu.Trigger>
++                <IconButton variant="ghost" size="1">
++                    <FontAwesomeIcon icon={faSlidersH} style={{ fontSize: 12 }} />
++                </IconButton>
++            </DropdownMenu.Trigger>
++            <DropdownMenu.Content align="end">
++                {SettingSwitch("Show hidden syntax", "showHiddenSyntax")}
++                {SettingSwitch("Show size bars", "showSizeBar")}
++            </DropdownMenu.Content>
++        </DropdownMenu.Root>
++    </Flex>
++}
+diff --git a/src/components/tabs.tsx b/src/components/tabs.tsx
+index 5b970d5..dfa344d 100644
+--- a/src/components/tabs.tsx
++++ b/src/components/tabs.tsx
+@@ -1,4 +1,5 @@
+-import { ReactNode, useState } from "react"
++import { ReactNode } from "react"
++import { Tabs } from "@radix-ui/themes"
+ 
+ export type TabType<T> = {
+     key: T,
+@@ -6,32 +7,29 @@ export type TabType<T> = {
+     render: ReactNode
+ };
+ 
+-export function Tabs<T>({ tabs, defaultTab }: {
++export function TabsComponent<T>({ tabs, defaultTab }: {
+     tabs: TabType<T>[],
+     defaultTab: T
+ }) {
+-    const [currentTab, setCurrentTab] = useState<T>(defaultTab);
+-
+-    return <>
+-        <div className="toolbar">
++    return <Tabs.Root defaultValue={defaultTab as string} style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
++        <Tabs.List>
+             {tabs.map(tab =>
+-                <a
++                <Tabs.Trigger
+                     key={tab.key as string}
+-                    className={["toolbar-item", currentTab === tab.key && "active"].join(" ")}
+-                    onClick={() => setCurrentTab(tab.key)}
++                    value={tab.key as string}
+                 >
+                     {tab.title}
+-                </a>)}
+-        </div>
++                </Tabs.Trigger>
++            )}
++        </Tabs.List>
+         {tabs.map(tab =>
+-            <div key={tab.key as string} className="flexv-item flexv"
+-                style={tab.key === currentTab
+-                    ? {}
+-                    : { display: "none" }
+-                }
++            <Tabs.Content
++                key={tab.key as string}
++                value={tab.key as string}
++                style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}
+             >
+                 {tab.render}
+-            </div>
++            </Tabs.Content>
+         )}
+-    </>
+-}
+\ No newline at end of file
++    </Tabs.Root>
++}
+diff --git a/src/formats/av1/av1-analyzer.tsx b/src/formats/av1/av1-analyzer.tsx
+index 449b439..9e2c083 100644
+--- a/src/formats/av1/av1-analyzer.tsx
++++ b/src/formats/av1/av1-analyzer.tsx
+@@ -1,88 +1,78 @@
+-import { HexEditor } from "../../components/hex-editor";
++import { useState } from "react";
++import { toast } from "sonner";
+ import { BitBuffer } from "../../bitstream/buffer";
+-import { BitstreamExplorer, EMPTY_TREE } from "../../bitstream/bitstream-explorer";
++import { BitstreamExplorer } from "../../bitstream/bitstream-explorer";
+ import { BitstreamUploader } from "../../bitstream/uploader";
+ import { AV1 } from "./av1-bitstream";
+-import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
+-import { extractMp4Tracks, isMP4Format } from "../../formats/mp4/mp4-bitstream";
+-import { SyntaxToolbar } from "../../components/syntax-toolbar";
+-import { SyntaxTable } from "../../components/syntax-table";
++import { extractMp4Tracks, isMP4Format } from "../mp4/mp4-bitstream";
++import { extractIvfTracks, isIVFFormat } from "../ivf/ivf-bitstream";
+ import { MediaTrack } from "../../types/media.types";
+-import { useState } from "react";
+-import { extracIvfTracks, isIVFFormat } from "../ivf/ivf-bitstream";
++import { AnalyzerLayout } from "../../components/analyzer-layout";
++import { TrackSelector } from "../../components/track-selector";
+ import { TrackDownloader } from "../../components/downloader";
++import { SyntaxToolbar } from "../../components/syntax-toolbar";
++import { SyntaxTable } from "../../components/syntax-table";
++import { HexEditor } from "../../components/hex-editor";
+ import { FrameViewer } from "../../components/frame-viewer";
+-import { Tabs } from "../../components/tabs";
+-import { FrameViewerFfmpeg } from "../../components/frame-viewer-libde265";
++import { TabsComponent } from "../../components/tabs";
+ 
+-export const Av1AnalyzerComponent = (props: {}) => {
++export function Av1AnalyzerComponent() {
+     const [tracks, setTracks] = useState<Record<string, MediaTrack>>({});
+     const [selectedTrack, setSelectedTrack] = useState<string>();
+ 
+-    return <BitstreamExplorer
+-        parser={(buffer: BitBuffer[]) => {
+-            return AV1(buffer);
+-        }}
+-        containers={["Detect", "MP4", "IVF", "OBU"]}
+-        unpack={(buffer: Uint8Array, format: string) => {
+-            format = format.split(" ")[0].toLowerCase();
+-            if (format == "mp4" || (format == "detect" && isMP4Format(buffer))) {
+-                const tracks = extractMp4Tracks(buffer, ["av01"]);
+-                if (Object.keys(tracks).length === 0) {
+-                    alert(`Could not find "av01" track in mp4 file.`);
+-                    return ["mp4", []];
++    return (
++        <BitstreamExplorer
++            parser={(buffer) => AV1(buffer)}
++            containers={["Detect", "MP4", "IVF", "OBU"]}
++            unpack={(buffer, format) => {
++                format = format.split(" ")[0].toLowerCase();
++                if (format === "mp4" || (format === "detect" && isMP4Format(buffer))) {
++                    const found = extractMp4Tracks(buffer, ["av01"]);
++                    if (Object.keys(found).length === 0) {
++                        toast.error('Could not find "av01" track in MP4 file');
++                        return ["mp4", []];
++                    }
++                    setTracks(found);
++                    const trackId = selectedTrack || Object.keys(found)[0];
++                    return ["mp4", found[trackId].chunkRanges.map((r) => new BitBuffer(buffer, r))];
+                 }
+-                setTracks(tracks);
+-                const trackId = selectedTrack || Object.keys(tracks)[0];
+-                const buffers = tracks[trackId].chunkRanges.map(chunkRange => new BitBuffer(buffer, chunkRange));
+-                return ["mp4", buffers];
+-            } else if (format == "ivf" || (format == "detect" && isIVFFormat(buffer))) {
+-                const tracks = extracIvfTracks(buffer, ["av01"]);
+-                if (Object.keys(tracks).length === 0) {
+-                    alert(`Could not find "av01" track in ivf file.`);
+-                    return ["mp4", []];
++                if (format === "ivf" || (format === "detect" && isIVFFormat(buffer))) {
++                    const found = extractIvfTracks(buffer, ["av01"]);
++                    if (Object.keys(found).length === 0) {
++                        toast.error('Could not find "av01" track in IVF file');
++                        return ["ivf", []];
++                    }
++                    setTracks(found);
++                    const trackId = selectedTrack || Object.keys(found)[0];
++                    return ["ivf", found[trackId].chunkRanges.map((r) => new BitBuffer(buffer, r))];
+                 }
+-                setTracks(tracks);
+-                const trackId = selectedTrack || Object.keys(tracks)[0];
+-                const buffers = tracks[trackId].chunkRanges.map(chunkRange => new BitBuffer(buffer, chunkRange));
+-                console.log(trackId, tracks, buffers);
+-                return ["ivf", buffers];
++                return ["obu", [new BitBuffer(buffer)]];
++            }}
++            uploader={
++                <BitstreamUploader title="Drop AV1 raw bitstream file" samples={{
++                    "av1_multi.mp4": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/sample_data/av1_multi.mp4",
++                    "av1_single.ivf": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/sample_data/av1_single.ivf",
++                    "av1_audvid.mp4": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/sample_data/av1_audvid.mp4",
++                    "av1_single.mp4": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/sample_data/av1_single.mp4",
++                    "av1_single.obu": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/sample_data/av1_single.obu",
++                }} />
+             }
+-            return ["obu", [new BitBuffer(buffer)]];
+-        }}
+-        uploader={<BitstreamUploader title="Drop AV1 raw bitstream file" samples={{
+-            "av1_multi.mp4": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/sample_data/av1_multi.mp4",
+-            "av1_single.ivf": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/sample_data/av1_single.ivf",
+-            "av1_audvid.mp4": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/sample_data/av1_audvid.mp4",
+-            "av1_single.mp4": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/sample_data/av1_single.mp4",
+-            "av1_single.obu": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/sample_data/av1_single.obu",
+-        }} />}
+-    >
+-        <PanelGroup autoSaveId="example" direction="horizontal">
+-            <Panel defaultSize={50} className="panel">
+-                <SyntaxToolbar
+-                    leftItems={<>
+-                        {
+-                            tracks && <div className="toolbar-item" data-tooltip="Select track to parse">
+-                                Track
+-                                <select value={selectedTrack} onChange={e => setSelectedTrack(e.target.value)}>
+-                                    {Object.keys(tracks).map(id => <option key={id} value={id}>{id}</option>)}
+-                                </select>
+-                            </div>
+-                        }
++        >
++            <AnalyzerLayout
++                left={<>
++                    <SyntaxToolbar leftItems={<>
++                        <TrackSelector tracks={tracks} selectedTrack={selectedTrack} onSelect={setSelectedTrack} />
+                         <TrackDownloader downloadExtension=".obu" />
+                     </>} />
+-                <SyntaxTable />
+-            </Panel>
+-            <PanelResizeHandle className="resize-handle fa-solid fa-ellipsis-vertical" />
+-            <Panel className="panel">
+-                <Tabs defaultTab="frame"
+-                    tabs={[
+-                        {key: "frame", title: "Frame", render: <FrameViewer config={{codec: "av01.0.15M.10"}}/>},
+-                        {key: "hexEditor", title: "Hex", render: <HexEditor />}
+-                    ]}
+-                />
+-            </Panel>
+-        </PanelGroup>
+-    </BitstreamExplorer>
++                    <SyntaxTable />
++                </>}
++                right={
++                    <TabsComponent defaultTab="frame" tabs={[
++                        { key: "frame", title: "Frame", render: <FrameViewer config={{ codec: "av01.0.15M.10" }} /> },
++                        { key: "hexEditor", title: "Hex", render: <HexEditor /> },
++                    ]} />
++                }
++            />
++        </BitstreamExplorer>
++    );
+ }
+diff --git a/src/formats/hevc/hevc-analyzer.tsx b/src/formats/hevc/hevc-analyzer.tsx
+index 5d0522d..b1e3b4d 100644
+--- a/src/formats/hevc/hevc-analyzer.tsx
++++ b/src/formats/hevc/hevc-analyzer.tsx
+@@ -1,84 +1,69 @@
+-import { HexEditor } from "../../components/hex-editor";
+-import { Bitstream } from "../../bitstream/parser";
++import { useState } from "react";
++import { toast } from "sonner";
+ import { BitBuffer } from "../../bitstream/buffer";
+-import { BitstreamExplorer, EMPTY_TREE } from "../../bitstream/bitstream-explorer";
++import { BitstreamExplorer } from "../../bitstream/bitstream-explorer";
+ import { BitstreamUploader } from "../../bitstream/uploader";
+ import { HEVC, SystemStreamHEVC, isSystemStreamHEVC, systemStreamToAnnexB } from "./hevc-bitstream";
+-import { SyntaxTable } from "../../components/syntax-table";
+-import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
+ import { extractMp4Tracks, isMP4Format } from "../mp4/mp4-bitstream";
+ import { MediaTrack } from "../../types/media.types";
+-import { useState } from "react";
+-import { SyntaxToolbar } from "../../components/syntax-toolbar";
++import { AnalyzerLayout } from "../../components/analyzer-layout";
++import { TrackSelector } from "../../components/track-selector";
+ import { TrackDownloader } from "../../components/downloader";
+-import { Tabs } from "../../components/tabs";
+-import { FrameViewer } from "../../components/frame-viewer";
++import { SyntaxToolbar } from "../../components/syntax-toolbar";
++import { SyntaxTable } from "../../components/syntax-table";
++import { HexEditor } from "../../components/hex-editor";
+ import { FrameViewerFfmpeg } from "../../components/frame-viewer-libde265";
++import { TabsComponent } from "../../components/tabs";
+ 
+-export const HevcAnalyzerComponent = (props: {}) => {
++export function HevcAnalyzerComponent() {
+     const [tracks, setTracks] = useState<Record<string, MediaTrack>>({});
+     const [selectedTrack, setSelectedTrack] = useState<string>();
+ 
+-    return <BitstreamExplorer
+-        parser={(buffers: BitBuffer[], format: string) => {
+-            if (format === "hevc_ss") {
+-                return SystemStreamHEVC(buffers);
+-            } else {
+-                return HEVC(buffers[0]);
+-            }
+-        }}
+-        containers={["Detect", "MP4", "hevc", "hevc_ss (system stream)"]}
+-        unpack={(buffer: Uint8Array, format: string) => {
+-            format = format.split(" ")[0].toLowerCase();
+-            if (format === "mp4" || (format === "detect" && isMP4Format(buffer))) {
+-                const tracks: Record<string, MediaTrack> = extractMp4Tracks(buffer, ["hev1"]);
+-                if (Object.keys(tracks).length === 0) {
+-                    alert(`Could not find "hev1" track in mp4 file.`);
+-                    return ["mp4", []];
++    return (
++        <BitstreamExplorer
++            parser={(buffers, format) => {
++                return format === "hevc_ss" ? SystemStreamHEVC(buffers) : HEVC(buffers[0]);
++            }}
++            containers={["Detect", "MP4", "hevc", "hevc_ss (system stream)"]}
++            unpack={(buffer, format) => {
++                format = format.split(" ")[0].toLowerCase();
++                if (format === "mp4" || (format === "detect" && isMP4Format(buffer))) {
++                    const found = extractMp4Tracks(buffer, ["hev1"]);
++                    if (Object.keys(found).length === 0) {
++                        toast.error('Could not find "hev1" track in MP4 file');
++                        return ["mp4", []];
++                    }
++                    setTracks(found);
++                    const trackId = selectedTrack || Object.keys(found)[0];
++                    return ["hevc_ss", found[trackId].chunkRanges.map((r) => new BitBuffer(buffer, r))];
+                 }
+-                setTracks(tracks);
+-                const trackId = selectedTrack || Object.keys(tracks)[0];
+-                const buffers = tracks[trackId].chunkRanges.map(chunkRange => new BitBuffer(buffer, chunkRange));
+-                return ["hevc_ss", buffers];
+-            } else if (format === "hevc_ss" || (format === "detect" && isSystemStreamHEVC([new BitBuffer(buffer)]))) {
+-                return ["hevc_ss", [new BitBuffer(buffer)]];
++                if (format === "hevc_ss" || (format === "detect" && isSystemStreamHEVC([new BitBuffer(buffer)]))) {
++                    return ["hevc_ss", [new BitBuffer(buffer)]];
++                }
++                return ["hevc", [new BitBuffer(buffer)]];
++            }}
++            uploader={
++                <BitstreamUploader title="Drop HEVC raw bitstream file" samples={{
++                    "hevc_single.mp4": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/sample_data/hevc_single.mp4",
++                    "hevc_single.hevc": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/sample_data/hevc_single.hevc",
++                }} />
+             }
+-
+-            return ["hevc", [new BitBuffer(buffer)]];
+-        }}
+-        uploader={<BitstreamUploader title="Drop HEVC raw bitstream file" samples={{
+-            "hevc_single.mp4": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/sample_data/hevc_single.mp4",
+-            "hevc_single.hevc": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/sample_data/hevc_single.hevc",
+-        }} />}
+-    >
+-        <PanelGroup autoSaveId="example" direction="horizontal">
+-            <Panel defaultSize={50} className="panel">
+-                <SyntaxToolbar
+-                    leftItems={
+-                        <>{tracks && <div className="toolbar-item" data-tooltip="Select track to parse">
+-                            Track
+-                            <select value={selectedTrack} onChange={e => setSelectedTrack(e.target.value)}>
+-                                {Object.keys(tracks).map(id => <option key={id} value={id}>{id}</option>)}
+-                            </select>
+-                        </div>}
+-                            <TrackDownloader downloadExtension=".hevc" transformer={systemStreamToAnnexB} />
+-                        </>
+-                    } />
+-                <SyntaxTable />
+-            </Panel>
+-            <PanelResizeHandle className="resize-handle fa-solid fa-ellipsis-vertical" />
+-            <Panel className="panel">
+-                <Tabs defaultTab="hexEditor"
+-                    tabs={[
+-                        // { key: "frame", title: "Frame", render: <FrameViewer config={{ 
+-                        //     codec: "hvc1.1.6.L123.00", 
+-                        //     hevc: { format: "annexb" }, pt: 2
+-                        // } as any} /> },
+-                        {key: "frame", title: "Frame", render: <FrameViewerFfmpeg />},
+-                        { key: "hexEditor", title: "Hex", render: <HexEditor /> }
+-                    ]}
+-                />
+-            </Panel>
+-        </PanelGroup>
+-    </BitstreamExplorer>
++        >
++            <AnalyzerLayout
++                left={<>
++                    <SyntaxToolbar leftItems={<>
++                        <TrackSelector tracks={tracks} selectedTrack={selectedTrack} onSelect={setSelectedTrack} />
++                        <TrackDownloader downloadExtension=".hevc" transformer={systemStreamToAnnexB} />
++                    </>} />
++                    <SyntaxTable />
++                </>}
++                right={
++                    <TabsComponent defaultTab="hexEditor" tabs={[
++                        { key: "frame", title: "Frame", render: <FrameViewerFfmpeg /> },
++                        { key: "hexEditor", title: "Hex", render: <HexEditor /> },
++                    ]} />
++                }
++            />
++        </BitstreamExplorer>
++    );
+ }
+diff --git a/src/formats/ivf/ivf-analyzer.tsx b/src/formats/ivf/ivf-analyzer.tsx
+index b59bc0c..d9f56ec 100644
+--- a/src/formats/ivf/ivf-analyzer.tsx
++++ b/src/formats/ivf/ivf-analyzer.tsx
+@@ -1,34 +1,30 @@
+-import { HexEditor } from "../../components/hex-editor";
+-import { Bitstream } from "../../bitstream/parser";
+ import { BitBuffer } from "../../bitstream/buffer";
+-import { BitstreamExplorer, EMPTY_TREE } from "../../bitstream/bitstream-explorer";
++import { BitstreamExplorer } from "../../bitstream/bitstream-explorer";
+ import { BitstreamUploader } from "../../bitstream/uploader";
+-import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
+-import { SyntaxTable } from "../../components/syntax-table";
+-import { SyntaxToolbar } from "../../components/syntax-toolbar";
+ import { DuckIVF } from "./ivf-bitstream";
++import { AnalyzerLayout } from "../../components/analyzer-layout";
+ import { TrackDownloader } from "../../components/downloader";
++import { SyntaxToolbar } from "../../components/syntax-toolbar";
++import { SyntaxTable } from "../../components/syntax-table";
++import { HexEditor } from "../../components/hex-editor";
+ 
+-export const IvfAnalyzerComponent = (props: {}) => {
+-    return <BitstreamExplorer
+-        parser={(buffers: BitBuffer[]) => {
+-            return DuckIVF(buffers[0]);
+-        }}
+-        uploader={<BitstreamUploader title="Drop MP4 file here" samples={{
+-            "av1_single.ivf": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/sample_data/av1_single.ivf",
+-        }} />}
+-    >
+-        <PanelGroup autoSaveId="example" direction="horizontal">
+-            <Panel defaultSize={50} className="panel">
+-                <SyntaxToolbar
+-                    leftItems={<TrackDownloader downloadExtension=".ivf" />}
+-                />
+-                <SyntaxTable />
+-            </Panel>
+-            <PanelResizeHandle className="resize-handle fa-solid fa-ellipsis-vertical" />
+-            <Panel className="panel">
+-                <HexEditor />
+-            </Panel>
+-        </PanelGroup>
+-    </BitstreamExplorer>
++export function IvfAnalyzerComponent() {
++    return (
++        <BitstreamExplorer
++            parser={(buffers) => DuckIVF(buffers[0])}
++            uploader={
++                <BitstreamUploader title="Drop IVF file here" samples={{
++                    "av1_single.ivf": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/sample_data/av1_single.ivf",
++                }} />
++            }
++        >
++            <AnalyzerLayout
++                left={<>
++                    <SyntaxToolbar leftItems={<TrackDownloader downloadExtension=".ivf" />} />
++                    <SyntaxTable />
++                </>}
++                right={<HexEditor />}
++            />
++        </BitstreamExplorer>
++    );
+ }
+diff --git a/src/formats/ivf/ivf-bitstream.tsx b/src/formats/ivf/ivf-bitstream.tsx
+index 052fbd2..7023bb0 100644
+--- a/src/formats/ivf/ivf-bitstream.tsx
++++ b/src/formats/ivf/ivf-bitstream.tsx
+@@ -3,7 +3,6 @@ import { Bitstream, MAX_ITER, ParserCtx, syntax } from "../../bitstream/parser";
+ import { BitBuffer } from "../../bitstream/buffer";
+ import { assert, assertNums, forEachChild, getChildValue } from "../../bitstream/util";
+ import { MediaTrack } from "../../types/media.types";
+-import { EMPTY_TREE } from "../../bitstream/bitstream-explorer";
+ 
+ // https://wiki.multimedia.cx/index.php/Duck_IVF
+ 
+@@ -14,7 +13,7 @@ export const isIVFFormat = (buffer: Uint8Array) => {
+     return (signature.toLocaleUpperCase() === "DKIF");
+ }
+ 
+-export const extracIvfTracks = (buffer: Uint8Array, codecs?: string[]): Record<string, MediaTrack> => {
++export const extractIvfTracks = (buffer: Uint8Array, codecs?: string[]): Record<string, MediaTrack> => {
+     const root = DuckIVF(new BitBuffer(buffer));
+     const trackCodec = getChildValue(root, "codec");
+     assert(trackCodec !== undefined, "Codec not found in ivf");
+diff --git a/src/formats/mp4/mp4-analyzer.tsx b/src/formats/mp4/mp4-analyzer.tsx
+index e1ee45b..fb464bd 100644
+--- a/src/formats/mp4/mp4-analyzer.tsx
++++ b/src/formats/mp4/mp4-analyzer.tsx
+@@ -1,35 +1,36 @@
+-import { HexEditor } from "../../components/hex-editor";
+ import { Bitstream } from "../../bitstream/parser";
+ import { ISOBMFF } from "./mp4-bitstream";
+ import { BitBuffer } from "../../bitstream/buffer";
+ import { BitstreamExplorer, EMPTY_TREE } from "../../bitstream/bitstream-explorer";
+ import { BitstreamUploader } from "../../bitstream/uploader";
+-import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
+-import { SyntaxTable } from "../../components/syntax-table";
++import { AnalyzerLayout } from "../../components/analyzer-layout";
+ import { SyntaxToolbar } from "../../components/syntax-toolbar";
++import { SyntaxTable } from "../../components/syntax-table";
++import { HexEditor } from "../../components/hex-editor";
+ 
+-export const Mp4AnalyzerComponent = (props: {}) => {
+-    return <BitstreamExplorer
+-        parser={(buffers: BitBuffer[]) => {
+-            const bs = new Bitstream(buffers[0]);
+-            ISOBMFF(bs, bs.getEndPos());
+-            return (bs.getCurrent().children || [EMPTY_TREE])[0];
+-        }}
+-        uploader={<BitstreamUploader title="Drop MP4 file here" samples={{
+-            "av1_multi.mp4": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/sample_data/av1_multi.mp4",
+-            "av1_audvid.mp4": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/sample_data/av1_audvid.mp4",
+-            "hevc_single.mp4": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/sample_data/hevc_single.mp4",
+-        }} />}
+-    >
+-        <PanelGroup autoSaveId="example" direction="horizontal">
+-            <Panel defaultSize={50} className="panel">
+-                <SyntaxToolbar />
+-                <SyntaxTable />
+-            </Panel>
+-            <PanelResizeHandle className="resize-handle fa-solid fa-ellipsis-vertical" />
+-            <Panel className="panel">
+-                <HexEditor />
+-            </Panel>
+-        </PanelGroup>
+-    </BitstreamExplorer>
++export function Mp4AnalyzerComponent() {
++    return (
++        <BitstreamExplorer
++            parser={(buffers) => {
++                const bs = new Bitstream(buffers[0]);
++                ISOBMFF(bs, bs.getEndPos());
++                return (bs.getCurrent().children || [EMPTY_TREE])[0];
++            }}
++            uploader={
++                <BitstreamUploader title="Drop MP4 file here" samples={{
++                    "av1_multi.mp4": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/sample_data/av1_multi.mp4",
++                    "av1_audvid.mp4": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/sample_data/av1_audvid.mp4",
++                    "hevc_single.mp4": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/sample_data/hevc_single.mp4",
++                }} />
++            }
++        >
++            <AnalyzerLayout
++                left={<>
++                    <SyntaxToolbar />
++                    <SyntaxTable />
++                </>}
++                right={<HexEditor />}
++            />
++        </BitstreamExplorer>
++    );
+ }
+diff --git a/src/formats/raw/raw-analyzer.tsx b/src/formats/raw/raw-analyzer.tsx
+index 363f644..77887fe 100644
+--- a/src/formats/raw/raw-analyzer.tsx
++++ b/src/formats/raw/raw-analyzer.tsx
+@@ -1,37 +1,30 @@
+-import { HexEditor } from "../../components/hex-editor";
+ import { Bitstream } from "../../bitstream/parser";
+ import { BitBuffer } from "../../bitstream/buffer";
+ import { BitstreamExplorer } from "../../bitstream/bitstream-explorer";
+ import { BitstreamUploader } from "../../bitstream/uploader";
+-import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
++import { AnalyzerLayout } from "../../components/analyzer-layout";
++import { HexEditor } from "../../components/hex-editor";
+ 
+-export const RawAnalyzerComponent = (props: {}) => {
+-    return <BitstreamExplorer
+-        parser={(buffers: BitBuffer[]) => {
+-            const bs = new Bitstream(buffers[0]);
+-            return {
+-                key: "ROOT",
+-                varName: "root",
+-                title: "ROOT",
+-                start: 0,
+-                size: bs.getEndPos()
+-            };
+-        }}
+-        uploader={<BitstreamUploader title="Drop binary file" samples={{
+-            "av1_multi.mp4": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/sample_data/av1_multi.mp4",
+-            "av1_audvid.mp4": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/sample_data/av1_audvid.mp4",
+-            "av1_single.mp4": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/sample_data/av1_single.mp4",
+-            "av1_single.obu": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/sample_data/av1_single.obu",
+-        }}/>}
+-    >
+-    <PanelGroup autoSaveId="example" direction="horizontal">
+-        <Panel defaultSize={50} className="panel">
+-            {/* <SyntaxViewer /> */}
+-        </Panel>
+-        <PanelResizeHandle className="resize-handle fa-solid fa-ellipsis-vertical"/>
+-        <Panel className="panel">
+-            <HexEditor />
+-        </Panel>
+-    </PanelGroup>
+-    </BitstreamExplorer>
++export function RawAnalyzerComponent() {
++    return (
++        <BitstreamExplorer
++            parser={(buffers) => {
++                const bs = new Bitstream(buffers[0]);
++                return { key: "ROOT", varName: "root", title: "ROOT", start: 0, size: bs.getEndPos() };
++            }}
++            uploader={
++                <BitstreamUploader title="Drop binary file" samples={{
++                    "av1_multi.mp4": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/sample_data/av1_multi.mp4",
++                    "av1_audvid.mp4": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/sample_data/av1_audvid.mp4",
++                    "av1_single.mp4": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/sample_data/av1_single.mp4",
++                    "av1_single.obu": "https://raw.githubusercontent.com/mdakram28/media-parser-gui/main/sample_data/av1_single.obu",
++                }} />
++            }
++        >
++            <AnalyzerLayout
++                left={<div />}
++                right={<HexEditor />}
++            />
++        </BitstreamExplorer>
++    );
+ }
+diff --git a/src/main.tsx b/src/main.tsx
+index 3c7fac7..b16783c 100644
+--- a/src/main.tsx
++++ b/src/main.tsx
+@@ -1,11 +1,7 @@
+-import * as React from 'react';
+ import * as ReactDOM from 'react-dom/client';
+-import { CssBaseline } from '@mui/material';
+-import { ThemeProvider } from '@emotion/react';
++import '@radix-ui/themes/styles.css';
++import './index.css';
+ import App from './App';
+-import theme from './theme';
+-import { BrowserRouter, HashRouter } from 'react-router-dom';
+-import { MemoryRouter } from 'react-router-dom'
+ 
+ // @ts-ignore
+ Number.prototype.mod = function (n) {
+@@ -16,8 +12,6 @@ Number.prototype.mod = function (n) {
+ 
+ ReactDOM.createRoot(document.getElementById('root')!).render(
+   <>
+-    <HashRouter>
+-      <App />
+-    </HashRouter>
++    <App />
+   </>,
+ );
+diff --git a/src/react-util.tsx b/src/react-util.tsx
+deleted file mode 100644
+index 0899a89..0000000
+--- a/src/react-util.tsx
++++ /dev/null
+@@ -1,22 +0,0 @@
+-import { useEffect, useRef } from "react";
+-
+-export function useTraceUpdate(props: any) {
+-    const prev = useRef(props);
+-    useEffect(() => {
+-        const changedProps = Object.entries(props).reduce((ps, [k, v]) => {
+-            if (prev.current[k] !== v) {
+-                // @ts-ignore
+-                ps[k] = [prev.current[k], v];
+-            }
+-            return ps;
+-        }, {});
+-        if (Object.keys(changedProps).length > 0) {
+-            console.log('Changed props:', changedProps);
+-        }
+-        prev.current = props;
+-    });
+-}
+-
+-export function classes(obj: Record<string, boolean>){
+-    return Object.keys(obj).filter(k => obj[k]).join(" ");
+-}
+\ No newline at end of file
+diff --git a/src/theme.tsx b/src/theme.tsx
+deleted file mode 100644
+index 9677a59..0000000
+--- a/src/theme.tsx
++++ /dev/null
+@@ -1,19 +0,0 @@
+-import { createTheme } from '@mui/material/styles';
+-import { red } from '@mui/material/colors';
+-
+-// A custom theme for this app
+-const theme = createTheme({
+-  palette: {
+-    primary: {
+-      main: '#556cd6',
+-    },
+-    secondary: {
+-      main: '#19857b',
+-    },
+-    error: {
+-      main: red.A400,
+-    },
+-  },
+-});
+-
+-export default theme;
+diff --git a/src/types/parser.types.ts b/src/types/parser.types.ts
+index 3564fbc..3b864e9 100644
+--- a/src/types/parser.types.ts
++++ b/src/types/parser.types.ts
+@@ -11,7 +11,7 @@ export type DataNode = {
+     value?: DataNodeValue,
+     start: number,
+     size: number,
+-    skip: number,
++    skip?: number,
+     hidden?: boolean
+     filtered?: boolean
+ }
+\ No newline at end of file
+diff --git a/tsconfig.json b/tsconfig.json
+index fbff405..b3887ee 100644
+--- a/tsconfig.json
++++ b/tsconfig.json
+@@ -15,6 +15,7 @@
+     "isolatedModules": true,
+     "noEmit": true,
+     "jsx": "react-jsx",
++    "baseUrl": "."
+   },
+   "include": ["src"],
+   "references": [{ "path": "./tsconfig.node.json" }]
+diff --git a/vite.config.ts b/vite.config.ts
+index 8f5ba37..ad5d40a 100644
+--- a/vite.config.ts
++++ b/vite.config.ts
+@@ -1,9 +1,9 @@
+ import { defineConfig } from 'vite';
+ import react from '@vitejs/plugin-react';
+-
++import tailwindcss from '@tailwindcss/vite';
+ // https://vitejs.dev/config/
+ export default defineConfig({
+-  plugins: [react()],
++  plugins: [react(), tailwindcss()],
+   base: '',
+   optimizeDeps: {
+     exclude: ["@ffmpeg/ffmpeg", "@ffmpeg/util"],

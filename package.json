@@ -1,5 +1,5 @@
 {
-  "name": "material-ui-vite-ts",
+  "name": "media-parser-gui",
   "private": true,
   "version": "5.0.0",
   "type": "module",
@@ -10,27 +10,25 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@emotion/react": "latest",
-    "@emotion/styled": "latest",
     "@ffmpeg/ffmpeg": "^0.12.10",
     "@ffmpeg/util": "^0.12.1",
     "@fortawesome/fontawesome-svg-core": "^6.5.1",
     "@fortawesome/free-solid-svg-icons": "^6.5.1",
     "@fortawesome/react-fontawesome": "^0.2.0",
-    "@mui/icons-material": "latest",
-    "@mui/material": "latest",
-    "@mui/x-tree-view": "^6.17.0",
+    "@radix-ui/themes": "^3.3.0",
+    "@tailwindcss/vite": "^4.1.18",
+    "@tanstack/react-virtual": "^3.13.18",
     "react": "latest",
     "react-dom": "latest",
     "react-resizable-panels": "^1.0.9",
-    "react-router-dom": "^6.21.1"
+    "sonner": "^2.0.7",
+    "tailwindcss": "^4.1.18"
   },
   "devDependencies": {
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "@vitejs/plugin-react": "latest",
     "react-github-btn": "^1.4.0",
-    "sass": "^1.69.7",
     "typescript": "latest",
     "vite": "latest"
   }

@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+@layer base {
+  html, body {
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .radix-themes {
+    --default-font-family: var(--font-family);
+    --selection-primary: var(--accent-a5);
+    --selection-secondary: var(--blue-a5);
+
+    --glass-bg: rgba(20, 20, 35, 0.6);
+    --glass-bg-solid: rgba(20, 20, 35, 0.85);
+    --glass-border: rgba(255, 255, 255, 0.06);
+    --glass-blur: blur(20px);
+    --glass-highlight: rgba(255, 255, 255, 0.03);
+  }
+
+  .radix-themes:where(.light) {
+    --glass-bg: rgba(255, 255, 255, 0.5);
+    --glass-bg-solid: rgba(255, 255, 255, 0.8);
+    --glass-border: rgba(0, 0, 0, 0.08);
+    --glass-highlight: rgba(255, 255, 255, 0.5);
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.08) transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  *::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-radius: 3px;
+  }
+  *::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+  }
+}

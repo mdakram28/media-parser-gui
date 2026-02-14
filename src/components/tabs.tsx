@@ -1,4 +1,5 @@
-import { ReactNode, useState } from "react"
+import { ReactNode } from "react"
+import { Tabs } from "@radix-ui/themes"
 
 export type TabType<T> = {
     key: T,
@@ -6,32 +7,29 @@ export type TabType<T> = {
     render: ReactNode
 };
 
-export function Tabs<T>({ tabs, defaultTab }: {
+export function TabsComponent<T>({ tabs, defaultTab }: {
     tabs: TabType<T>[],
     defaultTab: T
 }) {
-    const [currentTab, setCurrentTab] = useState<T>(defaultTab);
-
-    return <>
-        <div className="toolbar">
+    return <Tabs.Root defaultValue={defaultTab as string} style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
+        <Tabs.List>
             {tabs.map(tab =>
-                <a
+                <Tabs.Trigger
                     key={tab.key as string}
-                    className={["toolbar-item", currentTab === tab.key && "active"].join(" ")}
-                    onClick={() => setCurrentTab(tab.key)}
+                    value={tab.key as string}
                 >
                     {tab.title}
-                </a>)}
-        </div>
+                </Tabs.Trigger>
+            )}
+        </Tabs.List>
         {tabs.map(tab =>
-            <div key={tab.key as string} className="flexv-item flexv"
-                style={tab.key === currentTab
-                    ? {}
-                    : { display: "none" }
-                }
+            <Tabs.Content
+                key={tab.key as string}
+                value={tab.key as string}
+                style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}
             >
                 {tab.render}
-            </div>
+            </Tabs.Content>
         )}
-    </>
+    </Tabs.Root>
 }

@@ -5,13 +5,12 @@ function downloadURL(data: string, fileName: string) {
     a.href = data;
     a.download = fileName;
     document.body.appendChild(a);
-    // @ts-ignore
-    a.style = 'display: none';
+    a.style.display = 'none';
     a.click();
     a.remove();
 }
 
-export function downloadBlob(parts: Uint8Array[], fileName: string, mimeType: string) {
+export function downloadBlob(parts: BlobPart[], fileName: string, mimeType: string) {
     var blob, url: string;
     blob = new Blob(parts, {
         type: mimeType

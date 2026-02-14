@@ -1,81 +1,84 @@
-import { ReactElement, useContext, useState } from "react";
+import { ReactElement, useContext, useEffect, useState } from "react";
 import { BitstreamExplorerContext } from "../bitstream/bitstream-explorer";
-import { FormControlLabel, Switch } from "@mui/material";
-import { MediaTrack } from "../types/media.types";
-import { downloadBlob } from "../browser-util";
+import { IconButton, Switch, Text, Tooltip, TextField, DropdownMenu, Flex } from "@radix-ui/themes";
 import { SyntaxTableSettings } from "./syntax-table";
-
-
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSearch, faRedo, faSlidersH } from "@fortawesome/free-solid-svg-icons";
 
 export function SyntaxToolbar({ leftItems, rightItems }: {
     rightItems?: ReactElement,
     leftItems?: ReactElement
 }) {
     const {
-        syntax: root,
         setFilter,
         reset,
         settings, setSettings
     } = useContext(BitstreamExplorerContext);
+    const [searchText, setSearchText] = useState("");
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setFilter((f) => ({ ...f, text: searchText }));
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [searchText, setFilter]);
 
     function SettingSwitch<T extends keyof SyntaxTableSettings>(
         title: string,
         key: T
     ) {
-
-        return <div className="toolbar-item">
-            <FormControlLabel control={
-                <Switch value={settings[key]} onChange={(ev) => setSettings(s => ({ ...s, [key]: ev.target.checked }))} />
-            } label={title} />
-        </div>
+        return <DropdownMenu.Item onSelect={(e) => e.preventDefault()}>
+            <Flex align="center" gap="2">
+                <Switch
+                    size="1"
+                    checked={settings[key] as boolean}
+                    onCheckedChange={(checked) => setSettings(s => ({ ...s, [key]: checked }))}
+                />
+                <Text as="label" size="2" className="cursor-pointer">{title}</Text>
+            </Flex>
+        </DropdownMenu.Item>
     }
 
-    return <>
-        <div className="toolbar">
-            <div data-tooltip="Filter by title" className="toolbar-item" style={{ verticalAlign: "middle" }}>
-                <i className="fas fa-search"></i>&nbsp;&nbsp;
-                <form onSubmit={(e: any) => {
-                    e.preventDefault();
-                    const search = new FormData(e.target).get("search")?.toString() || "";
-                    setFilter(f => ({ ...f, text: search }))
-                }}>
-                    <input name="search" />
-                </form>
-            </div>
-            {leftItems}
+    return <Flex align="center" gap="1" style={{
+        height: 36,
+        background: "var(--glass-bg)",
+        backdropFilter: "var(--glass-blur)",
+        WebkitBackdropFilter: "var(--glass-blur)",
+        borderBottom: "1px solid var(--glass-border)",
+        flexShrink: 0,
+        paddingInline: 8,
+    }}>
+        <Flex align="center" gap="2">
+            <FontAwesomeIcon icon={faSearch} style={{ color: "var(--gray-a11)", fontSize: 12 }} />
+            <TextField.Root
+                size="1"
+                placeholder="Filter..."
+                style={{ width: 128 }}
+                value={searchText}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchText(e.target.value)}
+            />
+        </Flex>
+        {leftItems}
 
-            <span className="toolbar-item" style={{ flex: 1 }}></span>
-            {rightItems}
+        <span style={{ flex: 1 }} />
+        {rightItems}
 
-            {/* Right */}
-            <a className="toolbar-item"
-                data-tooltip="Reset"
-                onClick={reset}><i className="fas fa-redo"></i></a>
-            <a data-tooltip="Settings" className="toolbar-item"
-                onClick={(ev: any) => {
-                    console.log(ev.target);
-                    const button: HTMLElement = ev.target.closest(".toolbar-item");
-                    const menu = button.getElementsByClassName("toolbar-menu")[0];
-                    if (!menu) return;
-                    menu.classList.toggle("visible");
-                    if (menu.classList.contains("visible")) {
-                        const closeListener = (ev: any) => {
-                            if (!menu.contains(ev.target)) {
-                                menu.classList.remove("visible");
-                                document.removeEventListener("click", closeListener);
-                            }
-                        };
-                        setTimeout(() => document.addEventListener("click", closeListener), 0);
-                    }
-                }}>
-                <i className="fas fa-sliders-h"></i>
-                <div className="toolbar-menu">
+        <Tooltip content="Reset">
+            <IconButton variant="ghost" size="1" onClick={reset}>
+                <FontAwesomeIcon icon={faRedo} style={{ fontSize: 12 }} />
+            </IconButton>
+        </Tooltip>
 
-                    
-                    {SettingSwitch("Show hidden syntax", "showHiddenSyntax")}
-                    {SettingSwitch("Show size bars", "showSizeBar")}
-                </div>
-            </a >
-        </div >
-    </>
+        <DropdownMenu.Root>
+            <DropdownMenu.Trigger>
+                <IconButton variant="ghost" size="1">
+                    <FontAwesomeIcon icon={faSlidersH} style={{ fontSize: 12 }} />
+                </IconButton>
+            </DropdownMenu.Trigger>
+            <DropdownMenu.Content align="end">
+                {SettingSwitch("Show hidden syntax", "showHiddenSyntax")}
+                {SettingSwitch("Show size bars", "showSizeBar")}
+            </DropdownMenu.Content>
+        </DropdownMenu.Root>
+    </Flex>
 }

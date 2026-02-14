@@ -11,7 +11,7 @@ export type DataNode = {
     value?: DataNodeValue,
     start: number,
     size: number,
-    skip: number,
+    skip?: number,
     hidden?: boolean
     filtered?: boolean
 }
